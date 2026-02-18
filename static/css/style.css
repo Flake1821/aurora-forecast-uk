@@ -1552,11 +1552,7 @@ a:hover {
             rgba(120, 144, 156, 0.25) 12px, rgba(120, 144, 156, 0.25) 14px,
             transparent 14px, transparent 26px
         );
-    animation: imf-wave-drift-down 7s linear infinite;
-}
-@keyframes imf-wave-drift-down {
-    0%   { transform: translateY(0); }
-    100% { transform: translateY(-33.33%); }
+    animation: imf-wave-drift-up 7s linear infinite;
 }
 @keyframes imf-wave-drift-up {
     0%   { transform: translateY(-33.33%); }
