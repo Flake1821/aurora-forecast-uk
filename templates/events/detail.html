@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }} — UK Aurora & Night Sky{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('events.index') }}">Events</a></li>
+                <li class="breadcrumb-item active">{{ event.title[:50] }}</li>
+            </ol>
+        </nav>
+
+        <div class="glass-card">
+            <div class="d-flex align-items-start gap-3 mb-3">
+                <div class="event-date-badge">
+                    <span class="month">{{ event.event_date.strftime('%b') }}</span>
+                    <span class="day">{{ event.event_date.strftime('%d') }}</span>
+                </div>
+                <div>
+                    <h1 class="h3 mb-1">{{ event.title }}</h1>
+                    <p class="text-secondary mb-0">
+                        <i class="bi bi-clock me-1"></i>{{ event.event_date.strftime('%A %d %B %Y, %H:%M') }}
+                        {% if event.end_date %} — {{ event.end_date.strftime('%H:%M') }}{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            {% if event.location %}
+            <p class="mb-2"><i class="bi bi-geo-alt me-2 text-secondary"></i>{{ event.location }}</p>
+            {% endif %}
+            {% if event.price %}
+            <p class="mb-2"><i class="bi bi-tag me-2 text-secondary"></i>{{ event.price }}</p>
+            {% endif %}
+            {% if event.event_type %}
+            <p class="mb-3">
+                <span class="badge" style="background: rgba(124, 77, 255, 0.2); color: var(--aurora-purple);">
+                    {{ event.event_type }}
+                </span>
+            </p>
+            {% endif %}
+
+            <div class="post-content mb-4">{{ event.description }}</div>
+
+            {% if event.booking_url %}
+            <a href="{{ event.booking_url }}" target="_blank" rel="noopener" class="btn btn-aurora">
+                <i class="bi bi-ticket-perforated me-2"></i>Book Now
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

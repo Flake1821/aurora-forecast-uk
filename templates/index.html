@@ -1,0 +1,597 @@
+{% extends 'base.html' %}
+
+{% block main_class %}mt-0 p-0{% endblock %}
+
+{% block hero %}{% endblock %}
+
+{% block content %}
+{% set kp = space_weather.get('kp_index') %}
+{% set kp_severity = space_weather.get('kp_severity', 'Unknown') %}
+{% set chance = space_weather.get('cornwall_chance', {}) %}
+{% set aw_status = space_weather.get('aurorawatch_status', 'unknown') %}
+{% set moon = space_weather.get('moon_phase', {}) %}
+{% set cw = space_weather.get('current_weather', {}) %}
+{% set verdict = space_weather.get('go_outside', {}) %}
+{% set kp_threshold = space_weather.get('kp_threshold', 5) %}
+{% set sw = space_weather.get('solar_wind', {}) %}
+{% set imf = space_weather.get('imf_data', {}) %}
+{% set scales = space_weather.get('noaa_scales', {}) %}
+{% set alerts = space_weather.get('swpc_alerts', []) %}
+{% set lp = space_weather.get('light_pollution', {}) %}
+
+<!-- ═══════ FULL-VIEWPORT AURORA DASHBOARD ═══════ -->
+<section class="dashboard-viewport">
+    <div class="dashboard-overlay"></div>
+    <div class="container position-relative" style="z-index: 2;">
+
+        <!-- Compact Title -->
+        <div class="dashboard-title">
+            <h1>Aurora Forecast UK</h1>
+            <p>Live aurora & night sky conditions for {{ location_name }}</p>
+        </div>
+
+        <!-- ═══ LIVE NOW ═══ -->
+        <div class="section-badge live-badge">
+            <span class="badge-dot badge-dot-pulse"></span>
+            LIVE NOW
+            <span class="badge-time" id="liveTimestamp">
+                {% if space_weather.get('kp_timestamp') %}
+                Updated {{ space_weather.get('kp_timestamp', '')[:16] }}
+                {% endif %}
+            </span>
+            <span class="badge-refresh-note" id="refreshCountdown">Auto-updates every 5 min</span>
+        </div>
+
+        <div class="live-section">
+            <!-- Row 1: AuroraWatch Status + Kp Gauges -->
+            <div class="live-row-primary">
+
+                <!-- AuroraWatch + Aurora Chance -->
+                <div class="cond-panel cond-status">
+                    <div class="cond-status-header">
+                        <span class="cond-label">AuroraWatch UK</span>
+                        <span id="awStatus" class="weather-status-badge status-{{ aw_status }}">{{ aw_status|capitalize }}</span>
+                        <button class="info-tooltip-btn" aria-label="What is AuroraWatch?"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">AuroraWatch UK monitors geomagnetic activity from Lancaster University. Green = quiet, Yellow = minor activity, Amber = possible aurora, Red = aurora likely.</div>
+
+                    <!-- Aurora Chance -->
+                    <div class="cornwall-chance" id="cornwallChance">
+                        <div class="chance-header">
+                            <i class="bi bi-geo-alt-fill me-1"></i><span id="chanceLocationLabel">{{ location_name }}</span> Aurora Chance
+                        </div>
+                        <div class="chance-indicator chance-{{ chance.get('level', 'none') }}" id="chanceIndicator">
+                            <span class="chance-dot"></span>
+                            <span class="chance-text" id="chanceText">{{ chance.get('text', 'Loading...') }}</span>
+                        </div>
+                    </div>
+
+                    <p id="cornwallNote" class="cond-note">
+                        {{ space_weather.get('cornwall_note', 'Loading conditions...') }}
+                    </p>
+                    <div class="cond-meta">
+                        <i class="bi bi-geo-alt me-1"></i><span id="locationMeta">{{ location_name }} ({{ '%.1f'|format(location_lat) }}&deg;N)</span>
+                        {% if space_weather.get('kp_timestamp') %}
+                        <span class="ms-3"><i class="bi bi-clock me-1"></i>{{ space_weather.get('kp_timestamp', '')[:16] }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Radial Kp Gauge (centre) -->
+                <div class="cond-panel cond-kp-radial">
+                    <div class="cond-kp-label">
+                        Kp Now
+                        <button class="info-tooltip-btn" aria-label="What is the Kp index?"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">The Kp index measures geomagnetic disturbance on a 0&ndash;9 scale. Higher values mean stronger aurora. {{ location_name }} needs Kp {{ kp_threshold }}+ for visible aurora.</div>
+                    <div class="radial-gauge-container" id="radialGauge"
+                         data-kp="{{ '%.1f'|format(kp) if kp is not none else '0' }}"></div>
+                </div>
+
+                <!-- Predicted Kp Gauge -->
+                {% set pred_kp = space_weather.get('kp_predicted_next') %}
+                <div class="cond-panel cond-kp-radial cond-kp-predicted">
+                    <div class="cond-kp-label">
+                        {% set pred_hours = space_weather.get('kp_predicted_hours', 3) %}
+                        <span id="kpPredictedLabel">Kp Next</span>
+                        <button class="info-tooltip-btn" aria-label="What is the predicted Kp?"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">NOAA forecast Kp for the next 3-hour period (starting in ~{{ pred_hours }} hour{{ 's' if pred_hours != 1 else '' }}). Shows expected geomagnetic activity soon.</div>
+                    <div class="radial-gauge-container" id="radialGaugePredicted"
+                         data-kp="{{ '%.1f'|format(pred_kp) if pred_kp is not none else '0' }}"></div>
+                </div>
+            </div>
+
+            <!-- Row 1b: Aurora Tonight — nighttime viewing & photography potential -->
+            {% set tonight = space_weather.get('aurora_tonight', {}) %}
+            {% if tonight %}
+            <div class="live-row-tonight">
+                <div class="cond-panel cond-aurora-tonight tonight-{{ tonight.get('rating_level', 'none') }}" id="auroraTonightPanel">
+                    <div class="tonight-header">
+                        <span class="tonight-title">
+                            <i class="bi bi-stars me-1"></i>Aurora Tonight <span class="tonight-location" id="tonightLocation">for {{ tonight.get('location_name', location_name) }}</span>
+                        </span>
+                        <span class="tonight-rating tonight-rating-{{ tonight.get('rating_level', 'none') }}" id="tonightRating">
+                            {{ tonight.get('rating', 'Unknown') }}
+                        </span>
+                    </div>
+
+                    <div class="tonight-photo-verdict" id="tonightPhotoVerdict">
+                        <i class="bi bi-camera me-1"></i>{{ tonight.get('photography_verdict', '') }}
+                    </div>
+
+                    <div class="tonight-info-grid">
+                        <div class="tonight-info-cell">
+                            <span class="tonight-info-label">Peak Kp Tonight</span>
+                            <span class="tonight-info-value" id="tonightPeakKp">Kp {{ tonight.get('tonight_peak_kp', '?') }}{% if tonight.get('peak_kp_time') %} <small>at ~{{ tonight.get('peak_kp_time') }}</small>{% endif %}</span>
+                            <span class="tonight-info-detail">Need Kp {{ tonight.get('kp_threshold', '?') }}+ for {{ tonight.get('location_name', 'your location') }}</span>
+                        </div>
+                        <div class="tonight-info-cell">
+                            <span class="tonight-info-label">Dark Hours</span>
+                            <span class="tonight-info-value" id="tonightDarkHours">{{ tonight.get('dark_hours', '--') }}</span>
+                            <span class="tonight-info-detail">Sunset to sunrise</span>
+                        </div>
+                        <div class="tonight-info-cell">
+                            <span class="tonight-info-label">Cloud Outlook</span>
+                            <span class="tonight-info-value" id="tonightCloudOutlook">{{ tonight.get('cloud_outlook', '--') }}</span>
+                        </div>
+                        <div class="tonight-info-cell">
+                            <span class="tonight-info-label">Moon</span>
+                            <span class="tonight-info-value" id="tonightMoon">{{ tonight.get('moon_impact', '--') }}</span>
+                        </div>
+                    </div>
+
+                    {% if tonight.get('best_window', {}).get('window') %}
+                    <div class="tonight-window">
+                        <i class="bi bi-clock-fill me-1"></i>
+                        Best window: <strong>{{ tonight.get('best_window', {}).get('window', '') }}</strong>
+                        {% if tonight.get('best_window', {}).get('avg_cloud') is not none %}
+                        <span class="tonight-window-cloud">(~{{ tonight.get('best_window', {}).get('avg_cloud') }}% cloud)</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if tonight.get('active_alerts') %}
+                    <div class="tonight-alerts">
+                        {% for alert_text in tonight.get('active_alerts', []) %}
+                        <div class="tonight-alert-item">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ alert_text }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Row 3: Local Sky Conditions -->
+            <div class="live-row-weather">
+
+                <!-- Current Weather (Right Now) -->
+                {% set wcode = cw.get('weather_code') %}
+                {% set dstatus = space_weather.get('darkness_info', {}).get('darkness_status', 'unknown') %}
+                <div class="cond-panel cond-weather-now weather-time-{{ dstatus }}{% if wcode is not none %} weather-wmo-{{ wcode }}{% endif %}" data-weather-code="{{ wcode }}" data-darkness="{{ dstatus }}" data-wind-speed="{{ cw.get('wind_speed', 0) or 0 }}" data-wind-dir="{{ cw.get('wind_direction', 0) or 0 }}" style="--rain-angle: 8deg;">
+                    <div class="weather-now-header">
+                        <i class="bi bi-{{ cw.get('weather_icon', 'question-circle') }}" id="weatherIcon"></i>
+                        <div class="weather-now-title">
+                            <span class="weather-now-label">Right Now
+                                <button class="info-tooltip-btn" aria-label="About current weather"><i class="bi bi-question-circle-fill"></i></button>
+                            </span>
+                            <span class="weather-now-desc" id="weatherDesc">{{ cw.get('weather_description', 'Loading...') }}</span>
+                        </div>
+                    </div>
+                    <div class="info-tooltip-content">Live weather at your location. Cloud cover is the most critical factor &mdash; you cannot see aurora through clouds. Visibility and temperature help you plan your outing.</div>
+                    <div class="weather-now-stats">
+                        <div class="weather-stat">
+                            <span class="weather-stat-value" id="currentCloud">{{ cw.get('cloud_cover', '--') }}%</span>
+                            <span class="weather-stat-label">Cloud Cover</span>
+                            <div class="cloud-bar-mini">
+                                <div class="cloud-bar-fill" id="currentCloudBar"
+                                     style="width: {{ cw.get('cloud_cover', 0) or 0 }}%"></div>
+                            </div>
+                        </div>
+                        <div class="weather-stat">
+                            <span class="weather-stat-value" id="currentTemp">{{ cw.get('temperature', '--') }}&deg;C</span>
+                            <span class="weather-stat-label">Temperature</span>
+                        </div>
+                        <div class="weather-stat weather-stat-wind">
+                            <span class="weather-stat-value" id="currentWindSpeed">{% if cw.get('wind_speed') is not none %}{{ cw.get('wind_speed') }} km/h{% else %}-- km/h{% endif %}</span>
+                            <span class="weather-stat-label">Wind{% if cw.get('wind_direction_compass') %} ({{ cw.get('wind_direction_compass') }}){% endif %}</span>
+                            {% if cw.get('wind_gusts') is not none and cw.get('wind_gusts', 0)|float > (cw.get('wind_speed', 0) or 0)|float + 10 %}
+                            <span class="wind-gust-note" id="windGustNote">Gusts {{ cw.get('wind_gusts') }} km/h</span>
+                            {% else %}
+                            <span class="wind-gust-note" id="windGustNote" style="display:none;"></span>
+                            {% endif %}
+                        </div>
+                        <div class="weather-stat">
+                            <span class="weather-stat-value" id="currentVisibility">{{ cw.get('visibility_km', '--') }} km</span>
+                            <span class="weather-stat-label">Visibility</span>
+                        </div>
+                    </div>
+                    <div class="weather-viewing-label weather-viewing-{{ cw.get('cloud_level', 'unknown') }}" id="currentViewingLabel">
+                        {{ cw.get('cloud_label', 'Loading...') }}
+                    </div>
+
+                    <!-- Hourly Cloud Forecast Mini-Chart -->
+                    {% set hourly_cloud = space_weather.get('hourly_cloud_forecast', []) %}
+                    {% if hourly_cloud %}
+                    <div class="hourly-cloud-section">
+                        <div class="hourly-cloud-title">Next 12 Hours Cloud Cover</div>
+                        <div class="hourly-cloud-bars" id="hourlyCloudBars">
+                            {% for h in hourly_cloud %}
+                            <div class="hourly-bar-col" title="{{ h.hour }}: {{ h.cloud_pct }}% cloud">
+                                <span class="hourly-bar-pct">{{ h.cloud_pct }}</span>
+                                <div class="hourly-bar-bg">
+                                    <div class="hourly-bar-fill" style="height: {{ h.cloud_pct }}%"></div>
+                                </div>
+                                <span class="hourly-bar-time">{{ h.hour[:2] }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Darkness & Timing -->
+                {% set dark = space_weather.get('darkness_info', {}) %}
+                <div class="cond-panel cond-darkness">
+                    <div class="panel-header-row">
+                        <span class="panel-mini-label">
+                            <i class="bi bi-moon-stars-fill me-1"></i>Darkness
+                        </span>
+                        <button class="info-tooltip-btn" aria-label="About darkness"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">Aurora is only visible in dark skies. You need at least nautical twilight (sun 12&deg; below horizon) for faint aurora, and full darkness for the best views.</div>
+                    <div class="darkness-status darkness-{{ dark.get('darkness_status', 'unknown') }}" id="darknessStatus">
+                        {{ dark.get('darkness_label', 'Loading...') }}
+                    </div>
+                    <div class="darkness-times" id="darknessTimes">
+                        {% if dark.get('sunset') %}
+                        <span class="dark-time"><i class="bi bi-sunset me-1"></i>Sunset {{ dark.get('sunset') }}</span>
+                        {% endif %}
+                        {% if dark.get('sunrise') %}
+                        <span class="dark-time"><i class="bi bi-sunrise me-1"></i>Sunrise {{ dark.get('sunrise') }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Light Pollution -->
+                <div class="cond-panel cond-light-pollution">
+                    <div class="panel-header-row">
+                        <span class="panel-mini-label"><i class="bi bi-lightbulb me-1"></i>Light Pollution</span>
+                        <button class="info-tooltip-btn" aria-label="What is the Bortle scale?"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">The Bortle scale measures sky darkness from 1 (darkest) to 9 (city centre). Lower numbers mean better aurora viewing. Find a spot away from streetlights facing north.</div>
+                    <div class="bortle-display">
+                        <span class="bortle-class">Bortle {{ lp.get('bortle', '?') }}</span>
+                        <span class="bortle-label">{{ lp.get('label', '') }}</span>
+                    </div>
+                    <div class="bortle-scale" aria-label="Bortle scale indicator">
+                        {% for i in range(1, 10) %}
+                        <span class="bortle-dot {% if i <= lp.get('bortle', 5) %}bortle-filled{% endif %} {% if i == lp.get('bortle', 5) %}bortle-current{% endif %}"></span>
+                        {% endfor %}
+                    </div>
+                    <div class="bortle-advice">{{ lp.get('advice', '') }}</div>
+                </div>
+
+                <!-- Moon Phase -->
+                <div class="cond-panel cond-moon">
+                    <div class="moon-header-row">
+                        <div class="moon-visual" id="moonVisual" data-phase="{{ moon.get('phase_fraction', 0) }}">
+                            <div class="moon-sphere">
+                                <div class="moon-light"></div>
+                                <div class="moon-shadow" id="moonShadow"></div>
+                            </div>
+                        </div>
+                        <button class="info-tooltip-btn" aria-label="About moon phase"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">Moonlight washes out faint aurora. New moon and crescent phases (&lt; 30% illuminated) are best. A full moon makes only the brightest aurora visible.</div>
+                    <div class="moon-phase-name" id="moonPhaseName">{{ moon.get('phase_name', 'Loading...') }}</div>
+                    <div class="moon-illumination" id="moonIllumination">{{ moon.get('illumination', '--') }}% illuminated</div>
+                    {% if moon.get('moonrise') or moon.get('moonset') %}
+                    <div class="moon-rise-set">
+                        {% if moon.get('moonrise') %}
+                        <span class="moon-time"><i class="bi bi-arrow-up-circle me-1"></i>Rises {{ moon.get('moonrise') }}</span>
+                        {% endif %}
+                        {% if moon.get('moonset') %}
+                        <span class="moon-time"><i class="bi bi-arrow-down-circle me-1"></i>Sets {{ moon.get('moonset') }}</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="moon-note {% if moon.get('is_favorable') %}moon-favorable{% else %}moon-unfavorable{% endif %}">
+                        {{ moon.get('note', '') }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 4: Should I Go Outside? Verdict -->
+            <div class="live-row-verdict">
+                <div class="cond-panel cond-verdict-panel verdict-{{ verdict.get('level', 'no') }}" id="verdictPanel">
+                    <div class="verdict-header">
+                        Should I go outside?
+                        <button class="info-tooltip-btn" aria-label="How is this calculated?"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">A combined assessment of aurora activity, cloud cover, moonlight, IMF Bz, and weather. All factors need to align for good viewing &mdash; clear skies are essential!</div>
+                    <div class="verdict-answer" id="verdictAnswer">
+                        {{ verdict.get('verdict', 'Checking conditions...') }}
+                    </div>
+                    <ul class="verdict-reasons" id="verdictReasons">
+                        {% for reason in verdict.get('reasons', []) %}
+                        <li>{{ reason }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% set bw = space_weather.get('best_viewing_window', {}) %}
+                    {% if bw and bw.get('window') %}
+                    <div class="best-window best-window-{{ bw.get('quality', 'marginal') }}" id="bestWindow">
+                        <i class="bi bi-clock-fill me-1"></i>Best window: <strong>{{ bw.get('window') }}</strong>
+                        {% if bw.get('avg_cloud') is not none %}
+                        <span class="bw-cloud">(~{{ bw.get('avg_cloud') }}% cloud)</span>
+                        {% endif %}
+                    </div>
+                    {% elif bw %}
+                    <div class="best-window best-window-none" id="bestWindow">
+                        <i class="bi bi-clock me-1"></i>{{ bw.get('summary', 'No clear window tonight') }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Row 5: Space Weather Data (Solar Wind, IMF Bz, Storm Scale) -->
+            <div class="live-row-solar">
+
+                <!-- Solar Wind -->
+                <div class="cond-panel cond-solar-wind{% if sw.get('speed_level') in ('elevated', 'high', 'extreme') %} sw-{{ sw.get('speed_level') }}{% endif %}">
+                    <div class="panel-header-row">
+                        <span class="panel-mini-label"><i class="bi bi-wind me-1"></i>Solar Wind<span class="sw-live-dot"></span></span>
+                        <button class="info-tooltip-btn" aria-label="What is the solar wind?"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">The solar wind is a stream of charged particles from the Sun. High speed (&gt;500 km/s) and density (&gt;10 p/cm&sup3;) increase aurora chances.</div>
+                    <div class="solar-wind-values">
+                        <div class="sw-stat">
+                            <span class="sw-value sw-speed-{{ sw.get('speed_level', 'unknown') }}" id="solarWindSpeed">{{ sw.get('speed', '--') }}</span>
+                            <span class="sw-unit">km/s</span>
+                            <span class="sw-label">Speed</span>
+                        </div>
+                        <div class="sw-stat">
+                            <span class="sw-value" id="solarWindDensity">{{ sw.get('density', '--') }}</span>
+                            <span class="sw-unit">p/cm&sup3;</span>
+                            <span class="sw-label">Density</span>
+                        </div>
+                    </div>
+                    <div class="sw-level-label sw-speed-{{ sw.get('speed_level', 'unknown') }}" id="solarWindLabel">{{ sw.get('speed_label', 'No data') }}</div>
+                </div>
+
+                <!-- IMF Bz -->
+                <div class="cond-panel cond-imf{% if imf.get('bz') is not none and imf.get('bz', 0) <= -20 %} imf-south-extreme{% elif imf.get('bz') is not none and imf.get('bz', 0) <= -10 %} imf-south-strong{% elif imf.get('bz') is not none and imf.get('bz', 0) <= -5 %} imf-south-moderate{% elif imf.get('bz') is not none and imf.get('bz', 0) <= 0 %} imf-south-weak{% endif %}">
+                    <div class="panel-header-row">
+                        <span class="panel-mini-label"><i class="bi bi-magnet me-1"></i>IMF Bz</span>
+                        <button class="info-tooltip-btn" aria-label="What is IMF Bz?"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">The Interplanetary Magnetic Field's north&ndash;south component. When Bz points south (negative values), Earth's magnetic shield opens and aurora is more likely. Below &minus;10 nT is excellent.</div>
+                    <div class="imf-display">
+                        <span class="imf-arrow {% if imf.get('bz') is not none and imf.get('bz', 0) <= 0 %}imf-south{% else %}imf-north{% endif %}" id="imfArrow">
+                            {% if imf.get('bz') is not none and imf.get('bz', 0) <= 0 %}&darr;{% else %}&uarr;{% endif %}
+                        </span>
+                        <span class="imf-value imf-{{ imf.get('bz_level', 'unknown') }}" id="imfBzValue">{{ imf.get('bz', '--') }}</span>
+                        <span class="imf-unit">nT</span>
+                    </div>
+                    <div class="imf-label imf-{{ imf.get('bz_level', 'unknown') }}" id="imfBzLabel">{{ imf.get('bz_label', 'No data') }}</div>
+                </div>
+
+                <!-- NOAA Storm Scale -->
+                <div class="cond-panel cond-scales{% if scales.get('g_scale', 0) >= 1 %} gs-active{% endif %}">
+                    <div class="panel-header-row">
+                        <span class="panel-mini-label"><i class="bi bi-exclamation-triangle me-1"></i>Storm Scale</span>
+                        <button class="info-tooltip-btn" aria-label="What is the storm scale?"><i class="bi bi-question-circle-fill"></i></button>
+                    </div>
+                    <div class="info-tooltip-content">NOAA's Geomagnetic Storm Scale from G1 (minor) to G5 (extreme). G1+ means aurora is possible in northern UK. G3+ means aurora may be visible across southern England.</div>
+                    <div class="g-scale-display">
+                        <span class="g-scale-badge g-scale-{{ scales.get('g_scale', 0) }}{% if scales.get('g_scale', 0) >= 1 %} g-scale-active{% endif %}" id="gScaleBadge">G{{ scales.get('g_scale', 0) }}</span>
+                        <span class="g-scale-text" id="gScaleText">{{ scales.get('g_text', 'None') }}</span>
+                    </div>
+                    {% if scales.get('r_scale', 0) > 0 %}
+                    <div class="scale-extra" id="rScaleRow">
+                        <span class="mini-badge r-badge">R{{ scales.get('r_scale', 0) }}</span>
+                        <span class="scale-extra-text">{{ scales.get('r_text', '') }}</span>
+                    </div>
+                    {% endif %}
+                    {% if scales.get('s_scale', 0) > 0 %}
+                    <div class="scale-extra" id="sScaleRow">
+                        <span class="mini-badge s-badge">S{{ scales.get('s_scale', 0) }}</span>
+                        <span class="scale-extra-text">{{ scales.get('s_text', '') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Kp Timeline Chart ── -->
+        <div class="chart-panel">
+            <div class="chart-header">
+                <span class="chart-title">
+                    <i class="bi bi-graph-up me-1"></i>Geomagnetic Activity Timeline
+                    <button class="info-tooltip-btn" aria-label="About this chart"><i class="bi bi-question-circle-fill"></i></button>
+                </span>
+                <span class="chart-legend">
+                    <span class="legend-item"><span class="legend-dot legend-observed"></span>Observed</span>
+                    <span class="legend-item"><span class="legend-dot legend-predicted"></span>Predicted</span>
+                    <span class="legend-item"><span class="legend-line legend-threshold"></span><span id="chartThresholdLabel">{{ location_name }} (Kp {{ kp_threshold }})</span></span>
+                </span>
+            </div>
+            <div class="info-tooltip-content chart-tooltip">Shows measured (observed) and forecast Kp values over the last 2 days and next 3 days. The dashed line shows the minimum Kp needed for aurora at your location.</div>
+            <div class="chart-container">
+                <canvas id="kpTimelineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- ── Aurora Oval Map ── -->
+        <div class="chart-panel aurora-oval-panel">
+            <div class="chart-header">
+                <span class="chart-title">
+                    <i class="bi bi-globe-europe-africa me-1"></i>Aurora Map
+                    <button class="info-tooltip-btn" aria-label="About the aurora map"><i class="bi bi-question-circle-fill"></i></button>
+                </span>
+                <span class="oval-forecast-time" id="ovalForecastTime"></span>
+            </div>
+            <div class="info-tooltip-content chart-tooltip">The NOAA OVATION model shows where aurora is predicted right now. Green/cyan areas indicate aurora probability. Purple/pink shows storm-level activity. The white dot shows your location.</div>
+            <div class="aurora-oval-container">
+                <canvas id="auroraOvalCanvas" width="600" height="400"></canvas>
+                <div class="oval-loading" id="ovalLoading">
+                    <i class="bi bi-arrow-clockwise spin"></i> Loading aurora map...
+                </div>
+                <div class="oval-legend">
+                    <span class="oval-legend-item"><span class="oval-swatch" style="background:#001a00"></span>None</span>
+                    <span class="oval-legend-item"><span class="oval-swatch" style="background:#00cc66"></span>Low</span>
+                    <span class="oval-legend-item"><span class="oval-swatch" style="background:#00ddbb"></span>Medium</span>
+                    <span class="oval-legend-item"><span class="oval-swatch" style="background:#cc44ff"></span>High</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Aurora Horizon View ── -->
+        <div class="chart-panel aurora-view-panel">
+            <div class="chart-header">
+                <span class="chart-title">
+                    <i class="bi bi-binoculars me-1"></i>Your Aurora View
+                    <button class="info-tooltip-btn" aria-label="About this view"><i class="bi bi-question-circle-fill"></i></button>
+                </span>
+                <span class="aurora-view-conditions" id="auroraViewConditions"></span>
+            </div>
+            <div class="info-tooltip-content chart-tooltip">A simulated view of the aurora looking north from your location, based on current Kp activity, cloud cover, darkness, and moon conditions. Shows what you might see right now.</div>
+            <div class="aurora-view-container">
+                <canvas id="auroraViewCanvas" width="800" height="350"></canvas>
+            </div>
+            <div class="aurora-view-caption" id="auroraViewCaption">
+                Looking north from {{ location_name }}
+            </div>
+        </div>
+
+        <!-- ═══ SWPC ALERTS (conditional) ═══ -->
+        {% if alerts %}
+        <div class="swpc-alerts-section" id="alertsSection">
+            <div class="section-badge alert-badge">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                SPACE WEATHER ALERTS
+            </div>
+            <div class="alerts-list">
+                {% for alert in alerts %}
+                <div class="swpc-alert-card">
+                    <span class="alert-product-id">{{ alert.get('product_id', '') }}</span>
+                    <div class="alert-content">
+                        <span class="alert-summary">{{ alert.get('summary', '') }}</span>
+                        {% if alert.get('friendly_explanation') %}
+                        <span class="alert-explanation">{{ alert.get('friendly_explanation') }}</span>
+                        {% endif %}
+                        {% if alert.get('valid_from') or alert.get('valid_until') %}
+                        <span class="alert-validity">
+                            <i class="bi bi-clock me-1"></i>{{ alert.get('valid_from', '?') }} &rarr; {{ alert.get('valid_until', '?') }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <span class="alert-time">{{ alert.get('issue_datetime', '')[:16] }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="swpc-alerts-section" id="alertsSection" style="display: none;"></div>
+        {% endif %}
+
+        <!-- ═══ 3-DAY FORECAST ═══ -->
+        <div class="section-badge forecast-badge">
+            <i class="bi bi-calendar3-range me-1"></i>
+            3-DAY FORECAST
+            <button class="info-tooltip-btn" aria-label="About the forecast"><i class="bi bi-question-circle-fill"></i></button>
+        </div>
+        <div class="info-tooltip-content forecast-tooltip">Aurora and cloud cover forecast for the next three nights (8pm&ndash;6am). Look for nights with high Kp and low cloud cover for the best chances.</div>
+
+        <div class="forecast-grid">
+            {% for i in range(3) %}
+            {% set day = space_weather.get('forecast_days', [])[i] if i < space_weather.get('forecast_days', [])|length else none %}
+            {% set night = space_weather.get('cloud_cover_3day', [])[i] if i < space_weather.get('cloud_cover_3day', [])|length else none %}
+            <div class="day-column" id="day-col-{{ i }}">
+                <div class="day-header">{{ day.date_label if day else '---' }}</div>
+
+                <!-- Aurora Forecast -->
+                <div class="day-aurora {% if day %}{% if day.max_kp >= 7 %}forecast-storm{% elif day.max_kp >= 5 %}forecast-high{% elif day.max_kp >= 3 %}forecast-moderate{% else %}forecast-quiet{% endif %}{% else %}forecast-quiet{% endif %}">
+                    <div class="day-kp">Kp {{ day.max_kp if day else '--' }} <span class="day-kp-max">max</span></div>
+                    {% if day %}
+                    <div class="day-severity">{{ day.get('kp_severity', '') }}</div>
+                    {% set day_chance = day.get('cornwall_chance', {}) %}
+                    <div class="day-chance day-chance-{{ day_chance.get('level', 'none') }}">
+                        <span class="chance-dot-sm"></span>
+                        {{ day_chance.get('text', '') }}
+                    </div>
+                    {% else %}
+                    <div class="day-aurora-note">Loading...</div>
+                    {% endif %}
+                </div>
+
+                <!-- Divider -->
+                <div class="day-divider"></div>
+
+                <!-- Cloud Cover -->
+                <div class="day-cloud">
+                    <div class="day-cloud-row">
+                        <i class="bi bi-{{ night.icon if night else 'question-circle' }} day-cloud-icon"></i>
+                        <span class="day-cloud-pct">{{ night.night_avg_cloud if night and night.night_avg_cloud is not none else '--' }}%</span>
+                        <span class="day-cloud-desc">{{ night.description if night else '' }}</span>
+                    </div>
+                    {% if night and night.night_avg_cloud is not none %}
+                    <div class="day-cloud-bar">
+                        <div class="day-cloud-fill" style="width: {{ night.night_avg_cloud }}%"></div>
+                    </div>
+                    {% endif %}
+                    {% if night and night.get('viewing_label') %}
+                    <div class="day-viewing day-viewing-{{ night.get('viewing_level', 'unknown') }}">
+                        {{ night.viewing_label }}
+                    </div>
+                    {% endif %}
+                    <div class="day-cloud-time">20:00&ndash;06:00</div>
+                </div>
+            </div>
+            {% else %}
+            <div class="day-column">
+                <div class="day-header">---</div>
+                <p class="text-secondary small text-center mb-0 py-3">Loading forecast...</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- ── Action Row ── -->
+        <div class="dashboard-actions">
+            <span class="dashboard-attribution">
+                Data: <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a>
+                &middot; <a href="https://aurorawatch.lancs.ac.uk/" target="_blank" rel="noopener">AuroraWatch UK</a>
+                &middot; <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
+                &middot; Try <a href="https://aurora-alerts.uk/" target="_blank" rel="noopener">Glendale App</a>
+            </span>
+        </div>
+
+    </div>
+</section>
+
+<!-- Pass data to JS -->
+<script>
+    window.__kpTimeline = {{ space_weather.get('kp_timeline', [])|tojson }};
+    window.__userLocation = {{ location_name|tojson }};
+    window.__userLat = {{ location_lat|tojson }};
+    window.__userLon = {{ location_lon|tojson }};
+    window.__kpThreshold = {{ kp_threshold|tojson }};
+    window.__hasLocation = {{ 'true' if has_location else 'false' }};
+    // Aurora View conditions
+    window.__auroraViewData = {
+        kp: {{ kp|tojson }},
+        kpThreshold: {{ kp_threshold|tojson }},
+        cloudCover: {{ cw.get('cloud_cover', 0)|tojson }},
+        darknessStatus: {{ space_weather.get('darkness_info', {}).get('darkness_status', 'unknown')|tojson }},
+        moonIllumination: {{ moon.get('illumination', 0)|tojson }},
+        moonPhase: {{ moon.get('phase_fraction', 0)|tojson }},
+        lat: {{ location_lat|tojson }},
+        locationName: {{ location_name|tojson }},
+        bortle: {{ lp.get('bortle', 5)|tojson }}
+    };
+</script>
+
+<!-- Below-fold sections (Alerts, Gallery, Events, Facebook) removed for now -->
+{% endblock %}

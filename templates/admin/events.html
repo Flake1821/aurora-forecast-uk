@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Manage Events — Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-calendar-event me-2"></i>Manage Events</h2>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('admin.new_event') }}" class="btn btn-sm btn-aurora">
+            <i class="bi bi-plus-lg me-1"></i>New Event
+        </a>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-aurora-outline">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+    </div>
+</div>
+
+{% if events %}
+<div class="table-responsive">
+    <table class="table table-dark table-hover" style="background: transparent;">
+        <thead>
+            <tr class="text-secondary small">
+                <th>Date</th>
+                <th>Title</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td class="text-secondary">{{ event.event_date.strftime('%d %b %Y') if event.event_date }}</td>
+                <td>{{ event.title }}</td>
+                <td class="text-secondary small">{{ event.location }}</td>
+                <td><span class="badge" style="background: var(--night-card-hover);">{{ event.event_type }}</span></td>
+                <td class="text-secondary">{{ event.price or 'Free' }}</td>
+                <td>
+                    {% if event.is_published %}
+                    <span class="badge bg-success">Published</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Draft</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin.edit_event', event_id=event.id) }}" class="btn btn-sm btn-aurora-outline py-0 px-2">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-calendar-event d-block"></i>
+    <h3>No events yet</h3>
+    <p>Create your first event or sync from Facebook.</p>
+    <a href="{{ url_for('admin.new_event') }}" class="btn btn-aurora mt-2">
+        <i class="bi bi-plus-lg me-1"></i>Create Event
+    </a>
+</div>
+{% endif %}
+{% endblock %}

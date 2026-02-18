@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }} — UK Aurora & Night Sky{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('alerts.index') }}">Alerts</a></li>
+                <li class="breadcrumb-item active">{{ post.title[:50] }}</li>
+            </ol>
+        </nav>
+
+        {% if post.primary_image and post.primary_image.local_filename %}
+        <img src="{{ url_for('static', filename='photos/' + post.primary_image.local_filename) }}"
+             class="img-fluid rounded mb-4" alt="{{ post.title }}">
+        {% endif %}
+
+        <h1 class="mb-3">{{ post.title }}</h1>
+
+        <div class="post-meta">
+            <span><i class="bi bi-calendar3 me-1"></i>{{ post.published_at.strftime('%d %B %Y') if post.published_at }}</span>
+            <div class="post-engagement">
+                <span><i class="bi bi-heart me-1"></i>{{ post.reactions_count }}</span>
+                <span><i class="bi bi-chat me-1"></i>{{ post.comments_count }}</span>
+                <span><i class="bi bi-share me-1"></i>{{ post.shares_count }}</span>
+            </div>
+        </div>
+
+        <div class="post-content mb-4">{{ post.message }}</div>
+
+        {% if post.fb_permalink %}
+        <a href="{{ post.fb_permalink }}" target="_blank" rel="noopener" class="btn btn-aurora-outline">
+            <i class="bi bi-facebook me-2"></i>View on Facebook
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+venv/
+.venv/
+
+# SQLite database (cache only, recreated automatically)
+instance/
+
+# macOS
+.DS_Store
+
+# Uploads (user-generated, ephemeral)
+uploads/
+static/photos/
+
+# IDE
+.vscode/
+.idea/
+
+# App logs
+.server.log
+.server.pid
+
+# Local launcher scripts
+*.command

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Photo Gallery — UK Aurora & Night Sky{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <h2><i class="bi bi-images me-2"></i>Photo Gallery</h2>
+    <p>Astrophotography from the UK's dark skies</p>
+</div>
+
+{% if posts %}
+<div class="gallery-grid">
+    {% for post in posts %}
+    {% if post.primary_image and post.primary_image.local_filename %}
+    <a href="{{ url_for('blog.post', post_id=post.id) }}" class="gallery-item">
+        <img src="{{ url_for('static', filename='photos/' + post.primary_image.local_filename) }}"
+             alt="{{ post.title }}" loading="lazy">
+        <div class="gallery-overlay">
+            <span class="caption">{{ post.title }}</span>
+        </div>
+    </a>
+    {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-images d-block"></i>
+    <h3>No photos yet</h3>
+    <p>Gallery images will appear here once the Facebook sync is configured.</p>
+</div>
+{% endif %}
+{% endblock %}

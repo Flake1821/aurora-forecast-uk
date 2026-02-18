@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Edit Post — Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-pencil me-2"></i>Edit Post</h2>
+            <a href="{{ url_for('admin.posts') }}" class="btn btn-sm btn-aurora-outline">
+                <i class="bi bi-arrow-left me-1"></i>Back
+            </a>
+        </div>
+
+        <!-- Post preview -->
+        <div class="glass-card mb-4">
+            {% if post.primary_image and post.primary_image.local_filename %}
+            <img src="{{ url_for('static', filename='photos/' + post.primary_image.local_filename) }}"
+                 class="img-fluid rounded mb-3" alt="{{ post.title }}" style="max-height: 300px; object-fit: cover; width: 100%;">
+            {% endif %}
+            <h5>{{ post.title }}</h5>
+            <p class="text-secondary small mb-2">
+                Published: {{ post.published_at.strftime('%d %B %Y %H:%M') if post.published_at }}
+                &middot; <i class="bi bi-heart"></i> {{ post.reactions_count }}
+                &middot; <i class="bi bi-chat"></i> {{ post.comments_count }}
+                &middot; <i class="bi bi-share"></i> {{ post.shares_count }}
+            </p>
+            <div class="post-content" style="max-height: 200px; overflow-y: auto; font-size: 0.9rem;">{{ post.message }}</div>
+            {% if post.fb_permalink %}
+            <a href="{{ post.fb_permalink }}" target="_blank" rel="noopener" class="btn btn-sm btn-aurora-outline mt-2">
+                <i class="bi bi-facebook me-1"></i>View on Facebook
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Edit form -->
+        <div class="glass-card">
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-select bg-dark text-white border-secondary">
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if post.category == cat %}selected{% endif %}>{{ cat|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input" name="is_featured" value="1"
+                               id="featured" {% if post.is_featured %}checked{% endif %}>
+                        <label class="form-check-label" for="featured">Featured (show on homepage)</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input" name="is_hidden" value="1"
+                               id="hidden" {% if post.is_hidden %}checked{% endif %}>
+                        <label class="form-check-label" for="hidden">Hidden (exclude from public pages)</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-aurora">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

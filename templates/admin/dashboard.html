@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard — UK Aurora & Night Sky{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h2>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('main.index') }}" class="btn btn-sm btn-aurora-outline">
+            <i class="bi bi-eye me-1"></i>View Site
+        </a>
+        <a href="{{ url_for('admin.logout') }}" class="btn btn-sm btn-aurora-outline">Logout</a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="admin-stat-card">
+            <div class="stat-value">{{ total_posts }}</div>
+            <div class="stat-label">Total Posts</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="admin-stat-card">
+            <div class="stat-value">{{ total_events }}</div>
+            <div class="stat-label">Events</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="admin-stat-card">
+            <div class="stat-value">{{ settings.last_fb_sync|time_ago if settings and settings.last_fb_sync else 'Never' }}</div>
+            <div class="stat-label">Last Sync</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="admin-stat-card">
+            <div class="stat-value">{{ category_counts.get('alert', 0) }}</div>
+            <div class="stat-label">Alerts</div>
+        </div>
+    </div>
+</div>
+
+<!-- Category breakdown -->
+<div class="row g-3 mb-4">
+    {% for cat in ['alert', 'gallery', 'blog', 'event', 'uncategorized'] %}
+    <div class="col">
+        <div class="glass-card text-center py-2">
+            <div class="fw-bold">{{ category_counts.get(cat, 0) }}</div>
+            <small class="text-secondary text-capitalize">{{ cat }}</small>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="glass-card">
+            <h5 class="mb-3"><i class="bi bi-arrow-repeat me-2"></i>Facebook Sync</h5>
+            <div class="d-flex gap-2 flex-wrap">
+                <form method="POST" action="{{ url_for('admin.sync_now') }}">
+                    <button type="submit" class="btn btn-aurora">
+                        <i class="bi bi-arrow-repeat me-1"></i>Sync Recent
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.sync_now') }}">
+                    <input type="hidden" name="full" value="1">
+                    <button type="submit" class="btn btn-aurora-outline">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Full Sync
+                    </button>
+                </form>
+            </div>
+            {% if not settings or not settings.last_fb_sync %}
+            <p class="text-secondary small mt-2 mb-0">
+                <i class="bi bi-info-circle me-1"></i>Set <code>FB_PAGE_ID</code> and <code>FB_PAGE_ACCESS_TOKEN</code> in .env to enable sync.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="glass-card">
+            <h5 class="mb-3"><i class="bi bi-lightning me-2"></i>Quick Links</h5>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('admin.posts') }}" class="btn btn-aurora-outline">
+                    <i class="bi bi-file-text me-1"></i>Manage Posts
+                </a>
+                <a href="{{ url_for('admin.events') }}" class="btn btn-aurora-outline">
+                    <i class="bi bi-calendar-event me-1"></i>Manage Events
+                </a>
+                <a href="{{ url_for('admin.settings') }}" class="btn btn-aurora-outline">
+                    <i class="bi bi-gear me-1"></i>Settings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Posts -->
+{% if recent_posts %}
+<div class="glass-card">
+    <h5 class="mb-3"><i class="bi bi-clock-history me-2"></i>Recent Posts</h5>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover mb-0" style="background: transparent;">
+            <thead>
+                <tr class="text-secondary small">
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Engagement</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in recent_posts %}
+                <tr>
+                    <td class="text-secondary small">{{ post.published_at.strftime('%d %b') if post.published_at }}</td>
+                    <td>
+                        {{ post.title[:60] }}{% if post.title|length > 60 %}...{% endif %}
+                        {% if post.is_featured %}<span class="badge bg-warning text-dark ms-1">Featured</span>{% endif %}
+                        {% if post.is_hidden %}<span class="badge bg-secondary ms-1">Hidden</span>{% endif %}
+                    </td>
+                    <td><span class="badge" style="background: var(--night-card-hover);">{{ post.category }}</span></td>
+                    <td class="text-secondary small">
+                        <i class="bi bi-heart me-1"></i>{{ post.reactions_count }}
+                        <i class="bi bi-chat ms-2 me-1"></i>{{ post.comments_count }}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('admin.edit_post', post_id=post.id) }}" class="btn btn-sm btn-aurora-outline py-0 px-2">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

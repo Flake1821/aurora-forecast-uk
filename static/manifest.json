@@ -1,0 +1,20 @@
+{
+    "name": "Aurora Forecast UK",
+    "short_name": "Aurora Forecast UK",
+    "description": "Live aurora alerts, space weather, and night sky conditions for the UK",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a1a",
+    "theme_color": "#1a0a2e",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/static/img/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["weather", "education"],
+    "lang": "en-GB"
+}

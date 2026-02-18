@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Aurora & Sky Alerts — UK Aurora & Night Sky{% endblock %}
+
+{% block content %}
+<div class="section-header">
+    <h2><i class="bi bi-broadcast me-2"></i>Aurora & Sky Alerts</h2>
+    <p>Night sky alerts and forecasts for the UK</p>
+</div>
+
+<!-- Space Weather Dashboard (placeholder for Phase 4) -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="glass-card text-center">
+            <div class="text-muted small text-uppercase mb-1">Kp Index</div>
+            <div class="kp-display kp-low" id="kpValue">--</div>
+            <div class="text-muted small mt-1">Current geomagnetic activity</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card text-center">
+            <div class="text-muted small text-uppercase mb-1">AuroraWatch UK</div>
+            <div class="mt-2 mb-2">
+                <span class="weather-status-badge status-green" id="awStatus">Loading...</span>
+            </div>
+            <div class="text-muted small mt-1">UK geomagnetic status</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card text-center">
+            <div class="text-muted small text-uppercase mb-1">Aurora Visibility</div>
+            <div class="mt-2 mb-2">
+                <span class="text-secondary" id="cornwallNote">Checking conditions...</span>
+            </div>
+            <div class="text-muted small mt-1">Kp threshold depends on your latitude</div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Posts -->
+{% if posts.items %}
+<div class="row g-4">
+    {% for post in posts.items %}
+    <div class="col-md-6 col-lg-4">
+        <div class="aurora-card h-100">
+            {% if post.primary_image and post.primary_image.local_filename %}
+            <img src="{{ url_for('static', filename='photos/' + post.primary_image.local_filename) }}"
+                 class="card-img-top" alt="{{ post.title }}" loading="lazy">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{{ url_for('alerts.detail', post_id=post.id) }}" class="text-decoration-none text-white">
+                        {{ post.title }}
+                    </a>
+                </h5>
+                <p class="card-text">{{ post.excerpt }}</p>
+                <div class="card-meta">
+                    <span><i class="bi bi-calendar3 me-1"></i>{{ post.published_at.strftime('%d %b %Y') if post.published_at }}</span>
+                    <span><i class="bi bi-heart me-1"></i>{{ post.reactions_count }}</span>
+                    <span><i class="bi bi-chat me-1"></i>{{ post.comments_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-broadcast d-block"></i>
+    <h3>No alerts yet</h3>
+    <p>Alerts will appear here once the Facebook sync is configured.</p>
+</div>
+{% endif %}
+{% endblock %}

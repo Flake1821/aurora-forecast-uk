@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}About — UK Aurora & Night Sky{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="section-header">
+            <h2>About UK Aurora & Night Sky</h2>
+        </div>
+        <div class="glass-card">
+            <p class="mb-3">
+                UK Aurora & Night Sky provides night-sky alerts for the whole of the UK,
+                covering aurora activity, meteor showers, eclipses, supermoons, planetary events
+                and rare atmospheric phenomena, alongside occasional astrophotography images
+                and tips.
+            </p>
+            <p class="mb-3">
+                We monitor space weather data from NOAA's Space Weather Prediction Center
+                and AuroraWatch UK to bring you timely alerts when there's a chance of
+                seeing the aurora borealis or other night sky events from anywhere in the UK.
+            </p>
+            <p class="mb-0">
+                Aurora visibility depends on your latitude. Southern England (around 50&deg;N)
+                typically needs Kp 5+, while Scotland (around 56&deg;N) may see aurora
+                at Kp 3. Set your location for personalised Kp thresholds and local weather.
+            </p>
+        </div>
+
+        <div class="glass-card mt-4">
+            <h4 class="mb-3">Data Sources</h4>
+            <ul class="list-unstyled mb-0">
+                <li class="mb-2">
+                    <strong>NOAA SWPC</strong> — Kp index, geomagnetic forecasts, and solar wind data
+                    from the <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">Space Weather Prediction Center</a>.
+                </li>
+                <li>
+                    <strong>AuroraWatch UK</strong> — Real-time UK geomagnetic activity status from
+                    <a href="https://aurorawatch.lancs.ac.uk/" target="_blank" rel="noopener">Lancaster University</a>.
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

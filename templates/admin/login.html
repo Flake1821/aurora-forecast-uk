@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Admin Login — UK Aurora & Night Sky{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="glass-card">
+            <h3 class="text-center mb-4">Admin Login</h3>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control bg-dark text-white border-secondary"
+                           id="password" name="password" required autofocus>
+                </div>
+                <button type="submit" class="btn btn-aurora w-100">Log In</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

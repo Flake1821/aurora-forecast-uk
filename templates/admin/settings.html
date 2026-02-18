@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Settings — Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-gear me-2"></i>Site Settings</h2>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-aurora-outline">
+                <i class="bi bi-arrow-left me-1"></i>Dashboard
+            </a>
+        </div>
+
+        <div class="glass-card">
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Site Name</label>
+                    <input type="text" name="site_name" class="form-control bg-dark text-white border-secondary"
+                           value="{{ settings.site_name }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tagline</label>
+                    <input type="text" name="tagline" class="form-control bg-dark text-white border-secondary"
+                           value="{{ settings.tagline }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contact Email</label>
+                    <input type="email" name="contact_email" class="form-control bg-dark text-white border-secondary"
+                           value="{{ settings.contact_email }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Facebook URL</label>
+                    <input type="url" name="facebook_url" class="form-control bg-dark text-white border-secondary"
+                           value="{{ settings.facebook_url }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Instagram URL</label>
+                    <input type="url" name="instagram_url" class="form-control bg-dark text-white border-secondary"
+                           value="{{ settings.instagram_url }}" placeholder="https://instagram.com/...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">About Text</label>
+                    <textarea name="about_text" class="form-control bg-dark text-white border-secondary"
+                              rows="4">{{ settings.about_text }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-aurora">Save Settings</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
