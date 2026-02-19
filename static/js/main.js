@@ -1297,109 +1297,164 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ═══════════════════════════════════════════════
-    // SKY EVENTS 2026 — Grid expand/collapse + filter
+    // SKY EVENTS 2026 — Card-to-modal FLIP animation
     // ═══════════════════════════════════════════════
 
     (function() {
         var grid = document.getElementById('skyGrid');
         if (!grid) return;
 
-        var detailPanel = document.getElementById('skyDetailPanel');
-        var detailContent = detailPanel.querySelector('.sky-detail-content');
-        var closeBtn = detailPanel.querySelector('.sky-detail-close');
+        var overlay = document.getElementById('skyOverlay');
+        var modal = document.getElementById('skyDetailModal');
+        var content = document.getElementById('skyDetailContent');
+        var closeBtn = document.getElementById('skyDetailClose');
         var activeCard = null;
+        var isAnimating = false;
 
-        function getColumnCount() {
-            var cols = getComputedStyle(grid).gridTemplateColumns;
-            return cols.split(' ').length;
+        // Target modal size (centred on screen)
+        function getModalTarget() {
+            var vw = window.innerWidth;
+            var vh = window.innerHeight;
+            var w = Math.min(640, vw - 48);
+            var h = Math.min(520, vh - 80);
+            return {
+                top: (vh - h) / 2,
+                left: (vw - w) / 2,
+                width: w,
+                height: h
+            };
         }
 
-        function getVisibleCards() {
-            return Array.from(grid.querySelectorAll('.sky-card')).filter(function(c) {
-                return c.style.display !== 'none';
-            });
-        }
+        function openModal(card) {
+            if (isAnimating) return;
+            isAnimating = true;
 
-        function closeDetail(animate) {
-            if (activeCard) {
-                activeCard.classList.remove('active');
-                activeCard = null;
-            }
-            if (!animate) {
-                detailPanel.style.transition = 'none';
-                detailPanel.classList.remove('open');
-                detailPanel.offsetHeight; // force reflow
-                detailPanel.style.transition = '';
-            } else {
-                detailPanel.classList.remove('open');
-            }
-        }
+            // Get card's bounding rect (the "First" position)
+            var rect = card.getBoundingClientRect();
 
-        function openDetail(card) {
-            var visibleCards = getVisibleCards();
-            var cardIndex = visibleCards.indexOf(card);
-            if (cardIndex === -1) return;
-
-            var colCount = getColumnCount();
-            var rowStart = Math.floor(cardIndex / colCount) * colCount;
-            var rowEnd = Math.min(rowStart + colCount - 1, visibleCards.length - 1);
-            var lastCardInRow = visibleCards[rowEnd];
-
-            // Get detail HTML from the card's hidden data div
+            // Get detail HTML
             var dataDiv = card.querySelector('.sky-card-detail-data');
-            if (!dataDiv) return;
-
+            if (!dataDiv) { isAnimating = false; return; }
             var title = card.querySelector('.sky-card-title').textContent;
             var date = card.querySelector('.sky-card-date').textContent;
             var badge = card.querySelector('.event-type-badge').outerHTML;
 
-            detailContent.innerHTML =
+            content.innerHTML =
                 '<div class="sky-detail-header">' +
                     badge +
-                    '<h5>' + title + '</h5>' +
                     '<span class="sky-card-date">' + date + '</span>' +
+                    '<h4>' + title + '</h4>' +
                 '</div>' +
                 dataDiv.innerHTML;
 
-            // Move detail panel after the last card in the row
-            lastCardInRow.insertAdjacentElement('afterend', detailPanel);
+            // Position modal at the card's location (First)
+            modal.style.top = rect.top + 'px';
+            modal.style.left = rect.left + 'px';
+            modal.style.width = rect.width + 'px';
+            modal.style.height = rect.height + 'px';
+            modal.style.borderRadius = '14px';
+            modal.classList.remove('animating', 'open', 'closing');
+            modal.style.opacity = '1';
+            modal.style.pointerEvents = 'none';
+            modal.offsetHeight; // force reflow
 
+            // Mark card as active (dim it)
             card.classList.add('active');
             activeCard = card;
 
-            // Trigger open animation on next frame
+            // Show overlay
+            overlay.classList.add('visible');
+
+            // Animate to target (Last)
+            var target = getModalTarget();
+            modal.classList.add('animating');
+
             requestAnimationFrame(function() {
-                detailPanel.classList.add('open');
-                setTimeout(function() {
-                    detailPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 350);
+                modal.style.top = target.top + 'px';
+                modal.style.left = target.left + 'px';
+                modal.style.width = target.width + 'px';
+                modal.style.height = target.height + 'px';
+                modal.style.borderRadius = '18px';
+                modal.classList.add('open');
             });
+
+            // Enable pointer events after animation
+            setTimeout(function() {
+                modal.style.pointerEvents = 'auto';
+                isAnimating = false;
+            }, 480);
         }
 
-        // Card click handler (delegated)
+        function closeModal(animate) {
+            if (!activeCard) return;
+
+            var card = activeCard;
+
+            if (animate && !isAnimating) {
+                isAnimating = true;
+
+                // Get card's current bounding rect to animate back to
+                var rect = card.getBoundingClientRect();
+
+                modal.classList.remove('animating', 'open');
+                modal.classList.add('closing');
+                modal.offsetHeight; // force reflow
+
+                // Animate back to card position
+                modal.style.top = rect.top + 'px';
+                modal.style.left = rect.left + 'px';
+                modal.style.width = rect.width + 'px';
+                modal.style.height = rect.height + 'px';
+                modal.style.borderRadius = '14px';
+                modal.style.pointerEvents = 'none';
+
+                overlay.classList.remove('visible');
+
+                setTimeout(function() {
+                    modal.classList.remove('closing');
+                    modal.style.opacity = '0';
+                    card.classList.remove('active');
+                    activeCard = null;
+                    isAnimating = false;
+                }, 380);
+            } else {
+                // Instant close (no animation)
+                modal.classList.remove('animating', 'open', 'closing');
+                modal.style.opacity = '0';
+                modal.style.pointerEvents = 'none';
+                overlay.classList.remove('visible');
+                card.classList.remove('active');
+                activeCard = null;
+            }
+        }
+
+        // Card click handler (delegated on grid)
         grid.addEventListener('click', function(e) {
-            if (e.target.closest('.sky-detail-close')) return;
-            if (e.target.closest('.sky-detail-panel')) return;
             var card = e.target.closest('.sky-card');
             if (!card) return;
 
             if (activeCard === card) {
-                closeDetail(true);
+                closeModal(true);
             } else {
-                closeDetail(false);
-                openDetail(card);
+                if (activeCard) closeModal(false);
+                openModal(card);
             }
         });
 
         // Close button
         closeBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            closeDetail(true);
+            closeModal(true);
+        });
+
+        // Overlay click to close
+        overlay.addEventListener('click', function() {
+            closeModal(true);
         });
 
         // Escape key
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && activeCard) closeDetail(true);
+            if (e.key === 'Escape' && activeCard) closeModal(true);
         });
 
         // Filter buttons
@@ -1411,7 +1466,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 btn.classList.add('active');
 
-                closeDetail(false);
+                closeModal(false);
 
                 grid.querySelectorAll('.sky-card').forEach(function(card) {
                     if (filter === 'all' || card.getAttribute('data-event-type') === filter) {
@@ -1423,17 +1478,22 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Reposition detail on resize
+        // Reposition modal on resize if open
         var resizeTimer;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
-                if (activeCard) {
-                    var card = activeCard;
-                    closeDetail(false);
-                    openDetail(card);
+                if (activeCard && modal.classList.contains('open')) {
+                    var target = getModalTarget();
+                    modal.style.transition = 'none';
+                    modal.style.top = target.top + 'px';
+                    modal.style.left = target.left + 'px';
+                    modal.style.width = target.width + 'px';
+                    modal.style.height = target.height + 'px';
+                    modal.offsetHeight;
+                    modal.style.transition = '';
                 }
-            }, 200);
+            }, 100);
         });
     })();
 

@@ -3828,52 +3828,100 @@ a:hover {
 /* Hidden detail data inside each card */
 .sky-card-detail-data { display: none !important; }
 
-/* ── Detail Panel (full-width, inserted between grid rows) ── */
-.sky-detail-panel {
-    grid-column: 1 / -1;
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
+/* ── Backdrop overlay ── */
+.sky-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    z-index: 1000;
+    pointer-events: none;
+    transition: background 0.4s ease;
+}
+.sky-overlay.visible {
+    background: rgba(0, 0, 0, 0.7);
+    pointer-events: auto;
+}
+
+/* ── Detail Modal (expands from card position) ── */
+.sky-detail-modal {
+    position: fixed;
+    z-index: 1001;
+    background: var(--night-card);
     border: 1px solid var(--glass-border);
     border-radius: var(--dashboard-radius);
-    position: relative;
     overflow: hidden;
-    max-height: 0;
     opacity: 0;
-    padding: 0 1.5rem;
-    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+    pointer-events: none;
+    will-change: transform, width, height, top, left, border-radius;
 }
-.sky-detail-panel.open {
-    max-height: 600px;
+.sky-detail-modal.animating {
+    transition: top 0.45s cubic-bezier(0.4, 0, 0.15, 1),
+                left 0.45s cubic-bezier(0.4, 0, 0.15, 1),
+                width 0.45s cubic-bezier(0.4, 0, 0.15, 1),
+                height 0.45s cubic-bezier(0.4, 0, 0.15, 1),
+                border-radius 0.45s cubic-bezier(0.4, 0, 0.15, 1),
+                opacity 0.3s ease;
+}
+.sky-detail-modal.open {
     opacity: 1;
-    padding: 1.5rem;
+    pointer-events: auto;
 }
+.sky-detail-modal.closing {
+    transition: top 0.35s cubic-bezier(0.4, 0, 0.15, 1),
+                left 0.35s cubic-bezier(0.4, 0, 0.15, 1),
+                width 0.35s cubic-bezier(0.4, 0, 0.15, 1),
+                height 0.35s cubic-bezier(0.4, 0, 0.15, 1),
+                border-radius 0.35s cubic-bezier(0.4, 0, 0.15, 1),
+                opacity 0.25s ease 0.1s;
+}
+
+/* Inner scrollable content wrapper */
+.sky-detail-inner {
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: 100%;
+    opacity: 0;
+    transition: opacity 0.25s ease 0.2s;
+}
+.sky-detail-modal.open .sky-detail-inner {
+    opacity: 1;
+}
+.sky-detail-modal.closing .sky-detail-inner {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+/* Close button */
 .sky-detail-close {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
+    top: 1rem;
+    right: 1rem;
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1);
     color: var(--text-secondary);
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    font-size: 0.85rem;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+    font-size: 0.9rem;
+    z-index: 10;
 }
 .sky-detail-close:hover {
     background: rgba(255,255,255,0.12);
     color: var(--text-primary);
+    transform: scale(1.1);
 }
+
+/* Content styling */
 .sky-detail-content {
-    font-size: 0.88rem;
+    font-size: 0.92rem;
     color: var(--text-secondary);
-    line-height: 1.7;
-    max-width: 800px;
+    line-height: 1.8;
+    max-width: 700px;
 }
 .sky-detail-content strong { color: var(--text-primary); }
 .sky-detail-content p:last-child { margin-bottom: 0; }
@@ -3882,17 +3930,21 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 1rem;
-    padding-right: 2.5rem;
+    margin-bottom: 1.25rem;
+    padding-right: 3rem;
+    flex-wrap: wrap;
 }
-.sky-detail-header h5 {
+.sky-detail-header h4 {
     margin: 0;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     color: var(--text-primary);
+    width: 100%;
+    margin-top: 0.25rem;
 }
 .sky-detail-header .sky-card-date {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
 }
 
 /* ── Responsive ── */
@@ -3902,9 +3954,11 @@ a:hover {
 @media (max-width: 768px) {
     .sky-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
     .sky-card-title { font-size: 0.85rem; }
+    .sky-detail-inner { padding: 1.5rem; }
+    .sky-detail-header h4 { font-size: 1.1rem; }
 }
 @media (max-width: 480px) {
     .sky-grid { grid-template-columns: 1fr; }
     .sky-card-body { padding: 0.75rem; }
-    .sky-detail-panel.open { padding: 1rem; }
+    .sky-detail-inner { padding: 1.25rem; }
 }

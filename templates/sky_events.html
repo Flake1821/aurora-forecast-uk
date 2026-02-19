@@ -656,12 +656,15 @@
                 </div>
             </div>
 
-            {# ── Detail Panel (moved between rows by JS) ── #}
-            <div class="sky-detail-panel" id="skyDetailPanel">
-                <button class="sky-detail-close" aria-label="Close"><i class="bi bi-x-lg"></i></button>
-                <div class="sky-detail-content"></div>
-            </div>
+        </div>
 
+        {# ── Modal overlay + expand panel ── #}
+        <div class="sky-overlay" id="skyOverlay"></div>
+        <div class="sky-detail-modal" id="skyDetailModal">
+            <button class="sky-detail-close" id="skyDetailClose" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+            <div class="sky-detail-inner">
+                <div class="sky-detail-content" id="skyDetailContent"></div>
+            </div>
         </div>
 
         <!-- Disclaimer -->
