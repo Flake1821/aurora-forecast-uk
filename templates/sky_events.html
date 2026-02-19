@@ -1,0 +1,519 @@
+{% extends 'base.html' %}
+{% block title %}Night Sky Events 2026 — Aurora Forecast UK{% endblock %}
+{% block meta_description %}All major astronomical events visible from the UK in 2026 — meteor showers, eclipses, full moons, planetary events and solstices.{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="section-header text-center mb-4">
+            <h2><i class="bi bi-stars me-2"></i>Night Sky Events 2026</h2>
+            <p class="text-secondary">Major astronomical events visible from the UK, in chronological order</p>
+        </div>
+
+        <!-- Filter buttons -->
+        <div class="event-filters mb-4">
+            <button class="event-filter-btn active" data-filter="all">All</button>
+            <button class="event-filter-btn" data-filter="meteor"><i class="bi bi-stars me-1"></i>Meteor Showers</button>
+            <button class="event-filter-btn" data-filter="eclipse"><i class="bi bi-moon me-1"></i>Eclipses</button>
+            <button class="event-filter-btn" data-filter="fullmoon"><i class="bi bi-circle-fill me-1"></i>Full Moons</button>
+            <button class="event-filter-btn" data-filter="planet"><i class="bi bi-globe2 me-1"></i>Planets</button>
+            <button class="event-filter-btn" data-filter="equinox"><i class="bi bi-sun me-1"></i>Seasons</button>
+        </div>
+
+        <!-- ════════════ JANUARY ════════════ -->
+        <h5 class="event-month">January</h5>
+
+        <div class="event-card cond-panel" data-event-type="meteor">
+            <div class="event-header">
+                <span class="event-date">3–4 Jan</span>
+                <span class="event-name">Quadrantids Meteor Shower Peak</span>
+                <span class="event-type-badge badge-meteor">Meteor Shower</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The Quadrantids are one of the strongest annual meteor showers, capable of producing up to <strong>120 meteors per hour</strong> under ideal conditions. The radiant lies in the constellation Boötes, near the defunct constellation Quadrans Muralis.</p>
+                <p><strong>Best viewing:</strong> After midnight on 3 January into pre-dawn on 4 January. Look towards the north-east sky.</p>
+                <p><strong>UK visibility:</strong> Good from all parts of the UK. The peak is brief (around 6 hours) so timing is important.</p>
+                <p><strong>Tips:</strong> The waxing crescent Moon sets early, leaving dark skies for the peak. Find a dark site away from light pollution and allow 20 minutes for your eyes to adapt.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">13 Jan</span>
+                <span class="event-name">Full Wolf Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>January's full Moon is traditionally known as the <strong>Wolf Moon</strong>, named after the howling wolves heard during cold midwinter nights. It rises around sunset and sets around sunrise, illuminating the long winter night.</p>
+                <p><strong>Best viewing:</strong> Visible all night from dusk to dawn.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations. January's full Moon rides high across the sky due to the Moon's orbit tilting opposite to the Sun's low winter path.</p>
+                <p><strong>Tips:</strong> A full Moon is a poor night for meteor or deep-sky observing, but ideal for moonlit winter landscape photography.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ FEBRUARY ════════════ -->
+        <h5 class="event-month">February</h5>
+
+        <div class="event-card cond-panel" data-event-type="planet">
+            <div class="event-header">
+                <span class="event-date">1 Feb</span>
+                <span class="event-name">Venus at Greatest Eastern Elongation</span>
+                <span class="event-type-badge badge-planet">Planet</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>Venus reaches its greatest angular separation from the Sun (<strong>47.2°</strong>), making it a brilliant <strong>evening star</strong> visible in the western sky after sunset.</p>
+                <p><strong>Best viewing:</strong> Look west-southwest after sunset. Venus will be clearly visible for several hours before setting.</p>
+                <p><strong>UK visibility:</strong> Excellent from all UK locations. At magnitude –4.4, Venus is unmistakable — by far the brightest point of light in the sky.</p>
+                <p><strong>Tips:</strong> Through a small telescope, Venus will appear as a half-lit disc similar to a first-quarter Moon. Try photographing Venus alongside twilight landscapes for dramatic results.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">12 Feb</span>
+                <span class="event-name">Full Snow Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>February's full Moon is known as the <strong>Snow Moon</strong>, reflecting the typically heavy snowfalls of midwinter in the Northern Hemisphere.</p>
+                <p><strong>Best viewing:</strong> Visible all night, rising in the east around sunset.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations. Like January's Wolf Moon, it tracks high across the sky during the long winter night.</p>
+                <p><strong>Tips:</strong> Ideal for photographing moonlit snowy landscapes. Use a telephoto lens at moonrise for dramatic scale against foreground features.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ MARCH ════════════ -->
+        <h5 class="event-month">March</h5>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">14 Mar</span>
+                <span class="event-name">Full Worm Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>Worm Moon</strong> marks the transition to spring, named for the earthworm casts that appear as the ground begins to thaw.</p>
+                <p><strong>Best viewing:</strong> Visible all night from dusk to dawn.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations.</p>
+                <p><strong>Tips:</strong> As we approach the equinox, the Moon's path across the sky becomes more moderate in altitude compared to winter full Moons.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="equinox">
+            <div class="event-header">
+                <span class="event-date">20 Mar</span>
+                <span class="event-name">March Equinox</span>
+                <span class="event-type-badge badge-equinox">Season</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>vernal equinox</strong> marks the astronomical start of spring in the Northern Hemisphere. Day and night are approximately equal in length.</p>
+                <p><strong>Best viewing:</strong> Not an observational event, but sunset and sunrise are due east and west — useful for calibrating your bearings at your observing site.</p>
+                <p><strong>UK visibility:</strong> From this date, nights become shorter and the window for astronomical observation begins to shrink.</p>
+                <p><strong>Tips:</strong> Equinox evenings are excellent for spotting the zodiacal light — a faint pyramid of light along the ecliptic visible in the west after twilight from dark sites.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="eclipse">
+            <div class="event-header">
+                <span class="event-date">29 Mar</span>
+                <span class="event-name">Total Lunar Eclipse</span>
+                <span class="event-type-badge badge-eclipse">Eclipse</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>A <strong>total lunar eclipse</strong> occurs when the Moon passes entirely through Earth's umbral shadow, turning a deep copper-red colour — a so-called "Blood Moon."</p>
+                <p><strong>Best viewing:</strong> The eclipse begins in the early hours. From the UK, the Moon will be setting during totality, so look low to the west-southwest.</p>
+                <p><strong>UK visibility:</strong> Partially visible from the UK — the early penumbral and partial phases are visible, but the Moon sets around totality. Western UK and higher elevations have the best chance of glimpsing the start of totality near the horizon.</p>
+                <p><strong>Tips:</strong> A low eclipse near the horizon can produce stunning photographs with foreground elements. Use a telephoto lens and find a location with a clear western horizon.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ APRIL ════════════ -->
+        <h5 class="event-month">April</h5>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">12 Apr</span>
+                <span class="event-name">Full Pink Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>Pink Moon</strong> is named after the pink phlox wildflowers that bloom in early spring across North America — the Moon itself does not appear pink.</p>
+                <p><strong>Best viewing:</strong> Visible all night, rising around sunset in the east.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations.</p>
+                <p><strong>Tips:</strong> April's full Moon sits lower in the sky than winter full Moons. Try capturing it at moonrise when it appears large near the horizon due to the "Moon illusion."</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="meteor">
+            <div class="event-header">
+                <span class="event-date">21–22 Apr</span>
+                <span class="event-name">Lyrids Meteor Shower Peak</span>
+                <span class="event-type-badge badge-meteor">Meteor Shower</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The Lyrids are one of the oldest recorded meteor showers, observed for over 2,700 years. They produce around <strong>18 meteors per hour</strong> at peak, with occasional surges of up to 100.</p>
+                <p><strong>Best viewing:</strong> After midnight on 21 April into pre-dawn on 22 April. The radiant is near the bright star Vega in the constellation Lyra, which rises in the north-east.</p>
+                <p><strong>UK visibility:</strong> Good from all UK locations. Vega is well-placed in the pre-dawn sky.</p>
+                <p><strong>Tips:</strong> The waning crescent Moon will not interfere. Lyrid meteors are often bright with persistent trains — some fireballs can cast brief shadows.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ MAY ════════════ -->
+        <h5 class="event-month">May</h5>
+
+        <div class="event-card cond-panel" data-event-type="meteor">
+            <div class="event-header">
+                <span class="event-date">5–6 May</span>
+                <span class="event-name">Eta Aquariids Meteor Shower Peak</span>
+                <span class="event-type-badge badge-meteor">Meteor Shower</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The Eta Aquariids originate from debris left by <strong>Halley's Comet</strong>. While they produce up to 50 meteors per hour in the Southern Hemisphere, UK observers typically see <strong>10–20 per hour</strong> as the radiant is low.</p>
+                <p><strong>Best viewing:</strong> Pre-dawn hours on 5–6 May, looking south-east. The radiant (in Aquarius) doesn't rise high above the UK horizon.</p>
+                <p><strong>UK visibility:</strong> Moderate — best from southern England where the radiant reaches a higher altitude. Meteors from this shower are very fast (66 km/s) and often leave persistent trains.</p>
+                <p><strong>Tips:</strong> Despite the low radiant, earthgrazers — long, bright meteors streaking horizontally — can appear across the sky. Best observed from the darkest sites you can reach.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">12 May</span>
+                <span class="event-name">Full Flower Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>May's full Moon is the <strong>Flower Moon</strong>, named for the abundance of wildflowers blooming across the countryside.</p>
+                <p><strong>Best viewing:</strong> Visible from dusk, tracking low across the southern sky.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations, though it stays lower in the sky as we approach summer.</p>
+                <p><strong>Tips:</strong> Late spring's warm evenings make this an enjoyable full Moon to observe. The low angle through more atmosphere can give it a golden or amber tint near the horizon.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ JUNE ════════════ -->
+        <h5 class="event-month">June</h5>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">10 Jun</span>
+                <span class="event-name">Full Strawberry Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>Strawberry Moon</strong> coincides with the strawberry harvest season. June's full Moon often appears amber or reddish as it tracks very low across the sky.</p>
+                <p><strong>Best viewing:</strong> Visible from late evening, staying very close to the southern horizon.</p>
+                <p><strong>UK visibility:</strong> Visible from all locations but at its lowest altitude of the year. The Moon barely rises above the rooftops from northern Scotland.</p>
+                <p><strong>Tips:</strong> The extremely low path makes this Moon naturally golden-amber all night. Perfect for creative photography with foreground landmarks silhouetted against a large, warm-toned Moon.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="equinox">
+            <div class="event-header">
+                <span class="event-date">20 Jun</span>
+                <span class="event-name">June Solstice — Longest Day</span>
+                <span class="event-type-badge badge-equinox">Season</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>summer solstice</strong> marks the longest day and shortest night of the year. The Sun reaches its highest point in the sky and the most northerly sunset/sunrise positions.</p>
+                <p><strong>Best viewing:</strong> Sunrise and sunset celebrations — many people gather at ancient sites like Stonehenge. In northern Scotland, twilight persists through the "night."</p>
+                <p><strong>UK visibility:</strong> London enjoys approximately 16 hours 38 minutes of daylight. In the Shetland Islands, there is no true darkness — the "simmer dim" persists all night.</p>
+                <p><strong>Tips:</strong> The worst time of year for deep-sky astronomy, but noctilucent clouds — electric-blue ice clouds at 80 km altitude — begin their season and are best seen from the UK around solstice. Look north, 1–2 hours after sunset.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ JULY ════════════ -->
+        <h5 class="event-month">July</h5>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">10 Jul</span>
+                <span class="event-name">Full Buck Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>Buck Moon</strong> is named for the time when male deer begin growing their new antlers. Like June, this full Moon stays low in the sky.</p>
+                <p><strong>Best viewing:</strong> Visible from late evening through dawn, tracking close to the southern horizon.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations, though it remains at a low altitude throughout the short summer night.</p>
+                <p><strong>Tips:</strong> Summer full Moons are ideal for wide-angle landscape photography. The short nights mean the Moon can be captured in twilight conditions with attractive colours.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="meteor">
+            <div class="event-header">
+                <span class="event-date">28–29 Jul</span>
+                <span class="event-name">Delta Aquariids Meteor Shower Peak</span>
+                <span class="event-type-badge badge-meteor">Meteor Shower</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The Southern Delta Aquariids produce around <strong>15–20 meteors per hour</strong> at peak. Although better from southern latitudes, UK observers can catch meteors low in the southern sky.</p>
+                <p><strong>Best viewing:</strong> After midnight, looking towards the south. The radiant is in the constellation Aquarius.</p>
+                <p><strong>UK visibility:</strong> Moderate — rates are lower from the UK due to the southern radiant. Southern England has an advantage.</p>
+                <p><strong>Tips:</strong> This shower overlaps with the early Perseids, so you may see meteors from both radiants in the same session. The waxing crescent Moon sets early, leaving dark skies.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ AUGUST ════════════ -->
+        <h5 class="event-month">August</h5>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">8 Aug</span>
+                <span class="event-name">Full Sturgeon Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>August's full Moon is the <strong>Sturgeon Moon</strong>, named by Native American fishing tribes for the large sturgeon fish caught at this time of year in the Great Lakes.</p>
+                <p><strong>Best viewing:</strong> Visible from late evening, rising in the south-east.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations. As summer progresses, full Moons begin to climb slightly higher again.</p>
+                <p><strong>Tips:</strong> Unfortunately for 2026, this Moon falls just days before the Perseid peak, so its brightness will significantly reduce visible meteor rates. Plan Perseid observing before and after full Moon.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="meteor">
+            <div class="event-header">
+                <span class="event-date">12 Aug</span>
+                <span class="event-name">Perseids Meteor Shower Peak</span>
+                <span class="event-type-badge badge-meteor">Meteor Shower</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The Perseids are the most popular annual meteor shower, producing up to <strong>100 meteors per hour</strong> under ideal conditions. They originate from Comet 109P/Swift–Tuttle and are renowned for bright fireballs.</p>
+                <p><strong>Best viewing:</strong> After midnight on 12 August into pre-dawn on 13 August. The radiant is in Perseus, rising high in the north-east.</p>
+                <p><strong>UK visibility:</strong> Excellent from all UK locations. August's warm evenings and the high radiant altitude make this the most comfortable meteor shower to observe.</p>
+                <p><strong>Tips:</strong> In 2026, the nearly-full Moon will be a significant issue, washing out fainter meteors. Focus on the brightest fireballs and try shielding the Moon behind a building or tree. The shower is active 17 Jul – 24 Aug, so try nights away from full Moon too.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="planet">
+            <div class="event-header">
+                <span class="event-date">14 Aug</span>
+                <span class="event-name">Saturn at Opposition</span>
+                <span class="event-type-badge badge-planet">Planet</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p><strong>Saturn</strong> reaches opposition — directly opposite the Sun — making it visible all night, rising at sunset and setting at sunrise. It shines at its brightest for the year.</p>
+                <p><strong>Best viewing:</strong> Visible all night, highest in the south around midnight. Saturn will be in the constellation Pisces/Aquarius.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations. Opposition occurs when Earth is closest to Saturn, making its rings and moons most visible through a telescope.</p>
+                <p><strong>Tips:</strong> Even a small telescope (60mm+) will reveal Saturn's iconic rings. 2026 sees the rings nearly edge-on as Saturn approaches its ring-plane crossing — a rare geometric event. A good pair of binoculars will show Saturn as a slightly elongated disc.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ SEPTEMBER ════════════ -->
+        <h5 class="event-month">September</h5>
+
+        <div class="event-card cond-panel" data-event-type="eclipse">
+            <div class="event-header">
+                <span class="event-date">7 Sep</span>
+                <span class="event-name">Total Lunar Eclipse — Harvest Moon</span>
+                <span class="event-type-badge badge-eclipse">Eclipse</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>A <strong>total lunar eclipse</strong> coincides with the Harvest Moon — a spectacular combination. The Moon will turn deep red as it passes through Earth's shadow, the iconic "Blood Moon" effect.</p>
+                <p><strong>Best viewing:</strong> The entire eclipse is visible from the UK. Totality occurs during evening hours — prime time for watching. The Moon rises already in partial eclipse.</p>
+                <p><strong>UK visibility:</strong> <strong>Fully visible from the entire UK</strong> — the best lunar eclipse of 2026 for British observers. Totality lasts approximately 1 hour 22 minutes.</p>
+                <p><strong>Tips:</strong> This is the headline event of 2026 for UK stargazers. Find a location with a clear south-eastern horizon for moonrise. Binoculars enhance the colour and detail. During totality, the background stars become visible, making for superb wide-angle photographs.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="equinox">
+            <div class="event-header">
+                <span class="event-date">22 Sep</span>
+                <span class="event-name">September Equinox</span>
+                <span class="event-type-badge badge-equinox">Season</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>autumnal equinox</strong> marks the start of astronomical autumn. Day and night are approximately equal, and from this date the nights grow longer than the days.</p>
+                <p><strong>Best viewing:</strong> Sunrise and sunset occur due east and west respectively.</p>
+                <p><strong>UK visibility:</strong> The equinox signals the return of longer nights — excellent news for astronomers and aurora hunters. Dark skies return to northern Scotland.</p>
+                <p><strong>Tips:</strong> The equinox period is also prime time for aurora activity. Geomagnetic storms are statistically more common around the equinoxes due to the orientation of Earth's magnetic field relative to the solar wind.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="planet">
+            <div class="event-header">
+                <span class="event-date">23 Sep</span>
+                <span class="event-name">Neptune at Opposition</span>
+                <span class="event-type-badge badge-planet">Planet</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p><strong>Neptune</strong> reaches opposition, shining at its brightest for the year at magnitude +7.8. It remains invisible to the naked eye but is reachable through binoculars and telescopes.</p>
+                <p><strong>Best viewing:</strong> Visible most of the night in the constellation Pisces. Highest around midnight.</p>
+                <p><strong>UK visibility:</strong> Good from all locations with optical aid. You'll need at least 7×50 binoculars and a detailed star chart to identify it among the background stars.</p>
+                <p><strong>Tips:</strong> Through a telescope at 100×+ magnification, Neptune appears as a tiny blue-green disc — distinct from the pinpoint stars around it. Its largest moon Triton can be spotted in larger amateur telescopes.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ OCTOBER ════════════ -->
+        <h5 class="event-month">October</h5>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">7 Oct</span>
+                <span class="event-name">Full Hunter's Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>Hunter's Moon</strong> is the first full Moon after the Harvest Moon. Historically, it marked the time to hunt and stockpile meat before winter.</p>
+                <p><strong>Best viewing:</strong> Visible all night, rising around sunset. October full Moons often appear large and orange at the horizon due to the shallow angle of the ecliptic.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations. The Moon climbs higher each month now as we approach winter.</p>
+                <p><strong>Tips:</strong> The Hunter's Moon rises at nearly the same time on successive evenings (unlike most months), so you get several evenings of "full-looking" moonrise in a row.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="meteor">
+            <div class="event-header">
+                <span class="event-date">21–22 Oct</span>
+                <span class="event-name">Orionids Meteor Shower Peak</span>
+                <span class="event-type-badge badge-meteor">Meteor Shower</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The Orionids are the second meteor shower produced by <strong>Halley's Comet</strong> debris (the Eta Aquariids being the first). They produce around <strong>20 meteors per hour</strong> at peak.</p>
+                <p><strong>Best viewing:</strong> After midnight on 21 October into pre-dawn on 22 October. The radiant is near Betelgeuse in Orion, which rises in the east.</p>
+                <p><strong>UK visibility:</strong> Good from all UK locations. Orion is well-placed in the autumn pre-dawn sky.</p>
+                <p><strong>Tips:</strong> Orionid meteors are fast (66 km/s) and often produce persistent trains that glow for several seconds. The waning crescent Moon will not be a problem for this shower.</p>
+            </div>
+        </div>
+
+        <!-- ════════════ NOVEMBER ════════════ -->
+        <h5 class="event-month">November</h5>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">5 Nov</span>
+                <span class="event-name">Full Beaver Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>November's full Moon is the <strong>Beaver Moon</strong>, named for the time when beaver traps were traditionally set before waterways froze over.</p>
+                <p><strong>Best viewing:</strong> Visible all night, rising in the east around sunset. November's Moon climbs high in the sky during the long autumn night.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations.</p>
+                <p><strong>Tips:</strong> Watch for Bonfire Night fireworks lighting up the sky beneath the full Moon — a uniquely British spectacle! The bright moonlight will compete with all but the largest fireworks displays.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="meteor">
+            <div class="event-header">
+                <span class="event-date">17–18 Nov</span>
+                <span class="event-name">Leonids Meteor Shower Peak</span>
+                <span class="event-type-badge badge-meteor">Meteor Shower</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The Leonids are famous for producing periodic <strong>meteor storms</strong> (most recently in 1999 and 2001). In a normal year, expect around <strong>15 meteors per hour</strong>. The parent comet is 55P/Tempel–Tuttle.</p>
+                <p><strong>Best viewing:</strong> After midnight on 17 November into pre-dawn on 18 November. The radiant is in Leo, rising in the east.</p>
+                <p><strong>UK visibility:</strong> Good from all UK locations. Leo is well above the horizon by 1am.</p>
+                <p><strong>Tips:</strong> Leonid meteors are among the fastest at 71 km/s, often producing bright fireballs with vivid colours. The waning crescent Moon rises late and won't interfere significantly.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="planet">
+            <div class="event-header">
+                <span class="event-date">24 Nov</span>
+                <span class="event-name">Mercury at Greatest Eastern Elongation</span>
+                <span class="event-type-badge badge-planet">Planet</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p><strong>Mercury</strong> reaches its greatest angular separation from the Sun in the evening sky (<strong>22.0°</strong>). As the innermost planet, Mercury is notoriously difficult to observe.</p>
+                <p><strong>Best viewing:</strong> Look low in the south-west immediately after sunset, about 30–45 minutes after the Sun goes down. Mercury will appear as a moderately bright yellowish "star."</p>
+                <p><strong>UK visibility:</strong> Moderate — autumn evening elongations are reasonably good from UK latitudes as the ecliptic makes a steep angle with the horizon.</p>
+                <p><strong>Tips:</strong> Use binoculars to find Mercury in the twilight glow, then try to spot it with the naked eye. Many experienced astronomers have never seen Mercury — this is your chance!</p>
+            </div>
+        </div>
+
+        <!-- ════════════ DECEMBER ════════════ -->
+        <h5 class="event-month">December</h5>
+
+        <div class="event-card cond-panel" data-event-type="fullmoon">
+            <div class="event-header">
+                <span class="event-date">4 Dec</span>
+                <span class="event-name">Full Cold Moon</span>
+                <span class="event-type-badge badge-fullmoon">Full Moon</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>Cold Moon</strong> marks the onset of winter. December's full Moon rides high across the sky during the longest nights of the year — the mirror of June's low Strawberry Moon.</p>
+                <p><strong>Best viewing:</strong> Visible all night, reaching a very high altitude as it crosses the sky. From northern UK locations, it passes almost directly overhead.</p>
+                <p><strong>UK visibility:</strong> Excellent from all locations.</p>
+                <p><strong>Tips:</strong> The Cold Moon is one of the highest full Moons of the year, casting sharp shadows and brilliantly illuminating winter landscapes. Unfortunately it falls just before the Geminid peak.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="meteor">
+            <div class="event-header">
+                <span class="event-date">13–14 Dec</span>
+                <span class="event-name">Geminids Meteor Shower Peak</span>
+                <span class="event-type-badge badge-meteor">Meteor Shower</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The Geminids are widely considered the <strong>best meteor shower of the year</strong>, producing up to <strong>150 multicoloured meteors per hour</strong> under ideal conditions. Unusually, they originate from an asteroid — 3200 Phaethon — rather than a comet.</p>
+                <p><strong>Best viewing:</strong> From around 9pm on 13 December through pre-dawn on 14 December. The radiant in Gemini is well-placed by mid-evening, rising in the east-northeast.</p>
+                <p><strong>UK visibility:</strong> Excellent from all UK locations. The Geminid radiant rises early, giving a long observing window. Rates increase steadily through the night.</p>
+                <p><strong>Tips:</strong> In 2026, the waning gibbous Moon (about 75% illuminated) will wash out fainter meteors during the second half of the night. Focus your observing before midnight when the Moon hasn't yet risen. Geminid meteors are slower than Perseids and come in a range of colours — white, yellow, green, and blue.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="equinox">
+            <div class="event-header">
+                <span class="event-date">21 Dec</span>
+                <span class="event-name">December Solstice — Shortest Day</span>
+                <span class="event-type-badge badge-equinox">Season</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The <strong>winter solstice</strong> is the shortest day and longest night of the year — the Sun reaches its lowest noontime altitude. From London, there are only about 7 hours 50 minutes of daylight.</p>
+                <p><strong>Best viewing:</strong> The longest night of the year — perfect for extended observing sessions. Astronomical darkness begins early and lasts until morning.</p>
+                <p><strong>UK visibility:</strong> The solstice marks the peak of the observing season. Over 16 hours of darkness from southern England, and even more from Scotland.</p>
+                <p><strong>Tips:</strong> Wrap up warm and make the most of the long night. The winter Milky Way is spectacular, Orion dominates the south, and the aurora season continues. Many observing groups hold all-night solstice events.</p>
+            </div>
+        </div>
+
+        <div class="event-card cond-panel" data-event-type="meteor">
+            <div class="event-header">
+                <span class="event-date">22 Dec</span>
+                <span class="event-name">Ursids Meteor Shower Peak</span>
+                <span class="event-type-badge badge-meteor">Meteor Shower</span>
+                <i class="bi bi-chevron-down event-chevron"></i>
+            </div>
+            <div class="event-details">
+                <p>The Ursids are the final meteor shower of the year, producing around <strong>5–10 meteors per hour</strong>. They radiate from near the star Kochab in Ursa Minor (the Little Bear).</p>
+                <p><strong>Best viewing:</strong> Pre-dawn hours on 22 December. The radiant is circumpolar from the UK, meaning it's visible all night.</p>
+                <p><strong>UK visibility:</strong> Good from all UK locations — the circumpolar radiant gives UK observers an advantage over southern latitudes.</p>
+                <p><strong>Tips:</strong> Though modest in rates, the Ursids occasionally produce unexpected outbursts. The waxing crescent Moon sets early, leaving excellent dark skies for the longest night of the year. A fitting end to the 2026 observing calendar.</p>
+            </div>
+        </div>
+
+        <!-- End of events -->
+        <div class="text-center mt-5 mb-3">
+            <p class="text-secondary small">
+                <i class="bi bi-info-circle me-1"></i>
+                Event dates and times are approximate. Meteor shower rates assume ideal dark-sky conditions.
+                Actual visibility depends on weather, light pollution, and your location within the UK.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

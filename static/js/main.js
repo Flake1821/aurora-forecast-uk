@@ -1297,6 +1297,57 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ═══════════════════════════════════════════════
+    // SKY EVENTS — expand/collapse + filter
+    // ═══════════════════════════════════════════════
+
+    // Accordion: click to expand/collapse event cards
+    document.querySelectorAll('.event-card').forEach(function(card) {
+        card.addEventListener('click', function() {
+            // Close any other expanded card (accordion)
+            document.querySelectorAll('.event-card.expanded').forEach(function(other) {
+                if (other !== card) other.classList.remove('expanded');
+            });
+            card.classList.toggle('expanded');
+        });
+    });
+
+    // Filter buttons: show/hide events by type
+    document.querySelectorAll('.event-filter-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var filter = btn.getAttribute('data-filter');
+
+            // Update active button
+            document.querySelectorAll('.event-filter-btn').forEach(function(b) {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+
+            // Show/hide event cards
+            document.querySelectorAll('.event-card').forEach(function(card) {
+                if (filter === 'all' || card.getAttribute('data-event-type') === filter) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                    card.classList.remove('expanded');
+                }
+            });
+
+            // Show/hide month headings if all events in that month are hidden
+            document.querySelectorAll('.event-month').forEach(function(heading) {
+                var next = heading.nextElementSibling;
+                var hasVisible = false;
+                while (next && !next.classList.contains('event-month')) {
+                    if (next.classList.contains('event-card') && next.style.display !== 'none') {
+                        hasVisible = true;
+                    }
+                    next = next.nextElementSibling;
+                }
+                heading.style.display = hasVisible ? '' : 'none';
+            });
+        });
+    });
+
+    // ═══════════════════════════════════════════════
     // DATA FRESHNESS — relative time display
     // ═══════════════════════════════════════════════
 

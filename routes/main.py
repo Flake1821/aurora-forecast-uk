@@ -89,6 +89,11 @@ def about():
     return render_template('about.html')
 
 
+@main_bp.route('/sky-events')
+def sky_events():
+    return render_template('sky_events.html')
+
+
 @main_bp.route('/contact')
 def contact():
     return render_template('contact.html')

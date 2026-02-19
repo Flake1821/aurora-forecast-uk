@@ -47,6 +47,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.sky_events' %}active{% endif %}"
+                           href="{{ url_for('main.sky_events') }}">
+                            <i class="bi bi-stars me-1"></i>Sky Events
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}"
                            href="{{ url_for('main.about') }}">
                             <i class="bi bi-info-circle me-1"></i>About
@@ -95,6 +101,7 @@
                     <ul class="list-unstyled footer-links">
                         <li><a href="{{ url_for('main.index') }}">Dashboard</a></li>
                         <li><a href="{{ url_for('main.about') }}">About</a></li>
+                        <li><a href="{{ url_for('main.sky_events') }}">Sky Events 2026</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">

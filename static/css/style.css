@@ -3709,3 +3709,134 @@ a:hover {
         font-size: 1.4rem;
     }
 }
+
+
+/* ═══════════════════════════════════════════════
+   SKY EVENTS PAGE
+   ═══════════════════════════════════════════════ */
+
+/* Month heading */
+.event-month {
+    color: var(--aurora-green);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 1.5rem 0 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 3px solid var(--aurora-green);
+}
+.event-month:first-of-type { margin-top: 0; }
+
+/* Event card — extends cond-panel */
+.event-card {
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: border-color 0.2s, background 0.2s;
+}
+.event-card:hover {
+    border-color: rgba(255,255,255,0.18);
+    background: var(--glass-bg-hover);
+}
+
+/* Header row inside card */
+.event-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Date column */
+.event-date {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+/* Event name */
+.event-name {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+}
+
+/* Type badge */
+.event-type-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+.badge-meteor   { background: rgba(0,230,118,0.15);  color: #00E676; }
+.badge-eclipse  { background: rgba(68,138,255,0.15);  color: #448AFF; }
+.badge-fullmoon { background: rgba(255,193,7,0.15);   color: #FFC107; }
+.badge-planet   { background: rgba(124,77,255,0.15);  color: #7C4DFF; }
+.badge-equinox  { background: rgba(29,233,182,0.15);  color: #1DE9B6; }
+
+/* Chevron rotation */
+.event-chevron {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+.event-card.expanded .event-chevron {
+    transform: rotate(180deg);
+}
+
+/* Expanded details (hidden by default) */
+.event-details {
+    display: none;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+.event-card.expanded .event-details {
+    display: block;
+}
+.event-details strong {
+    color: var(--text-primary);
+}
+.event-details p:last-child {
+    margin-bottom: 0;
+}
+
+/* Filter buttons */
+.event-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+}
+.event-filter-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.event-filter-btn:hover,
+.event-filter-btn.active {
+    background: rgba(0,230,118,0.12);
+    border-color: var(--aurora-green);
+    color: var(--aurora-green);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .event-header { flex-wrap: wrap; }
+    .event-date { min-width: 70px; font-size: 0.75rem; }
+    .event-name { font-size: 0.85rem; }
+    .event-type-badge { font-size: 0.62rem; }
+}
