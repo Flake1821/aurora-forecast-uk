@@ -4,161 +4,46 @@
 
 {% block content %}
 
-{# ═══ SVG ILLUSTRATION MACROS ═══ #}
-
-{% macro svg_meteor(color='#00E676', idx=0) %}
-<svg viewBox="0 0 280 175" xmlns="http://www.w3.org/2000/svg" class="sky-card-svg" aria-hidden="true">
-  <defs>
-    <linearGradient id="mt-t-{{ idx }}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="{{ color }}" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="{{ color }}" stop-opacity="0"/>
-    </linearGradient>
-    <radialGradient id="mt-g-{{ idx }}">
-      <stop offset="0%" stop-color="{{ color }}" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="{{ color }}" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="280" height="175" fill="#0a0a1a"/>
-  <circle cx="30" cy="25" r="1" fill="#fff" opacity="0.6"/>
-  <circle cx="85" cy="40" r="1.2" fill="#fff" opacity="0.5"/>
-  <circle cx="200" cy="20" r="0.8" fill="#fff" opacity="0.7"/>
-  <circle cx="250" cy="55" r="1" fill="#fff" opacity="0.4"/>
-  <circle cx="155" cy="65" r="1.3" fill="#fff" opacity="0.5"/>
-  <circle cx="60" cy="130" r="0.9" fill="#fff" opacity="0.6"/>
-  <circle cx="230" cy="140" r="1.1" fill="#fff" opacity="0.5"/>
-  <circle cx="120" cy="15" r="0.7" fill="#fff" opacity="0.8"/>
-  <ellipse cx="95" cy="60" rx="50" ry="50" fill="url(#mt-g-{{ idx }})"/>
-  <line x1="65" y1="40" x2="175" y2="110" stroke="url(#mt-t-{{ idx }})" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="65" cy="40" r="4" fill="{{ color }}"/>
-  <line x1="180" y1="25" x2="230" y2="60" stroke="url(#mt-t-{{ idx }})" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
-  <circle cx="180" cy="25" r="2" fill="{{ color }}" opacity="0.7"/>
-  <circle cx="90" cy="55" r="1.5" fill="{{ color }}" opacity="0.4"/>
-  <circle cx="110" cy="68" r="1" fill="{{ color }}" opacity="0.3"/>
-  <circle cx="130" cy="80" r="1.2" fill="{{ color }}" opacity="0.25"/>
-</svg>
-{% endmacro %}
-
-{% macro svg_fullmoon(color='#FFC107', idx=0) %}
-<svg viewBox="0 0 280 175" xmlns="http://www.w3.org/2000/svg" class="sky-card-svg" aria-hidden="true">
-  <defs>
-    <radialGradient id="fm-s-{{ idx }}" cx="40%" cy="40%">
-      <stop offset="0%" stop-color="#fffde7"/>
-      <stop offset="70%" stop-color="{{ color }}"/>
-      <stop offset="100%" stop-color="#c79100"/>
-    </radialGradient>
-    <radialGradient id="fm-g-{{ idx }}" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="{{ color }}" stop-opacity="0.15"/>
-      <stop offset="100%" stop-color="{{ color }}" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="280" height="175" fill="#0a0a1a"/>
-  <circle cx="30" cy="20" r="0.8" fill="#fff" opacity="0.5"/>
-  <circle cx="250" cy="30" r="1" fill="#fff" opacity="0.6"/>
-  <circle cx="45" cy="150" r="0.9" fill="#fff" opacity="0.4"/>
-  <circle cx="235" cy="145" r="1.1" fill="#fff" opacity="0.5"/>
-  <circle cx="140" cy="85" r="70" fill="url(#fm-g-{{ idx }})"/>
-  <circle cx="140" cy="85" r="48" fill="url(#fm-s-{{ idx }})"/>
-  <circle cx="125" cy="72" r="8" fill="rgba(0,0,0,0.08)"/>
-  <circle cx="155" cy="95" r="12" fill="rgba(0,0,0,0.06)"/>
-  <circle cx="132" cy="105" r="5" fill="rgba(0,0,0,0.07)"/>
-  <circle cx="160" cy="72" r="4" fill="rgba(0,0,0,0.05)"/>
-  <circle cx="118" cy="90" r="6" fill="rgba(0,0,0,0.06)"/>
-</svg>
-{% endmacro %}
-
-{% macro svg_eclipse(color='#448AFF', idx=0) %}
-<svg viewBox="0 0 280 175" xmlns="http://www.w3.org/2000/svg" class="sky-card-svg" aria-hidden="true">
-  <defs>
-    <radialGradient id="ec-c-{{ idx }}" cx="50%" cy="50%">
-      <stop offset="60%" stop-color="transparent"/>
-      <stop offset="80%" stop-color="{{ color }}" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="{{ color }}" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="ec-r-{{ idx }}" cx="60%" cy="45%">
-      <stop offset="0%" stop-color="#c62828" stop-opacity="0.7"/>
-      <stop offset="100%" stop-color="#1a0a1a"/>
-    </radialGradient>
-  </defs>
-  <rect width="280" height="175" fill="#0a0a1a"/>
-  <circle cx="25" cy="30" r="1" fill="#fff" opacity="0.5"/>
-  <circle cx="255" cy="25" r="0.8" fill="#fff" opacity="0.6"/>
-  <circle cx="40" cy="140" r="1.2" fill="#fff" opacity="0.4"/>
-  <circle cx="240" cy="150" r="0.9" fill="#fff" opacity="0.5"/>
-  <circle cx="70" cy="80" r="0.7" fill="#fff" opacity="0.6"/>
-  <circle cx="210" cy="90" r="1" fill="#fff" opacity="0.4"/>
-  <circle cx="140" cy="85" r="55" fill="url(#ec-c-{{ idx }})"/>
-  <circle cx="140" cy="85" r="44" fill="url(#ec-r-{{ idx }})"/>
-  <circle cx="152" cy="85" r="44" fill="rgba(10,10,26,0.8)"/>
-  <circle cx="102" cy="68" r="3" fill="{{ color }}" opacity="0.8"/>
-  <circle cx="102" cy="68" r="8" fill="{{ color }}" opacity="0.15"/>
-</svg>
-{% endmacro %}
-
-{% macro svg_planet(color='#7C4DFF', idx=0) %}
-<svg viewBox="0 0 280 175" xmlns="http://www.w3.org/2000/svg" class="sky-card-svg" aria-hidden="true">
-  <defs>
-    <radialGradient id="pl-b-{{ idx }}" cx="45%" cy="40%">
-      <stop offset="0%" stop-color="{{ color }}" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#1a0a2e"/>
-    </radialGradient>
-    <radialGradient id="pl-g-{{ idx }}">
-      <stop offset="0%" stop-color="{{ color }}" stop-opacity="0.12"/>
-      <stop offset="100%" stop-color="{{ color }}" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="280" height="175" fill="#0a0a1a"/>
-  <circle cx="35" cy="25" r="1" fill="#fff" opacity="0.5"/>
-  <circle cx="245" cy="35" r="0.8" fill="#fff" opacity="0.6"/>
-  <circle cx="50" cy="145" r="1.1" fill="#fff" opacity="0.4"/>
-  <circle cx="230" cy="140" r="0.9" fill="#fff" opacity="0.5"/>
-  <circle cx="140" cy="88" r="65" fill="url(#pl-g-{{ idx }})"/>
-  <ellipse cx="140" cy="92" rx="70" ry="16" fill="none" stroke="{{ color }}" stroke-width="3" stroke-opacity="0.3" stroke-dasharray="0 117 103 0"/>
-  <circle cx="140" cy="88" r="35" fill="url(#pl-b-{{ idx }})"/>
-  <ellipse cx="140" cy="78" rx="33" ry="3" fill="rgba(255,255,255,0.06)"/>
-  <ellipse cx="140" cy="92" rx="34" ry="4" fill="rgba(0,0,0,0.12)"/>
-  <ellipse cx="140" cy="92" rx="70" ry="16" fill="none" stroke="{{ color }}" stroke-width="3.5" stroke-opacity="0.5" stroke-dasharray="117 103"/>
-  <ellipse cx="140" cy="92" rx="55" ry="12" fill="none" stroke="{{ color }}" stroke-width="2" stroke-opacity="0.25" stroke-dasharray="92 82"/>
-</svg>
-{% endmacro %}
-
-{% macro svg_equinox(color='#1DE9B6', idx=0) %}
-<svg viewBox="0 0 280 175" xmlns="http://www.w3.org/2000/svg" class="sky-card-svg" aria-hidden="true">
-  <defs>
-    <linearGradient id="eq-s-{{ idx }}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0a0a1a"/>
-      <stop offset="70%" stop-color="#0d1b2a"/>
-      <stop offset="100%" stop-color="#1b2838"/>
-    </linearGradient>
-    <radialGradient id="eq-b-{{ idx }}" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#fff3e0"/>
-      <stop offset="60%" stop-color="{{ color }}"/>
-      <stop offset="100%" stop-color="{{ color }}" stop-opacity="0.8"/>
-    </radialGradient>
-    <radialGradient id="eq-g-{{ idx }}">
-      <stop offset="0%" stop-color="{{ color }}" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="{{ color }}" stop-opacity="0"/>
-    </radialGradient>
-    <clipPath id="eq-h-{{ idx }}">
-      <rect x="0" y="0" width="280" height="130"/>
-    </clipPath>
-  </defs>
-  <rect width="280" height="175" fill="url(#eq-s-{{ idx }})"/>
-  <circle cx="30" cy="20" r="0.8" fill="#fff" opacity="0.5"/>
-  <circle cx="250" cy="15" r="1" fill="#fff" opacity="0.4"/>
-  <circle cx="80" cy="35" r="0.7" fill="#fff" opacity="0.6"/>
-  <circle cx="140" cy="130" r="80" fill="url(#eq-g-{{ idx }})"/>
-  <circle cx="140" cy="130" r="30" fill="url(#eq-b-{{ idx }})" clip-path="url(#eq-h-{{ idx }})"/>
-  <line x1="140" y1="90" x2="140" y2="80" stroke="{{ color }}" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
-  <line x1="115" y1="108" x2="105" y2="98" stroke="{{ color }}" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
-  <line x1="165" y1="108" x2="175" y2="98" stroke="{{ color }}" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
-  <line x1="0" y1="130" x2="280" y2="130" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-  <path d="M0 130 Q70 120 140 130 Q210 140 280 130 L280 175 L0 175 Z" fill="#050510"/>
-</svg>
-{% endmacro %}
-
-{% macro svg_event(event_type, idx) %}
-{% if event_type == 'meteor' %}{{ svg_meteor('#00E676', idx) }}{% elif event_type == 'fullmoon' %}{{ svg_fullmoon('#FFC107', idx) }}{% elif event_type == 'eclipse' %}{{ svg_eclipse('#448AFF', idx) }}{% elif event_type == 'planet' %}{{ svg_planet('#7C4DFF', idx) }}{% elif event_type == 'equinox' %}{{ svg_equinox('#1DE9B6', idx) }}{% else %}{{ svg_meteor('#00E676', idx) }}{% endif %}
-{% endmacro %}
+{# ═══ EVENT IMAGE MAP ═══ #}
+{% set event_images = {
+    1:  'meteor-01.webp',
+    2:  'fullmoon-01.webp',
+    3:  'planet-01.webp',
+    4:  'fullmoon-01.webp',
+    5:  'fullmoon-01.webp',
+    6:  'equinox-01.webp',
+    7:  'eclipse-01.webp',
+    8:  'fullmoon-02.webp',
+    9:  'meteor-01.webp',
+    10: 'meteor-01.webp',
+    11: 'fullmoon-02.webp',
+    12: 'fullmoon-02.webp',
+    13: 'equinox-01.webp',
+    14: 'fullmoon-03.webp',
+    15: 'meteor-01.webp',
+    16: 'fullmoon-03.webp',
+    17: 'meteor-02.webp',
+    18: 'planet-02.webp',
+    19: 'eclipse-02.webp',
+    20: 'equinox-01.webp',
+    21: 'planet-02.webp',
+    22: 'fullmoon-03.webp',
+    23: 'meteor-03.webp',
+    24: 'fullmoon-04.webp',
+    25: 'meteor-03.webp',
+    26: 'planet-01.webp',
+    27: 'fullmoon-01.webp',
+    28: 'meteor-02.webp',
+    29: 'equinox-01.webp',
+    30: 'meteor-01.webp'
+} %}
+{% set event_alts = {
+    'meteor': 'Meteor shower streaking across the night sky',
+    'fullmoon': 'Full moon glowing in the night sky',
+    'eclipse': 'Total lunar eclipse blood moon',
+    'planet': 'Planet visible in the twilight sky',
+    'equinox': 'Dramatic sunrise on the horizon'
+} %}
 
 {# ═══ PAGE CONTENT ═══ #}
 
@@ -185,7 +70,10 @@
             {# ── JANUARY ── #}
 
             <div class="sky-card" data-event-type="meteor" data-idx="1" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('meteor', 1) }}</div>
+                <div class="sky-card-illustration sky-anim-meteor">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[1]) }}" alt="{{ event_alts['meteor'] }}" loading="eager" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-meteor">Meteor Shower</span>
                     <h6 class="sky-card-title">Quadrantids Meteor Shower Peak</h6>
@@ -200,7 +88,10 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="2" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 2) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[2]) }}" alt="{{ event_alts['fullmoon'] }}" loading="eager" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Wolf Moon</h6>
@@ -217,7 +108,10 @@
             {# ── FEBRUARY ── #}
 
             <div class="sky-card" data-event-type="planet" data-idx="3" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('planet', 3) }}</div>
+                <div class="sky-card-illustration sky-anim-planet">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[3]) }}" alt="{{ event_alts['planet'] }}" loading="eager" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-planet">Planet</span>
                     <h6 class="sky-card-title">Venus at Greatest Eastern Elongation</h6>
@@ -232,7 +126,10 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="4" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 4) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[4]) }}" alt="{{ event_alts['fullmoon'] }}" loading="eager" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Snow Moon</h6>
@@ -249,7 +146,10 @@
             {# ── MARCH ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="5" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 5) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[5]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Worm Moon</h6>
@@ -264,7 +164,10 @@
             </div>
 
             <div class="sky-card" data-event-type="equinox" data-idx="6" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('equinox', 6) }}</div>
+                <div class="sky-card-illustration sky-anim-equinox">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[6]) }}" alt="{{ event_alts['equinox'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-equinox">Season</span>
                     <h6 class="sky-card-title">March Equinox</h6>
@@ -279,7 +182,10 @@
             </div>
 
             <div class="sky-card" data-event-type="eclipse" data-idx="7" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('eclipse', 7) }}</div>
+                <div class="sky-card-illustration sky-anim-eclipse">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[7]) }}" alt="{{ event_alts['eclipse'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-eclipse">Eclipse</span>
                     <h6 class="sky-card-title">Total Lunar Eclipse</h6>
@@ -296,7 +202,10 @@
             {# ── APRIL ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="8" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 8) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[8]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Pink Moon</h6>
@@ -311,7 +220,10 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="9" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('meteor', 9) }}</div>
+                <div class="sky-card-illustration sky-anim-meteor">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[9]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-meteor">Meteor Shower</span>
                     <h6 class="sky-card-title">Lyrids Meteor Shower Peak</h6>
@@ -328,7 +240,10 @@
             {# ── MAY ── #}
 
             <div class="sky-card" data-event-type="meteor" data-idx="10" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('meteor', 10) }}</div>
+                <div class="sky-card-illustration sky-anim-meteor">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[10]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-meteor">Meteor Shower</span>
                     <h6 class="sky-card-title">Eta Aquariids Meteor Shower Peak</h6>
@@ -343,7 +258,10 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="11" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 11) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[11]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Flower Moon</h6>
@@ -360,7 +278,10 @@
             {# ── JUNE ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="12" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 12) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[12]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Strawberry Moon</h6>
@@ -375,7 +296,10 @@
             </div>
 
             <div class="sky-card" data-event-type="equinox" data-idx="13" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('equinox', 13) }}</div>
+                <div class="sky-card-illustration sky-anim-equinox">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[13]) }}" alt="{{ event_alts['equinox'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-equinox">Season</span>
                     <h6 class="sky-card-title">June Solstice &mdash; Longest Day</h6>
@@ -392,7 +316,10 @@
             {# ── JULY ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="14" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 14) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[14]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Buck Moon</h6>
@@ -407,7 +334,10 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="15" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('meteor', 15) }}</div>
+                <div class="sky-card-illustration sky-anim-meteor">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[15]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-meteor">Meteor Shower</span>
                     <h6 class="sky-card-title">Delta Aquariids Meteor Shower Peak</h6>
@@ -424,7 +354,10 @@
             {# ── AUGUST ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="16" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 16) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[16]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Sturgeon Moon</h6>
@@ -439,7 +372,10 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="17" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('meteor', 17) }}</div>
+                <div class="sky-card-illustration sky-anim-meteor">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[17]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-meteor">Meteor Shower</span>
                     <h6 class="sky-card-title">Perseids Meteor Shower Peak</h6>
@@ -454,7 +390,10 @@
             </div>
 
             <div class="sky-card" data-event-type="planet" data-idx="18" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('planet', 18) }}</div>
+                <div class="sky-card-illustration sky-anim-planet">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[18]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-planet">Planet</span>
                     <h6 class="sky-card-title">Saturn at Opposition</h6>
@@ -471,7 +410,10 @@
             {# ── SEPTEMBER ── #}
 
             <div class="sky-card" data-event-type="eclipse" data-idx="19" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('eclipse', 19) }}</div>
+                <div class="sky-card-illustration sky-anim-eclipse">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[19]) }}" alt="{{ event_alts['eclipse'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-eclipse">Eclipse</span>
                     <h6 class="sky-card-title">Total Lunar Eclipse &mdash; Harvest Moon</h6>
@@ -486,7 +428,10 @@
             </div>
 
             <div class="sky-card" data-event-type="equinox" data-idx="20" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('equinox', 20) }}</div>
+                <div class="sky-card-illustration sky-anim-equinox">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[20]) }}" alt="{{ event_alts['equinox'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-equinox">Season</span>
                     <h6 class="sky-card-title">September Equinox</h6>
@@ -501,7 +446,10 @@
             </div>
 
             <div class="sky-card" data-event-type="planet" data-idx="21" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('planet', 21) }}</div>
+                <div class="sky-card-illustration sky-anim-planet">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[21]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-planet">Planet</span>
                     <h6 class="sky-card-title">Neptune at Opposition</h6>
@@ -518,7 +466,10 @@
             {# ── OCTOBER ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="22" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 22) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[22]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Hunter's Moon</h6>
@@ -533,7 +484,10 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="23" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('meteor', 23) }}</div>
+                <div class="sky-card-illustration sky-anim-meteor">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[23]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-meteor">Meteor Shower</span>
                     <h6 class="sky-card-title">Orionids Meteor Shower Peak</h6>
@@ -550,7 +504,10 @@
             {# ── NOVEMBER ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="24" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 24) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[24]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Beaver Moon</h6>
@@ -565,7 +522,10 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="25" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('meteor', 25) }}</div>
+                <div class="sky-card-illustration sky-anim-meteor">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[25]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-meteor">Meteor Shower</span>
                     <h6 class="sky-card-title">Leonids Meteor Shower Peak</h6>
@@ -580,7 +540,10 @@
             </div>
 
             <div class="sky-card" data-event-type="planet" data-idx="26" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('planet', 26) }}</div>
+                <div class="sky-card-illustration sky-anim-planet">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[26]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-planet">Planet</span>
                     <h6 class="sky-card-title">Mercury at Greatest Eastern Elongation</h6>
@@ -597,7 +560,10 @@
             {# ── DECEMBER ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="27" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('fullmoon', 27) }}</div>
+                <div class="sky-card-illustration sky-anim-fullmoon">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[27]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-fullmoon">Full Moon</span>
                     <h6 class="sky-card-title">Full Cold Moon</h6>
@@ -612,7 +578,10 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="28" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('meteor', 28) }}</div>
+                <div class="sky-card-illustration sky-anim-meteor">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[28]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-meteor">Meteor Shower</span>
                     <h6 class="sky-card-title">Geminids Meteor Shower Peak</h6>
@@ -627,7 +596,10 @@
             </div>
 
             <div class="sky-card" data-event-type="equinox" data-idx="29" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('equinox', 29) }}</div>
+                <div class="sky-card-illustration sky-anim-equinox">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[29]) }}" alt="{{ event_alts['equinox'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-equinox">Season</span>
                     <h6 class="sky-card-title">December Solstice &mdash; Shortest Day</h6>
@@ -642,7 +614,10 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="30" role="button" tabindex="0">
-                <div class="sky-card-illustration">{{ svg_event('meteor', 30) }}</div>
+                <div class="sky-card-illustration sky-anim-meteor">
+                    <img src="{{ url_for('static', filename='img/events/' + event_images[30]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                    <div class="sky-ambient-overlay" aria-hidden="true"></div>
+                </div>
                 <div class="sky-card-body">
                     <span class="event-type-badge badge-meteor">Meteor Shower</span>
                     <h6 class="sky-card-title">Ursids Meteor Shower Peak</h6>
