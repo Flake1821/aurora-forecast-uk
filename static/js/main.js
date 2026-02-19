@@ -1348,6 +1348,199 @@ document.addEventListener('DOMContentLoaded', function () {
         hourOffset: 0         // slider position (0 = now, up to 11)
     };
 
+    // Seeded PRNG (mulberry32) — deterministic random per grid point
+    function mulberry32(seed) {
+        return function() {
+            seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+            var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+            t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Accurate European coastline data — Natural Earth derived
+    // Each region has: coast (stroke path) and fill (closed polygon)
+    // ═══════════════════════════════════════════════════════════════
+    var euroCoastData = {
+        // NORWAY — 75 points: southern tip to Nordkapp with fjord indentations
+        norwayCoast: [
+            [5.0,58.1],[5.3,58.4],[5.6,58.8],[5.2,59.0],[5.3,59.2],[5.6,59.4],[5.2,59.6],
+            [5.0,59.8],[5.3,60.0],[5.1,60.2],[5.3,60.4],[5.0,60.7],[4.9,60.9],[5.1,61.0],
+            [5.4,61.2],[5.1,61.4],[4.8,61.6],[5.0,61.8],[5.2,62.0],[5.6,62.1],[5.3,62.3],
+            [5.1,62.5],[5.5,62.7],[6.1,62.8],[6.5,62.7],[6.8,63.0],[7.2,63.1],[7.5,62.9],
+            [8.0,63.2],[8.5,63.3],[9.0,63.5],[9.5,63.6],[9.8,63.4],[10.2,63.6],[10.8,63.5],
+            [11.0,63.8],[11.5,64.0],[11.8,64.3],[12.2,64.6],[12.8,65.0],[13.2,65.2],
+            [13.5,65.5],[14.0,65.8],[14.2,66.0],[14.5,66.3],[14.8,66.6],[15.0,67.0],
+            [15.3,67.3],[15.0,67.5],[15.2,67.8],[15.5,68.0],[15.8,68.2],[16.0,68.4],
+            [16.5,68.5],[17.0,68.6],[17.5,68.8],[18.0,69.0],[18.5,69.2],[19.0,69.3],
+            [19.5,69.5],[20.0,69.6],[20.5,69.8],[21.0,69.9],[22.0,70.0],[23.0,70.1],
+            [24.5,70.0],[25.5,70.1],[26.5,70.5],[27.5,70.6],[28.5,70.7],[29.5,70.8],
+            [30.0,70.5],[31.0,70.2],[30.0,69.8]
+        ],
+        norwayFill: [
+            [5.0,58.1],[5.3,58.4],[5.6,58.8],[5.2,59.0],[5.3,59.2],[5.6,59.4],[5.2,59.6],
+            [5.0,59.8],[5.3,60.0],[5.1,60.2],[5.3,60.4],[5.0,60.7],[4.9,60.9],[5.1,61.0],
+            [5.4,61.2],[5.1,61.4],[4.8,61.6],[5.0,61.8],[5.2,62.0],[5.6,62.1],[5.3,62.3],
+            [5.1,62.5],[5.5,62.7],[6.1,62.8],[6.5,62.7],[6.8,63.0],[7.2,63.1],[7.5,62.9],
+            [8.0,63.2],[8.5,63.3],[9.0,63.5],[9.5,63.6],[9.8,63.4],[10.2,63.6],[10.8,63.5],
+            [11.0,63.8],[11.5,64.0],[11.8,64.3],[12.2,64.6],[12.8,65.0],[13.2,65.2],
+            [13.5,65.5],[14.0,65.8],[14.2,66.0],[14.5,66.3],[14.8,66.6],[15.0,67.0],
+            [15.3,67.3],[15.0,67.5],[15.2,67.8],[15.5,68.0],[15.8,68.2],[16.0,68.4],
+            [16.5,68.5],[17.0,68.6],[17.5,68.8],[18.0,69.0],[18.5,69.2],[19.0,69.3],
+            [19.5,69.5],[20.0,69.6],[20.5,69.8],[21.0,69.9],[22.0,70.0],[23.0,70.1],
+            [24.5,70.0],[25.5,70.1],[26.5,70.5],[27.5,70.6],[28.5,70.7],[29.5,70.8],
+            [30.0,70.5],[31.0,70.2],[30.0,69.8],
+            // Close along top edge and back
+            [30.0,72.0],[5.0,72.0]
+        ],
+
+        // SWEDEN/FINLAND — 48 points: Scania to Gulf of Bothnia, east coast detail
+        swedenCoast: [
+            // Southern Sweden (Scania, Malmö)
+            [12.8,55.4],[13.0,55.5],[13.4,55.4],[14.0,55.4],[14.3,55.5],[14.2,55.7],
+            // East coast Sweden — Blekinge, Kalmar
+            [14.5,56.0],[15.5,56.1],[16.3,56.2],[16.5,56.5],[16.7,56.9],[16.5,57.2],
+            [16.7,57.7],[16.5,58.0],[16.8,58.4],
+            // Stockholm archipelago
+            [17.0,58.7],[18.0,59.0],[18.3,59.3],[18.1,59.5],[18.5,59.8],
+            // Uppland, Gävle
+            [18.2,60.2],[17.8,60.5],[17.5,60.7],[17.2,61.0],[17.5,61.5],
+            // Ångermanland, Västernorrland
+            [17.8,62.0],[18.0,62.3],[17.8,62.6],[18.2,63.0],[18.5,63.3],
+            // Västerbotten, Norrbotten
+            [19.0,63.5],[19.5,64.0],[20.0,64.5],[20.5,65.0],[21.0,65.2],
+            [21.5,65.5],[22.0,65.7],[22.5,65.8],
+            // Gulf of Bothnia — Finnish side
+            [23.5,65.8],[24.0,65.5],[24.5,65.2],[25.0,65.0],[25.5,65.2],
+            [26.0,65.5],[26.5,65.3],[27.0,65.5],[28.0,65.7],
+            // Northern Finland border
+            [29.0,66.0],[29.5,67.0],[29.0,68.0],[28.5,69.0],[29.0,69.5],[30.0,69.8]
+        ],
+        swedenFill: [
+            // Southern tip
+            [12.8,55.4],[13.0,55.5],[13.4,55.4],[14.0,55.4],[14.3,55.5],[14.2,55.7],
+            [14.5,56.0],[15.5,56.1],[16.3,56.2],[16.5,56.5],[16.7,56.9],[16.5,57.2],
+            [16.7,57.7],[16.5,58.0],[16.8,58.4],
+            [17.0,58.7],[18.0,59.0],[18.3,59.3],[18.1,59.5],[18.5,59.8],
+            [18.2,60.2],[17.8,60.5],[17.5,60.7],[17.2,61.0],[17.5,61.5],
+            [17.8,62.0],[18.0,62.3],[17.8,62.6],[18.2,63.0],[18.5,63.3],
+            [19.0,63.5],[19.5,64.0],[20.0,64.5],[20.5,65.0],[21.0,65.2],
+            [21.5,65.5],[22.0,65.7],[22.5,65.8],
+            [23.5,65.8],[24.0,65.5],[24.5,65.2],[25.0,65.0],[25.5,65.2],
+            [26.0,65.5],[26.5,65.3],[27.0,65.5],[28.0,65.7],
+            [29.0,66.0],[29.5,67.0],[29.0,68.0],[28.5,69.0],[29.0,69.5],[30.0,69.8],
+            // Close via top-right edge, down right edge to Baltic, then west along coast
+            [30.0,72.0],[30.0,58.0],[29.0,57.8],[28.0,57.5],[27.0,57.0],
+            [26.0,56.5],[25.0,56.0],[24.0,55.5],[23.0,55.0],[22.0,54.5],
+            [21.0,54.8],[20.5,54.5],[19.5,54.2],[18.5,54.4],[17.0,54.5],
+            [16.0,54.2],[14.0,54.0],[13.0,54.3],[12.0,54.2],[11.0,54.5],
+            [10.8,55.0],[10.3,55.5],[10.5,55.8],[10.2,56.2],[10.0,56.6],[10.3,57.0],
+            // West coast back north (overlap with Norway at mountain range ~12-15°E)
+            [10.6,57.4],[11.0,58.5],[10.8,59.0],[10.5,60.5],
+            [11.5,61.5],[12.5,62.5],[13.5,63.5],[14.5,64.5],[15.5,66.0],[16.5,67.5],
+            [18.0,68.5],[20.0,69.5],[22.0,70.0],[25.0,70.1],[28.0,70.5],[30.0,70.5]
+        ],
+
+        // NW EUROPE — 58 points: Brittany to Skagen with Jutland
+        europeCoast: [
+            // Brittany — western tip
+            [-4.8,48.4],[-4.5,48.3],[-4.2,48.4],[-3.8,48.6],[-3.5,48.5],[-3.0,48.6],
+            [-2.5,48.5],[-2.0,48.6],[-1.5,48.6],[-1.2,48.8],
+            // Normandy
+            [-1.0,49.2],[-0.5,49.4],[0.0,49.4],[0.3,49.5],
+            // Pas-de-Calais
+            [0.8,49.9],[1.2,50.2],[1.6,50.7],[1.8,50.9],
+            // Belgian coast
+            [2.5,51.1],[3.2,51.4],[3.6,51.4],
+            // Dutch coast — Zeeland, Holland
+            [3.8,51.5],[4.0,51.8],[4.2,52.0],[4.5,52.3],[4.7,52.6],[4.8,52.8],
+            // Frisian islands area
+            [5.0,53.0],[5.4,53.2],[5.8,53.4],[6.2,53.5],[6.8,53.6],[7.2,53.6],
+            // German Bight
+            [7.5,53.7],[8.0,53.8],[8.3,54.0],[8.6,54.1],[8.8,54.3],[9.0,54.5],
+            // Schleswig-Holstein
+            [9.2,54.8],[9.5,55.0],[9.8,55.2],
+            // Jutland — west coast
+            [8.6,55.6],[8.2,55.9],[8.1,56.3],[8.0,56.6],[8.2,56.8],[8.6,57.0],
+            [9.0,57.1],[9.5,57.4],[9.8,57.6],
+            // Skagen (tip of Denmark)
+            [10.2,57.7],[10.5,57.6],[10.6,57.4],
+            // Jutland — east coast (Kattegat side)
+            [10.3,57.0],[10.0,56.6],[10.2,56.2],[10.5,55.8],[10.3,55.5],
+            [10.0,55.3],[9.8,55.0]
+        ],
+        europeFill: [
+            // Start west beyond map edge at bottom
+            [-30.0,48.0],[-4.8,48.4],[-4.5,48.3],[-4.2,48.4],[-3.8,48.6],[-3.5,48.5],
+            [-3.0,48.6],[-2.5,48.5],[-2.0,48.6],[-1.5,48.6],[-1.2,48.8],
+            [-1.0,49.2],[-0.5,49.4],[0.0,49.4],[0.3,49.5],
+            [0.8,49.9],[1.2,50.2],[1.6,50.7],[1.8,50.9],
+            [2.5,51.1],[3.2,51.4],[3.6,51.4],
+            [3.8,51.5],[4.0,51.8],[4.2,52.0],[4.5,52.3],[4.7,52.6],[4.8,52.8],
+            [5.0,53.0],[5.4,53.2],[5.8,53.4],[6.2,53.5],[6.8,53.6],[7.2,53.6],
+            [7.5,53.7],[8.0,53.8],[8.3,54.0],[8.6,54.1],[8.8,54.3],[9.0,54.5],
+            // Continue east along German/Polish/Baltic coast to map edge
+            [9.5,54.5],[10.0,54.3],[10.8,54.2],[11.0,54.0],[12.0,54.2],
+            [13.0,54.3],[14.0,54.0],[14.5,53.9],[16.0,54.2],[17.0,54.5],
+            [18.5,54.4],[19.5,54.2],[20.5,54.5],[21.0,54.8],[22.0,54.5],
+            [23.0,55.0],[24.0,55.5],[25.0,56.0],[26.0,56.5],[27.0,57.0],
+            [28.0,57.5],[29.0,57.8],[30.0,58.0],
+            // Close: along right edge down to bottom, then back to start
+            [30.0,40.0],[-30.0,40.0]
+        ],
+        // Jutland peninsula — separate fill to avoid self-intersecting polygon
+        jutlandFill: [
+            // West coast (north from Schleswig)
+            [9.0,54.5],[8.6,55.6],[8.2,55.9],[8.1,56.3],[8.0,56.6],[8.2,56.8],
+            [8.6,57.0],[9.0,57.1],[9.5,57.4],[9.8,57.6],
+            // Skagen tip
+            [10.2,57.7],[10.5,57.6],[10.6,57.4],
+            // East coast (Kattegat side back south)
+            [10.3,57.0],[10.0,56.6],[10.2,56.2],[10.5,55.8],[10.3,55.5],
+            [10.0,55.3],[9.8,55.0],[9.5,54.5],[9.0,54.5]
+        ],
+
+        // ICELAND — 38 points with Westfjords detail
+        icelandCoast: [
+            // South coast — Reykjanes to Höfn
+            [-22.7,63.8],[-22.0,63.5],[-21.5,63.6],[-21.0,63.5],[-20.5,63.4],
+            [-20.0,63.4],[-19.5,63.5],[-19.0,63.4],[-18.5,63.5],[-18.0,63.5],
+            [-17.0,63.5],[-16.0,64.0],[-15.5,64.2],[-15.0,64.3],[-14.5,64.5],
+            // East coast
+            [-14.0,65.0],[-14.2,65.5],[-14.5,65.8],[-14.8,66.0],
+            // North coast — Eyjafjörður area
+            [-15.5,66.2],[-16.0,66.0],[-16.5,66.2],[-17.0,66.1],[-17.5,66.3],
+            [-18.0,66.2],[-18.5,66.4],[-19.0,66.3],[-19.5,66.1],
+            // Westfjords — jagged indentations
+            [-20.0,66.0],[-20.5,66.2],[-21.0,66.3],[-21.5,66.0],[-22.0,66.2],
+            [-22.5,66.1],[-23.0,65.8],[-23.5,65.5],[-24.0,65.2],[-23.5,64.8],
+            [-23.2,64.5],[-22.7,63.8]
+        ],
+        icelandFill: [
+            [-22.7,63.8],[-22.0,63.5],[-21.5,63.6],[-21.0,63.5],[-20.5,63.4],
+            [-20.0,63.4],[-19.5,63.5],[-19.0,63.4],[-18.5,63.5],[-18.0,63.5],
+            [-17.0,63.5],[-16.0,64.0],[-15.5,64.2],[-15.0,64.3],[-14.5,64.5],
+            [-14.0,65.0],[-14.2,65.5],[-14.5,65.8],[-14.8,66.0],
+            [-15.5,66.2],[-16.0,66.0],[-16.5,66.2],[-17.0,66.1],[-17.5,66.3],
+            [-18.0,66.2],[-18.5,66.4],[-19.0,66.3],[-19.5,66.1],
+            [-20.0,66.0],[-20.5,66.2],[-21.0,66.3],[-21.5,66.0],[-22.0,66.2],
+            [-22.5,66.1],[-23.0,65.8],[-23.5,65.5],[-24.0,65.2],[-23.5,64.8],
+            [-23.2,64.5],[-22.7,63.8]
+        ],
+
+        // Danish islands (Zealand, Funen) — separate from Jutland
+        denmarkIslands: [
+            // Zealand (Sjælland)
+            [11.0,55.3],[11.5,55.5],[12.0,55.6],[12.3,55.8],[12.5,56.0],
+            [12.3,56.1],[12.0,55.9],[11.5,55.8],[11.0,55.6],[11.0,55.3]
+        ],
+        denmarkIslandsFill: [
+            [11.0,55.3],[11.5,55.5],[12.0,55.6],[12.3,55.8],[12.5,56.0],
+            [12.3,56.1],[12.0,55.9],[11.5,55.8],[11.0,55.6],[11.0,55.3]
+        ]
+    };
+
     function createOffscreen(w, h) {
         var c = document.createElement('canvas');
         c.width = w; c.height = h;
@@ -1594,6 +1787,11 @@ document.addEventListener('DOMContentLoaded', function () {
             octx.fillText(userLocation, ux + 10, uy + 3);
             octx.shadowBlur = 0;
         }
+
+        // Wind direction arrows — drawn on overlay for full opacity above clouds
+        if (cloudGridState.data && cloudGridState.data.grid) {
+            drawWindArrows(octx, cloudGridState.data.grid, cloudGridState.hourOffset, lonToX, latToY);
+        }
     }
 
     // Animation loop — composites pre-rendered layers with shimmer effect
@@ -1694,6 +1892,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function lonToX(lon) { return ((lon - lonMin) / (lonMax - lonMin)) * W; }
         function latToY(lat) { return ((latMax - lat) / (latMax - latMin)) * H; }
+
+        // Store projection functions for reuse by overlay/cloud slider
+        auroraState.lonToX = lonToX;
+        auroraState.latToY = latToY;
+        auroraState.mapW = W;
+        auroraState.mapH = H;
+        auroraState.mapLatMin = latMin;
+        auroraState.mapLatMax = latMax;
+        auroraState.mapLonMin = lonMin;
+        auroraState.mapLonMax = lonMax;
 
         fetch('https://services.swpc.noaa.gov/json/ovation_aurora_latest.json')
             .then(function(r) { return r.json(); })
@@ -1866,44 +2074,24 @@ document.addEventListener('DOMContentLoaded', function () {
         ];
         fillPoly(ire, palette.ireLand);
 
-        // European landmasses — fill with dimmer colour
-        // Norway (simplified filled shape extending to map edge)
-        var norFill = [
-            [5.0,58.0],[6.0,58.0],[7.0,58.0],[8.0,58.5],[8.5,59.0],[9.0,59.5],[10.0,59.0],
-            [11.0,59.0],[12.0,58.5],[12.0,59.0],[11.5,59.5],[11.0,60.0],[10.5,60.5],
-            [9.0,61.0],[7.0,62.0],[6.0,62.5],[5.5,63.0],[6.0,63.5],[7.0,64.0],
-            [9.0,64.5],[10.0,65.0],[12.0,65.5],[14.0,66.5],[15.0,67.5],[16.0,68.5],
-            [18.0,69.0],[20.0,69.5],[22.0,69.8],[25.0,70.0],[28.0,70.5],[30.0,70.0],
-            [30.0,72.0],[5.0,72.0]
-        ];
-        fillPoly(norFill, palette.norLand);
+        // European landmasses — accurate coastline fills
+        // Norway (fjord-detailed filled shape extending to map edge)
+        fillPoly(euroCoastData.norwayFill, palette.norLand);
 
-        // Sweden/Finland
-        var sweFill = [
-            [12.0,56.0],[12.5,56.5],[13.0,57.0],[12.5,57.5],[12.0,58.0],[12.0,58.5],
-            [12.0,59.0],[11.5,59.5],[11.0,60.0],[10.5,60.5],[11.0,60.0],[12.0,59.5],
-            [13.0,59.0],[14.0,58.5],[14.5,58.0],[14.0,57.5],[13.0,56.5],[12.0,56.0]
-        ];
-        fillPoly(sweFill, palette.euroLand);
+        // Sweden/Finland (full Scandinavian peninsula with Gulf of Bothnia)
+        fillPoly(euroCoastData.swedenFill, palette.euroLand);
 
-        // NW Europe coast — fill below the coastline to bottom of map
-        var eurFill = [
-            [-30.0,48.0],[-4.0,48.0],[-3.0,48.5],[-2.0,48.5],[-1.5,48.6],[-1.0,49.0],[0.0,49.5],
-            [1.0,50.0],[1.6,50.8],[2.5,51.0],[3.5,51.3],[4.0,51.5],[4.5,51.8],
-            [5.0,52.0],[5.5,52.5],[5.0,53.0],[5.5,53.3],[6.0,53.5],[7.0,53.5],
-            [8.0,54.0],[8.5,54.5],[9.0,55.0],[9.5,55.5],[10.0,55.5],[10.5,55.0],
-            [10.0,54.5],[9.5,54.5],[9.0,54.0],[8.5,53.5],[8.0,54.0],[7.0,53.5],
-            [7.0,40.0],[-30.0,40.0]
-        ];
-        fillPoly(eurFill, palette.euroLand);
+        // NW Europe coast — Brittany to Baltic, fill to bottom edge
+        fillPoly(euroCoastData.europeFill, palette.euroLand);
 
-        // Iceland
-        var ice = [
-            [-22.0,64.0],[-21.0,63.5],[-19.0,63.3],[-17.0,63.5],[-15.0,64.0],
-            [-14.0,64.5],[-14.0,65.5],[-15.0,66.0],[-17.0,66.3],[-19.0,66.5],
-            [-21.0,66.3],[-23.0,66.0],[-24.0,65.5],[-23.0,64.5],[-22.0,64.0]
-        ];
-        fillPoly(ice, palette.iceLand);
+        // Jutland peninsula (separate to avoid self-intersection)
+        fillPoly(euroCoastData.jutlandFill, palette.euroLand);
+
+        // Denmark islands (Zealand, Funen)
+        fillPoly(euroCoastData.denmarkIslandsFill, palette.euroLand);
+
+        // Iceland (with Westfjords detail)
+        fillPoly(euroCoastData.icelandFill, palette.iceLand);
     }
 
     function drawCoastlines(ctx, lonToX, latToY, palette) {
@@ -2101,41 +2289,20 @@ document.addEventListener('DOMContentLoaded', function () {
         ctx.strokeStyle = palette.euroCoastColor;
         ctx.lineWidth = palette.euroCoastWidth;
 
-        // Norway
-        var nor = [
-            [5.0,58.0],[6.0,58.0],[7.0,58.0],[8.0,58.5],[8.5,59.0],[9.0,59.5],[10.0,59.0],
-            [11.0,59.0],[12.0,58.5],[12.0,59.0],[11.5,59.5],[11.0,60.0],[10.5,60.5],
-            [9.0,61.0],[7.0,62.0],[6.0,62.5],[5.5,63.0],[6.0,63.5],[7.0,64.0],
-            [9.0,64.5],[10.0,65.0],[12.0,65.5],[14.0,66.5],[15.0,67.5],[16.0,68.5],
-            [18.0,69.0],[20.0,69.5],[22.0,69.8],[25.0,70.0],[28.0,70.5],[30.0,70.0]
-        ];
-        drawPath(ctx, nor, lonToX, latToY);
+        // Norway — fjord-detailed coastline
+        drawPath(ctx, euroCoastData.norwayCoast, lonToX, latToY);
 
-        // Sweden/Finland west coast
-        var swe = [
-            [12.0,56.0],[12.5,56.5],[13.0,57.0],[12.5,57.5],[12.0,58.0],[12.0,58.5],
-            [12.0,59.0],[11.5,59.5],[11.0,60.0],[10.5,60.5],[11.0,60.0],[12.0,59.5],
-            [13.0,59.0],[14.0,58.5],[14.5,58.0],[14.0,57.5],[13.0,56.5],[12.0,56.0]
-        ];
-        drawPath(ctx, swe, lonToX, latToY);
+        // Sweden/Finland — east coast with Gulf of Bothnia
+        drawPath(ctx, euroCoastData.swedenCoast, lonToX, latToY);
 
-        // NW Europe (France/Belgium/Netherlands coast)
-        var eur = [
-            [-4.0,48.0],[-3.0,48.5],[-2.0,48.5],[-1.5,48.6],[-1.0,49.0],[0.0,49.5],
-            [1.0,50.0],[1.6,50.8],[2.5,51.0],[3.5,51.3],[4.0,51.5],[4.5,51.8],
-            [5.0,52.0],[5.5,52.5],[5.0,53.0],[5.5,53.3],[6.0,53.5],[7.0,53.5],
-            [8.0,54.0],[8.5,54.5],[9.0,55.0],[9.5,55.5],[10.0,55.5],[10.5,55.0],
-            [10.0,54.5],[9.5,54.5],[9.0,54.0],[8.5,53.5],[8.0,54.0],[7.0,53.5]
-        ];
-        drawPath(ctx, eur, lonToX, latToY);
+        // NW Europe — Brittany to Jutland
+        drawPath(ctx, euroCoastData.europeCoast, lonToX, latToY);
 
-        // Iceland
-        var ice = [
-            [-22.0,64.0],[-21.0,63.5],[-19.0,63.3],[-17.0,63.5],[-15.0,64.0],
-            [-14.0,64.5],[-14.0,65.5],[-15.0,66.0],[-17.0,66.3],[-19.0,66.5],
-            [-21.0,66.3],[-23.0,66.0],[-24.0,65.5],[-23.0,64.5],[-22.0,64.0]
-        ];
-        drawPath(ctx, ice, lonToX, latToY);
+        // Denmark islands
+        drawPath(ctx, euroCoastData.denmarkIslands, lonToX, latToY);
+
+        // Iceland — with Westfjords
+        drawPath(ctx, euroCoastData.icelandCoast, lonToX, latToY);
     }
 
     function drawPath(ctx, points, lonToX, latToY) {
@@ -2165,6 +2332,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     var canvas = document.getElementById('auroraOvalCanvas');
                     if (canvas) {
                         buildCloudLayer(canvas.width, canvas.height);
+                        // Rebuild overlay to show wind arrows above clouds
+                        if (auroraState.lonToX) {
+                            buildOverlayLayer(
+                                auroraState.mapW, auroraState.mapH,
+                                auroraState.lonToX, auroraState.latToY,
+                                auroraState.mapLatMin, auroraState.mapLatMax,
+                                auroraState.mapLonMin, auroraState.mapLonMax
+                            );
+                        }
                     }
                     // Show the cloud slider and legend
                     var slider = document.getElementById('cloudHourSlider');
@@ -2193,51 +2369,103 @@ document.addEventListener('DOMContentLoaded', function () {
         var grid = cloudGridState.data.grid;
         var hourIdx = cloudGridState.hourOffset;
 
-        // Calculate grid cell sizes for patch overlap
-        var gridLonStep = 8;  // degrees between grid points
+        // Grid cell dimensions for patch sizing
+        var gridLonStep = 8;
         var gridLatStep = 6;
-        var patchRadiusX = (gridLonStep / (lonMax - lonMin)) * W * 0.8;
-        var patchRadiusY = (gridLatStep / (latMax - latMin)) * H * 0.8;
-        var patchRadius = Math.max(patchRadiusX, patchRadiusY);
+        var cellRadiusX = (gridLonStep / (lonMax - lonMin)) * W * 0.7;
+        var cellRadiusY = (gridLatStep / (latMax - latMin)) * H * 0.7;
+        var cellRadius = Math.max(cellRadiusX, cellRadiusY);
 
+        // Procedural multi-patch cloud rendering
         for (var i = 0; i < grid.length; i++) {
             var point = grid[i];
             var hourData = point.hours && point.hours[hourIdx];
             if (!hourData) continue;
 
             var cloudPct = hourData.cloud_cover;
-            if (cloudPct <= 5) continue;  // skip clear cells
+            if (cloudPct <= 5) continue;
 
             var x = cLonToX(point.lon);
             var y = cLatToY(point.lat);
 
-            // Cloud opacity scales with coverage, max 0.35 to not obscure aurora
-            var opacity = (cloudPct / 100) * 0.28;
+            // Seeded RNG for deterministic texture per grid point
+            var seed = Math.round(point.lat * 1000) * 31 + Math.round(point.lon * 1000);
+            var rand = mulberry32(seed);
 
-            var grad = cctx.createRadialGradient(x, y, 0, x, y, patchRadius);
-            grad.addColorStop(0, 'rgba(200, 210, 220, ' + opacity + ')');
-            grad.addColorStop(0.5, 'rgba(180, 190, 200, ' + (opacity * 0.6) + ')');
-            grad.addColorStop(1, 'rgba(160, 170, 180, 0)');
-            cctx.fillStyle = grad;
-            cctx.beginPath();
-            cctx.arc(x, y, patchRadius, 0, Math.PI * 2);
-            cctx.fill();
+            var baseOpacity = (cloudPct / 100) * 0.33;
+            var windSpeed = hourData.wind_speed || 0;
+            var windDir = hourData.wind_direction || 0;
+            var windRad = (windDir * Math.PI) / 180;
+            var elongation = 1.0 + Math.min(0.8, windSpeed / 30);
+
+            // Number of sub-patches: 3 for light cloud, 4-5 for dense
+            var numPatches = cloudPct < 40 ? 3 : (cloudPct < 70 ? 4 : 5);
+
+            for (var p = 0; p < numPatches; p++) {
+                // Random offset from grid centre (within 60% of cell radius)
+                var offX = (rand() - 0.5) * cellRadius * 1.2;
+                var offY = (rand() - 0.5) * cellRadius * 1.2;
+                var px = x + offX;
+                var py = y + offY;
+
+                // Varying size: small / medium / large
+                var sizeRoll = rand();
+                var patchSize;
+                if (sizeRoll < 0.3) patchSize = cellRadius * (0.25 + rand() * 0.15);       // small
+                else if (sizeRoll < 0.7) patchSize = cellRadius * (0.4 + rand() * 0.2);     // medium
+                else patchSize = cellRadius * (0.65 + rand() * 0.2);                          // large
+
+                // Per-patch opacity variation
+                var patchOpacity = baseOpacity * (0.5 + rand() * 0.5);
+
+                // Colour variation: warmer white to cooler grey
+                var r = Math.round(185 + rand() * 25);
+                var g = Math.round(195 + rand() * 20);
+                var b = Math.round(205 + rand() * 15);
+
+                // Apply wind elongation via canvas transform
+                cctx.save();
+                cctx.translate(px, py);
+                cctx.rotate(windRad);
+                cctx.scale(elongation, 1.0);
+
+                // 5-stop radial gradient for natural falloff
+                var grad = cctx.createRadialGradient(0, 0, 0, 0, 0, patchSize);
+                grad.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b + ',' + patchOpacity + ')');
+                grad.addColorStop(0.2, 'rgba(' + r + ',' + g + ',' + b + ',' + (patchOpacity * 0.85) + ')');
+                grad.addColorStop(0.5, 'rgba(' + r + ',' + g + ',' + b + ',' + (patchOpacity * 0.5) + ')');
+                grad.addColorStop(0.75, 'rgba(' + r + ',' + g + ',' + b + ',' + (patchOpacity * 0.2) + ')');
+                grad.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b + ',0)');
+                cctx.fillStyle = grad;
+                cctx.beginPath();
+                cctx.arc(0, 0, patchSize, 0, Math.PI * 2);
+                cctx.fill();
+
+                cctx.restore();
+            }
         }
 
-        // Blur for natural softness
+        // Soften with blur, then add density cores via screen blend
         try {
             var temp = createOffscreen(W, H);
             var tctx = temp.getContext('2d');
-            tctx.filter = 'blur(8px)';
+            tctx.filter = 'blur(5px)';
             tctx.drawImage(cc, 0, 0);
             cctx.clearRect(0, 0, W, H);
+            // Base layer — softened clouds
             cctx.drawImage(temp, 0, 0);
+            // Density cores — screen blended at reduced alpha for luminous centres
+            cctx.globalCompositeOperation = 'screen';
+            cctx.globalAlpha = 0.5;
+            tctx.filter = 'blur(10px)';
+            tctx.clearRect(0, 0, W, H);
+            tctx.drawImage(cc, 0, 0);
+            cctx.drawImage(temp, 0, 0);
+            cctx.globalCompositeOperation = 'source-over';
+            cctx.globalAlpha = 1.0;
         } catch (e) {
-            // blur not supported, radial gradients are soft enough
+            // blur not supported — multi-patch rendering is already textured
         }
-
-        // Draw wind direction arrows on top
-        drawWindArrows(cctx, grid, hourIdx, cLonToX, cLatToY);
     }
 
     function drawWindArrows(ctx, grid, hourIdx, lonToX, latToY) {
@@ -3187,6 +3415,15 @@ document.addEventListener('DOMContentLoaded', function () {
             var canvas = document.getElementById('auroraOvalCanvas');
             if (canvas) {
                 buildCloudLayer(canvas.width, canvas.height);
+                // Rebuild overlay to update wind arrows for new hour
+                if (auroraState.lonToX) {
+                    buildOverlayLayer(
+                        auroraState.mapW, auroraState.mapH,
+                        auroraState.lonToX, auroraState.latToY,
+                        auroraState.mapLatMin, auroraState.mapLatMax,
+                        auroraState.mapLonMin, auroraState.mapLonMax
+                    );
+                }
             }
         });
     }
