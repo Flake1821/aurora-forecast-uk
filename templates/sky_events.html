@@ -4,56 +4,6 @@
 
 {% block content %}
 
-{# ═══ EVENT IMAGE MAP ═══ #}
-{% set event_images = {
-    1:  'meteor-01.webp',
-    2:  'fullmoon-01.webp',
-    3:  'planet-01.webp',
-    4:  'fullmoon-01.webp',
-    5:  'eclipse-01.webp',
-    6:  'planet-02.webp',
-    7:  'planet-01.webp',
-    8:  'fullmoon-02.webp',
-    9:  'eclipse-01.webp',
-    10: 'planet-02.webp',
-    11: 'equinox-01.webp',
-    12: 'fullmoon-02.webp',
-    13: 'meteor-01.webp',
-    14: 'fullmoon-02.webp',
-    15: 'meteor-02.webp',
-    16: 'fullmoon-03.webp',
-    17: 'planet-01.webp',
-    18: 'equinox-01.webp',
-    19: 'fullmoon-03.webp',
-    20: 'fullmoon-03.webp',
-    21: 'meteor-01.webp',
-    22: 'eclipse-02.webp',
-    23: 'meteor-02.webp',
-    24: 'fullmoon-04.webp',
-    25: 'eclipse-02.webp',
-    26: 'equinox-01.webp',
-    27: 'planet-02.webp',
-    28: 'fullmoon-04.webp',
-    29: 'planet-01.webp',
-    30: 'meteor-03.webp',
-    31: 'meteor-03.webp',
-    32: 'fullmoon-01.webp',
-    33: 'meteor-02.webp',
-    34: 'fullmoon-04.webp',
-    35: 'planet-02.webp',
-    36: 'meteor-03.webp',
-    37: 'equinox-01.webp',
-    38: 'meteor-01.webp',
-    39: 'fullmoon-01.webp'
-} %}
-{% set event_alts = {
-    'meteor': 'Meteor shower streaking across the night sky',
-    'fullmoon': 'Full moon glowing in the night sky',
-    'eclipse': 'Dramatic eclipse event in the sky',
-    'planet': 'Planet visible in the twilight sky',
-    'equinox': 'Dramatic sunrise on the horizon'
-} %}
-
 {# ═══ PAGE CONTENT ═══ #}
 
 <div class="row justify-content-center">
@@ -79,8 +29,7 @@
             {# ── JANUARY ── #}
 
             <div class="sky-card" data-event-type="meteor" data-idx="1" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[1]) }}" alt="{{ event_alts['meteor'] }}" loading="eager" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -97,8 +46,7 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="2" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[2]) }}" alt="{{ event_alts['fullmoon'] }}" loading="eager" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -115,8 +63,7 @@
             </div>
 
             <div class="sky-card" data-event-type="planet" data-idx="3" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-planet">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[3]) }}" alt="{{ event_alts['planet'] }}" loading="eager" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-planet" role="img" aria-label="Planet illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -135,8 +82,7 @@
             {# ── FEBRUARY ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="4" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[4]) }}" alt="{{ event_alts['fullmoon'] }}" loading="eager" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -153,8 +99,7 @@
             </div>
 
             <div class="sky-card" data-event-type="eclipse" data-idx="5" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-eclipse">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[5]) }}" alt="{{ event_alts['eclipse'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-eclipse" role="img" aria-label="Eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -171,8 +116,7 @@
             </div>
 
             <div class="sky-card" data-event-type="planet" data-idx="6" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-planet">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[6]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-planet" role="img" aria-label="Planet illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -189,8 +133,7 @@
             </div>
 
             <div class="sky-card" data-event-type="planet" data-idx="7" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-planet">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[7]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-planet" role="img" aria-label="Planet illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -209,8 +152,7 @@
             {# ── MARCH ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="8" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[8]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -227,8 +169,7 @@
             </div>
 
             <div class="sky-card" data-event-type="eclipse" data-idx="9" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-eclipse">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[9]) }}" alt="{{ event_alts['eclipse'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-eclipse" role="img" aria-label="Eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -245,8 +186,7 @@
             </div>
 
             <div class="sky-card" data-event-type="planet" data-idx="10" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-planet">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[10]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-planet" role="img" aria-label="Planet illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -263,8 +203,7 @@
             </div>
 
             <div class="sky-card" data-event-type="equinox" data-idx="11" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-equinox">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[11]) }}" alt="{{ event_alts['equinox'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-equinox" role="img" aria-label="Equinox illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -283,8 +222,7 @@
             {# ── APRIL ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="12" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[12]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -301,8 +239,7 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="13" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[13]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -321,8 +258,7 @@
             {# ── MAY ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="14" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[14]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -339,8 +275,7 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="15" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[15]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -357,8 +292,7 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="16" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[16]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -377,8 +311,7 @@
             {# ── JUNE ── #}
 
             <div class="sky-card" data-event-type="planet" data-idx="17" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-planet">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[17]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-planet" role="img" aria-label="Planet illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -395,8 +328,7 @@
             </div>
 
             <div class="sky-card" data-event-type="equinox" data-idx="18" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-equinox">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[18]) }}" alt="{{ event_alts['equinox'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-equinox" role="img" aria-label="Equinox illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -413,8 +345,7 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="19" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[19]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -433,8 +364,7 @@
             {# ── JULY ── #}
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="20" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[20]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -451,8 +381,7 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="21" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[21]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -471,8 +400,7 @@
             {# ── AUGUST ── #}
 
             <div class="sky-card" data-event-type="eclipse" data-idx="22" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-eclipse">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[22]) }}" alt="{{ event_alts['eclipse'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-eclipse" role="img" aria-label="Eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -489,8 +417,7 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="23" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[23]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -507,8 +434,7 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="24" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[24]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -525,8 +451,7 @@
             </div>
 
             <div class="sky-card" data-event-type="eclipse" data-idx="25" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-eclipse">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[25]) }}" alt="{{ event_alts['eclipse'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-eclipse" role="img" aria-label="Eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -545,8 +470,7 @@
             {# ── SEPTEMBER ── #}
 
             <div class="sky-card" data-event-type="equinox" data-idx="26" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-equinox">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[26]) }}" alt="{{ event_alts['equinox'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-equinox" role="img" aria-label="Equinox illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -563,8 +487,7 @@
             </div>
 
             <div class="sky-card" data-event-type="planet" data-idx="27" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-planet">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[27]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-planet" role="img" aria-label="Planet illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -581,8 +504,7 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="28" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[28]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -601,8 +523,7 @@
             {# ── OCTOBER ── #}
 
             <div class="sky-card" data-event-type="planet" data-idx="29" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-planet">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[29]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-planet" role="img" aria-label="Planet illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -619,8 +540,7 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="30" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[30]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -637,8 +557,7 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="31" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[31]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -655,8 +574,7 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="32" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[32]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -675,8 +593,7 @@
             {# ── NOVEMBER ── #}
 
             <div class="sky-card" data-event-type="meteor" data-idx="33" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[33]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -693,8 +610,7 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="34" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[34]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -711,8 +627,7 @@
             </div>
 
             <div class="sky-card" data-event-type="planet" data-idx="35" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-planet">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[35]) }}" alt="{{ event_alts['planet'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-planet" role="img" aria-label="Planet illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -731,8 +646,7 @@
             {# ── DECEMBER ── #}
 
             <div class="sky-card" data-event-type="meteor" data-idx="36" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[36]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -749,8 +663,7 @@
             </div>
 
             <div class="sky-card" data-event-type="equinox" data-idx="37" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-equinox">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[37]) }}" alt="{{ event_alts['equinox'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-equinox" role="img" aria-label="Equinox illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -767,8 +680,7 @@
             </div>
 
             <div class="sky-card" data-event-type="meteor" data-idx="38" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-meteor">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[38]) }}" alt="{{ event_alts['meteor'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
@@ -785,8 +697,7 @@
             </div>
 
             <div class="sky-card" data-event-type="fullmoon" data-idx="39" role="button" tabindex="0">
-                <div class="sky-card-illustration sky-anim-fullmoon">
-                    <img src="{{ url_for('static', filename='img/events/' + event_images[39]) }}" alt="{{ event_alts['fullmoon'] }}" loading="lazy" width="560" height="350" class="sky-card-img">
+                <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
                 <div class="sky-card-body">
