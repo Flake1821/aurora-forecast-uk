@@ -21,9 +21,9 @@ def space_weather():
         location_name = request.args.get('location', session.get('user_location', DEFAULT_LOCATION))
         rural_urban = session.get('user_rural_urban', '')
 
-        # Validate RUC code format (e.g. 'A1', 'D1', 'F2') — clear stale text values
+        # Validate RUC code format: England/Wales 'A1'-'F2' or Scotland '1'-'8'
         import re
-        if rural_urban and not re.match(r'^[A-F][12]$', rural_urban):
+        if rural_urban and not re.match(r'^([A-F][12]|[1-8])$', rural_urban):
             rural_urban = ''
             session.pop('user_rural_urban', None)
 
@@ -214,6 +214,22 @@ def place_search(query):
                     })
     except Exception as e:
         logger.warning(f'Place search failed: {e}')
+
+    # Enrich place results with RUC11 code via reverse geocode
+    for result in results:
+        if not result.get('rural_urban'):
+            try:
+                rg = http_requests.get(
+                    f"https://api.postcodes.io/postcodes?lon={result['lon']}&lat={result['lat']}&limit=1",
+                    timeout=3
+                )
+                if rg.status_code == 200:
+                    rg_data = rg.json()
+                    if rg_data.get('result') and len(rg_data['result']) > 0:
+                        ruc = rg_data['result'][0].get('codes', {}).get('ruc11', '')
+                        result['rural_urban'] = ruc
+            except Exception:
+                pass  # Non-critical
 
     if not results:
         return jsonify({'results': [], 'error': 'No results found'}), 404

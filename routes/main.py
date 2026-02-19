@@ -23,9 +23,9 @@ def index():
     rural_urban = session.get('user_rural_urban', '')
     has_location = 'user_lat' in session
 
-    # Validate RUC code format (e.g. 'A1', 'D1', 'F2') — clear stale text values
+    # Validate RUC code format: England/Wales 'A1'-'F2' or Scotland '1'-'8'
     import re
-    if rural_urban and not re.match(r'^[A-F][12]$', rural_urban):
+    if rural_urban and not re.match(r'^([A-F][12]|[1-8])$', rural_urban):
         rural_urban = ''
         session.pop('user_rural_urban', None)
 

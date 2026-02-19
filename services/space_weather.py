@@ -98,7 +98,12 @@ def get_current_conditions(lat=None, lon=None, location_name=None, rural_urban='
         age = (datetime.utcnow() - cached.fetched_at).total_seconds()
         if age < CACHE_SECONDS:
             try:
-                return json.loads(cached.raw_data)
+                data = json.loads(cached.raw_data)
+                # Always recalculate light pollution (instant, no API call)
+                # because rural_urban may have been resolved after the cache was created
+                if rural_urban:
+                    data['light_pollution'] = _estimate_bortle(rural_urban)
+                return data
             except (json.JSONDecodeError, TypeError):
                 pass
 
@@ -2242,8 +2247,10 @@ def _estimate_bortle(rural_urban_code):
 
     Maps the Rural-Urban Classification 2011 code to an approximate
     Bortle class (1=darkest, 9=brightest) with advice for aurora viewing.
+    Supports both England/Wales codes (A1-F2) and Scotland codes (1-8).
     """
     mapping = {
+        # England/Wales Rural-Urban Classification 2011
         'A1': (8, 'City centre', 'Severe light pollution \u2014 only the brightest stars visible'),
         'A2': (8, 'City centre', 'Severe light pollution \u2014 only the brightest stars visible'),
         'B1': (7, 'Urban', 'Significant light pollution \u2014 aurora needs to be very bright'),
@@ -2256,6 +2263,23 @@ def _estimate_bortle(rural_urban_code):
         'E2': (4, 'Rural', 'Low light pollution \u2014 good conditions for aurora hunting'),
         'F1': (3, 'Dark rural', 'Very low light pollution \u2014 excellent dark sky site'),
         'F2': (3, 'Dark rural', 'Very low light pollution \u2014 excellent dark sky site'),
+        # Scottish Government Urban Rural Classification 2011-2012
+        # 1 = Large Urban Areas (pop >= 125,000)
+        '1': (8, 'City centre', 'Severe light pollution \u2014 only the brightest stars visible'),
+        # 2 = Other Urban Areas (pop 10,000-125,000)
+        '2': (7, 'Urban', 'Significant light pollution \u2014 aurora needs to be very bright'),
+        # 3 = Accessible Small Towns (pop 3,000-10,000, within 30min drive)
+        '3': (6, 'Small town', 'Moderate light pollution \u2014 strong aurora may be visible on horizon'),
+        # 4 = Remote Small Towns (pop 3,000-10,000, >30min drive)
+        '4': (5, 'Remote town', 'Some light pollution \u2014 good aurora should be visible'),
+        # 5 = Very Remote Small Towns (pop 3,000-10,000, >60min drive)
+        '5': (4, 'Very remote town', 'Low light pollution \u2014 good conditions for aurora hunting'),
+        # 6 = Accessible Rural (pop <3,000, within 30min drive)
+        '6': (4, 'Rural', 'Low light pollution \u2014 good conditions for aurora hunting'),
+        # 7 = Remote Rural (pop <3,000, >30min drive)
+        '7': (3, 'Remote rural', 'Very low light pollution \u2014 excellent dark sky site'),
+        # 8 = Very Remote Rural (pop <3,000, >60min drive)
+        '8': (2, 'Very remote rural', 'Minimal light pollution \u2014 outstanding dark sky site'),
     }
     bortle, label, advice = mapping.get(
         rural_urban_code, (5, 'Moderate', 'Light pollution level unknown for this location')
