@@ -1942,7 +1942,118 @@ a:hover {
 .cond-weather-now.weather-time-nautical_twilight .weather-now-desc,
 .cond-weather-now.weather-time-nautical_twilight .hourly-bar-pct,
 .cond-weather-now.weather-time-nautical_twilight .hourly-bar-time {
-    color: #9898b4;
+    color: #b4b4d0;
+}
+
+/* ── ADAPTIVE TEXT: daylight + weather overlays → light text ── */
+/* When weather darkens the daylight panel, switch from dark to light text */
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .weather-now-label,
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .weather-stat-value,
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .weather-now-header > i,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .weather-now-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .weather-stat-value,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .weather-now-header > i,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .weather-now-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .weather-stat-value,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .weather-now-header > i,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .weather-now-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .weather-stat-value,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .weather-now-header > i,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .weather-now-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .weather-stat-value,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .weather-now-header > i,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .weather-now-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .weather-stat-value,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .weather-now-header > i,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .weather-now-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .weather-stat-value,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .weather-now-header > i {
+    color: #eaeaf2;
+}
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .weather-now-desc,
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .weather-stat-label,
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .weather-viewing-label,
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .wind-gust-note,
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .hourly-cloud-title,
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .hourly-bar-pct,
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .hourly-bar-time,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .weather-now-desc,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .weather-stat-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .weather-viewing-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .wind-gust-note,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .hourly-cloud-title,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .hourly-bar-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .hourly-bar-time,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .weather-now-desc,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .weather-stat-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .weather-viewing-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .wind-gust-note,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .hourly-cloud-title,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .hourly-bar-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .hourly-bar-time,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .weather-now-desc,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .weather-stat-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .weather-viewing-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .wind-gust-note,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .hourly-cloud-title,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .hourly-bar-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .hourly-bar-time,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .weather-now-desc,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .weather-stat-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .weather-viewing-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .wind-gust-note,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .hourly-cloud-title,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .hourly-bar-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .hourly-bar-time,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .weather-now-desc,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .weather-stat-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .weather-viewing-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .wind-gust-note,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .hourly-cloud-title,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .hourly-bar-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .hourly-bar-time,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .weather-now-desc,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .weather-stat-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .weather-viewing-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .wind-gust-note,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .hourly-cloud-title,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .hourly-bar-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .hourly-bar-time {
+    color: #c0c0d4;
+}
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .cloud-bar-mini,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .cloud-bar-mini,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .cloud-bar-mini,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .cloud-bar-mini,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .cloud-bar-mini,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .cloud-bar-mini,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .cloud-bar-mini {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Boost civil twilight secondary text contrast ── */
+.cond-weather-now.weather-time-civil_twilight .weather-now-desc,
+.cond-weather-now.weather-time-civil_twilight .weather-stat-label,
+.cond-weather-now.weather-time-civil_twilight .weather-viewing-label,
+.cond-weather-now.weather-time-civil_twilight .wind-gust-note,
+.cond-weather-now.weather-time-civil_twilight .hourly-cloud-title,
+.cond-weather-now.weather-time-civil_twilight .hourly-bar-pct,
+.cond-weather-now.weather-time-civil_twilight .hourly-bar-time {
+    color: #d4c8b0;
+}
+
+/* ── Boost dark/astro secondary text contrast ── */
+.cond-weather-now.weather-time-dark .weather-stat-label,
+.cond-weather-now.weather-time-dark .weather-now-desc,
+.cond-weather-now.weather-time-dark .hourly-bar-pct,
+.cond-weather-now.weather-time-dark .hourly-bar-time,
+.cond-weather-now.weather-time-dark .hourly-cloud-title,
+.cond-weather-now.weather-time-astronomical_twilight .weather-stat-label,
+.cond-weather-now.weather-time-astronomical_twilight .weather-now-desc,
+.cond-weather-now.weather-time-astronomical_twilight .hourly-bar-pct,
+.cond-weather-now.weather-time-astronomical_twilight .hourly-bar-time,
+.cond-weather-now.weather-time-astronomical_twilight .hourly-cloud-title {
+    color: #bcc0d4;
 }
 
 /* ── CLEAR SKY (WMO 0, 1) — realistic twinkling stars at night ── */

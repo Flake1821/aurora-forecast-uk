@@ -956,16 +956,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 // ── Update Aurora View conditions on refresh ──
+                var cwData = data.current_weather || {};
+                var diData = data.darkness_info || {};
                 var newViewData = {
                     kp: data.kp_index,
                     kpThreshold: kpThreshold,
-                    cloudCover: (data.current_weather && data.current_weather.cloud_cover) || 0,
-                    darknessStatus: (data.darkness_info && data.darkness_info.darkness_status) || 'unknown',
+                    cloudCover: cwData.cloud_cover || 0,
+                    darknessStatus: diData.darkness_status || 'unknown',
                     moonIllumination: (data.moon_phase && data.moon_phase.illumination) || 0,
                     moonPhase: (data.moon_phase && data.moon_phase.phase_fraction) || 0,
                     lat: window.__userLat,
                     locationName: userLocation,
-                    bortle: (data.light_pollution && data.light_pollution.bortle) || 5
+                    bortle: (data.light_pollution && data.light_pollution.bortle) || 5,
+                    weatherCode: cwData.weather_code || 0,
+                    weatherDescription: cwData.weather_description || '',
+                    windSpeed: cwData.wind_speed || 0,
+                    windDirection: cwData.wind_direction || 0,
+                    windGusts: cwData.wind_gusts || 0,
+                    windLevel: cwData.wind_classification || 'calm',
+                    visibilityKm: cwData.visibility_km || 10,
+                    temperature: cwData.temperature || 10,
+                    sunset: diData.sunset || '',
+                    sunrise: diData.sunrise || ''
                 };
                 window.__auroraViewData = newViewData;
                 auroraViewState.conditions = newViewData;
@@ -1940,7 +1952,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var auroraViewState = {
         animFrameId: null,
         startTime: 0,
-        stars: [],       // pre-generated star positions
+        stars: [],        // pre-generated star positions
+        raindrops: [],    // pre-generated rain particles
+        snowflakes: [],   // pre-generated snow particles
+        lightningFlash: 0,       // 0-1 brightness
+        lightningCooldown: 5,    // seconds until next eligible flash
+        lastLightningTime: 0,    // timestamp of last flash
         conditions: null  // cached conditions data
     };
 
@@ -1963,6 +1980,35 @@ document.addEventListener('DOMContentLoaded', function () {
                     size: Math.random() * 1.5 + 0.3,
                     brightness: Math.random() * 0.6 + 0.2,
                     twinkleSpeed: Math.random() * 3 + 1
+                });
+            }
+        }
+
+        // Pre-generate rain particles (only once)
+        if (auroraViewState.raindrops.length === 0) {
+            for (var ri = 0; ri < 150; ri++) {
+                auroraViewState.raindrops.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H * 0.82,
+                    speed: 4 + Math.random() * 4,
+                    length: 8 + Math.random() * 12,
+                    opacity: 0.15 + Math.random() * 0.25
+                });
+            }
+        }
+
+        // Pre-generate snow particles (only once)
+        if (auroraViewState.snowflakes.length === 0) {
+            for (var si = 0; si < 120; si++) {
+                auroraViewState.snowflakes.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H * 0.82,
+                    size: 1 + Math.random() * 2.5,
+                    speed: 0.3 + Math.random() * 0.8,
+                    drift: Math.random() * Math.PI * 2,
+                    driftSpeed: 0.5 + Math.random() * 1.5,
+                    driftAmp: 10 + Math.random() * 20,
+                    opacity: 0.4 + Math.random() * 0.4
                 });
             }
         }
@@ -2003,10 +2049,72 @@ document.addEventListener('DOMContentLoaded', function () {
         var threshold = parseFloat(data.kpThreshold) || 5;
         var cloud = parseFloat(data.cloudCover) || 0;
         var isDark = data.darknessStatus === 'dark';
-        var isTwilight = data.darknessStatus === 'twilight' || data.darknessStatus === 'civil_twilight' || data.darknessStatus === 'nautical_twilight';
+        var isCivilTwilight = data.darknessStatus === 'civil_twilight';
+        var isNauticalTwilight = data.darknessStatus === 'nautical_twilight';
+        var isAstroTwilight = data.darknessStatus === 'astronomical_twilight';
+        var isTwilight = data.darknessStatus === 'twilight' || isCivilTwilight || isNauticalTwilight || isAstroTwilight;
+        var isDaylight = !isDark && !isTwilight;
         var moonIllum = parseFloat(data.moonIllumination) || 0;
         var lat = parseFloat(data.lat) || 52;
         var bortle = parseInt(data.bortle) || 5;
+
+        // ── Weather classification from WMO weather code ──
+        var weatherCode = parseInt(data.weatherCode) || 0;
+        var windSpeed = parseFloat(data.windSpeed) || 0;
+        var windLevelRaw = data.windLevel || 'calm';
+        var windLevel = (typeof windLevelRaw === 'object') ? (windLevelRaw.level || 'calm') : windLevelRaw;
+        var visibilityKm = parseFloat(data.visibilityKm) || 10;
+
+        var isRaining = (weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82);
+        var isSnowing = (weatherCode >= 71 && weatherCode <= 77) || (weatherCode >= 85 && weatherCode <= 86);
+        var isDrizzle = weatherCode >= 51 && weatherCode <= 55;
+        var isThunderstorm = weatherCode >= 95 && weatherCode <= 99;
+        var isFog = weatherCode === 45 || weatherCode === 48;
+        var isClearSky = weatherCode <= 1;
+        var isOvercast = weatherCode === 3 || cloud > 80;
+
+        // Precipitation intensity (0-1 scale from WMO code)
+        var precipIntensity = 0;
+        if (isRaining) {
+            if (weatherCode === 51 || weatherCode === 61 || weatherCode === 80) precipIntensity = 0.3;
+            else if (weatherCode === 53 || weatherCode === 63 || weatherCode === 81) precipIntensity = 0.6;
+            else if (weatherCode === 55 || weatherCode === 65 || weatherCode === 67 || weatherCode === 82) precipIntensity = 1.0;
+            else precipIntensity = 0.5;
+        } else if (isSnowing) {
+            if (weatherCode === 71 || weatherCode === 85) precipIntensity = 0.3;
+            else if (weatherCode === 73) precipIntensity = 0.6;
+            else if (weatherCode === 75 || weatherCode === 77 || weatherCode === 86) precipIntensity = 1.0;
+            else precipIntensity = 0.5;
+        }
+        if (isThunderstorm) precipIntensity = Math.max(precipIntensity, 0.8);
+
+        // Wind factor (0-1 from wind level)
+        var windFactor = 0;
+        if (windLevel === 'calm') windFactor = 0;
+        else if (windLevel === 'light') windFactor = 0.2;
+        else if (windLevel === 'moderate') windFactor = 0.5;
+        else if (windLevel === 'strong') windFactor = 0.8;
+        else if (windLevel === 'gale' || windLevel === 'storm') windFactor = 1.0;
+        else windFactor = Math.min(1, windSpeed / 60);
+
+        // Dawn vs dusk detection
+        var isDawn = false, isDusk = false;
+        if (isCivilTwilight || isNauticalTwilight) {
+            var now = new Date();
+            var currentHour = now.getHours() + now.getMinutes() / 60;
+            var sunriseH = 6, sunsetH = 20; // defaults
+            if (data.sunrise) {
+                var sp = data.sunrise.split(':');
+                if (sp.length >= 2) sunriseH = parseInt(sp[0]) + parseInt(sp[1]) / 60;
+            }
+            if (data.sunset) {
+                var sp2 = data.sunset.split(':');
+                if (sp2.length >= 2) sunsetH = parseInt(sp2[0]) + parseInt(sp2[1]) / 60;
+            }
+            var midday = (sunriseH + sunsetH) / 2;
+            isDawn = currentHour < midday;
+            isDusk = !isDawn;
+        }
 
         // Calculate aurora intensity from Kp and threshold
         var margin = kp - threshold;
@@ -2091,11 +2199,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             ctx.clearRect(0, 0, W, H);
 
-            // ── Sky gradient (dark sky or twilight) ──
-            // Light pollution brightens the sky (especially near horizon)
+            // ── Sky gradient (8 palettes based on time + weather) ──
             var skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
             if (isDark) {
-                if (bortle >= 7) {
+                if (isOvercast && cloud > 80) {
+                    // Overcast night — slightly lighter (cloud reflection)
+                    skyGrad.addColorStop(0, '#121218');
+                    skyGrad.addColorStop(0.4, '#181820');
+                    skyGrad.addColorStop(0.7, '#1e1e28');
+                    skyGrad.addColorStop(1, '#242430');
+                } else if (bortle >= 7) {
                     // Heavy light pollution — washed-out orange-grey sky glow
                     skyGrad.addColorStop(0, '#0e0e18');
                     skyGrad.addColorStop(0.3, '#141420');
@@ -2114,19 +2227,96 @@ document.addEventListener('DOMContentLoaded', function () {
                     skyGrad.addColorStop(0.7, '#0a0e20');
                     skyGrad.addColorStop(1, '#0e1428');
                 }
+            } else if (isAstroTwilight) {
+                // Astronomical twilight — near-dark with faint horizon glow
+                skyGrad.addColorStop(0, '#060510');
+                skyGrad.addColorStop(0.4, '#0a0a1a');
+                skyGrad.addColorStop(0.7, '#10122e');
+                skyGrad.addColorStop(1, '#1a2048');
+            } else if (isNauticalTwilight) {
+                // Nautical twilight — deep blue-purple
+                skyGrad.addColorStop(0, '#0a0e28');
+                skyGrad.addColorStop(0.3, '#101638');
+                skyGrad.addColorStop(0.6, '#1e2050');
+                skyGrad.addColorStop(1, '#3e3e70');
+            } else if (isCivilTwilight) {
+                if (isOvercast) {
+                    // Civil twilight overcast — muted warm grey
+                    skyGrad.addColorStop(0, '#1a1e30');
+                    skyGrad.addColorStop(0.4, '#2a2830');
+                    skyGrad.addColorStop(0.7, '#453e38');
+                    skyGrad.addColorStop(1, '#605040');
+                } else {
+                    // Civil twilight clear — golden hour orange/pink/purple
+                    skyGrad.addColorStop(0, '#1a2a5c');
+                    skyGrad.addColorStop(0.25, '#2e2858');
+                    skyGrad.addColorStop(0.45, '#6a3858');
+                    skyGrad.addColorStop(0.65, '#c06838');
+                    skyGrad.addColorStop(0.85, '#e09040');
+                    skyGrad.addColorStop(1, '#f0a848');
+                }
             } else if (isTwilight) {
+                // Generic twilight fallback
                 skyGrad.addColorStop(0, '#0a0e20');
                 skyGrad.addColorStop(0.5, '#141830');
                 skyGrad.addColorStop(0.8, '#1e2848');
                 skyGrad.addColorStop(1, '#283058');
             } else {
-                // Daylight — brighter sky, no aurora
-                skyGrad.addColorStop(0, '#1a2040');
-                skyGrad.addColorStop(0.5, '#2a3868');
-                skyGrad.addColorStop(1, '#4a5888');
+                // Daylight
+                if (isOvercast) {
+                    // Overcast daylight — flat grey
+                    skyGrad.addColorStop(0, '#8a8e96');
+                    skyGrad.addColorStop(0.3, '#969aa4');
+                    skyGrad.addColorStop(0.6, '#a8acb4');
+                    skyGrad.addColorStop(1, '#b8bcc4');
+                } else {
+                    // Clear daylight — bright blue sky
+                    skyGrad.addColorStop(0, '#1a6fd4');
+                    skyGrad.addColorStop(0.3, '#4a8ee0');
+                    skyGrad.addColorStop(0.6, '#88b8ec');
+                    skyGrad.addColorStop(1, '#d4e8fa');
+                }
             }
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, W, horizonY);
+
+            // ── Dawn/dusk directional horizon glow ──
+            if (isCivilTwilight && !isOvercast) {
+                var glowX = isDawn ? W * 0.85 : W * 0.15; // East=right (dawn), West=left (dusk) looking north
+                var glowGradTw = ctx.createRadialGradient(glowX, horizonY * 0.7, 0, glowX, horizonY * 0.7, W * 0.55);
+                glowGradTw.addColorStop(0, 'rgba(240, 160, 60, 0.25)');
+                glowGradTw.addColorStop(0.3, 'rgba(220, 120, 50, 0.15)');
+                glowGradTw.addColorStop(0.6, 'rgba(180, 80, 40, 0.06)');
+                glowGradTw.addColorStop(1, 'rgba(140, 60, 30, 0)');
+                ctx.fillStyle = glowGradTw;
+                ctx.fillRect(0, 0, W, horizonY);
+            } else if (isNauticalTwilight) {
+                var glowXn = isDawn ? W * 0.85 : W * 0.15;
+                var glowGradNt = ctx.createRadialGradient(glowXn, horizonY * 0.8, 0, glowXn, horizonY * 0.8, W * 0.45);
+                glowGradNt.addColorStop(0, 'rgba(140, 80, 100, 0.15)');
+                glowGradNt.addColorStop(0.4, 'rgba(100, 60, 80, 0.08)');
+                glowGradNt.addColorStop(1, 'rgba(60, 40, 60, 0)');
+                ctx.fillStyle = glowGradNt;
+                ctx.fillRect(0, 0, W, horizonY);
+            }
+
+            // ── Storm darkening overlay ──
+            if (isThunderstorm) {
+                var stormAlpha = isDaylight ? 0.4 : 0.2;
+                ctx.fillStyle = 'rgba(15, 15, 25, ' + stormAlpha + ')';
+                ctx.fillRect(0, 0, W, horizonY);
+            }
+
+            // ── Fog overlay ──
+            if (isFog || visibilityKm < 2) {
+                var fogAlpha = isFog ? 0.3 : Math.max(0, (2 - visibilityKm) / 2) * 0.25;
+                if (isDaylight) {
+                    ctx.fillStyle = 'rgba(180, 185, 190, ' + fogAlpha.toFixed(3) + ')';
+                } else {
+                    ctx.fillStyle = 'rgba(60, 65, 70, ' + (fogAlpha * 0.6).toFixed(3) + ')';
+                }
+                ctx.fillRect(0, 0, W, horizonY);
+            }
 
             // ── Light pollution sky glow (warm haze near horizon) ──
             if ((isDark || isTwilight) && bortle >= 5) {
@@ -2139,9 +2329,55 @@ document.addEventListener('DOMContentLoaded', function () {
                 ctx.fillRect(0, 0, W, horizonY);
             }
 
-            // ── Stars (only when dark) ──
+            // ── Sun disc + glow (daylight only) ──
+            if (isDaylight && cloud < 90) {
+                // Sun position: arc across sky based on time
+                // Looking north, sun is behind the viewer — appears high and moves R→L
+                var nowDate = new Date();
+                var sunriseHr = 6, sunsetHr = 20;
+                if (data.sunrise) { var ssp = data.sunrise.split(':'); if (ssp.length >= 2) sunriseHr = parseInt(ssp[0]) + parseInt(ssp[1]) / 60; }
+                if (data.sunset) { var ssp2 = data.sunset.split(':'); if (ssp2.length >= 2) sunsetHr = parseInt(ssp2[0]) + parseInt(ssp2[1]) / 60; }
+                var dayLength = sunsetHr - sunriseHr;
+                var currentHr = nowDate.getHours() + nowDate.getMinutes() / 60;
+                var dayProgress = Math.max(0, Math.min(1, (currentHr - sunriseHr) / dayLength));
+
+                // Sun tracks behind viewer (looking north) — appears near top edges
+                var sunX = W * (0.85 - dayProgress * 0.7); // right to left
+                var sunArc = Math.sin(dayProgress * Math.PI); // peaks at midday
+                var sunY = H * 0.05 + (1 - sunArc) * H * 0.25; // higher at midday
+
+                var sunGlowAlpha = cloud > 50 ? 0.15 : 0.35;
+
+                // Large soft glow
+                ctx.save();
+                var sunGlow = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 80);
+                sunGlow.addColorStop(0, 'rgba(255, 250, 220, ' + sunGlowAlpha.toFixed(2) + ')');
+                sunGlow.addColorStop(0.2, 'rgba(255, 245, 200, ' + (sunGlowAlpha * 0.6).toFixed(2) + ')');
+                sunGlow.addColorStop(0.5, 'rgba(255, 240, 180, ' + (sunGlowAlpha * 0.2).toFixed(2) + ')');
+                sunGlow.addColorStop(1, 'rgba(255, 235, 160, 0)');
+                ctx.fillStyle = sunGlow;
+                ctx.beginPath();
+                ctx.arc(sunX, sunY, 80, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Bright disc
+                if (cloud < 70) {
+                    ctx.beginPath();
+                    ctx.arc(sunX, sunY, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 250, 230, 0.9)';
+                    ctx.fill();
+                    // White core
+                    ctx.beginPath();
+                    ctx.arc(sunX, sunY, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // ── Stars (only when dark/twilight) ──
             if (isDark || isTwilight) {
-                var starAlpha = isDark ? 1 : 0.3;
+                var starAlpha = isDark ? 1 : (isAstroTwilight ? 0.7 : isNauticalTwilight ? 0.4 : 0.15);
                 // Moon reduces star visibility
                 if (moonIllum > 50) starAlpha *= 0.5;
                 // Light pollution washes out faint stars
@@ -2152,9 +2388,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Cloud reduces stars
                 starAlpha *= cloudFactor;
 
+                var twinkleTurb = 1 + windFactor * 2; // wind makes stars twinkle faster
                 for (var s = 0; s < auroraViewState.stars.length; s++) {
                     var star = auroraViewState.stars[s];
-                    var twinkle = 0.5 + 0.5 * Math.sin(elapsed * star.twinkleSpeed + s);
+                    var twinkle = 0.5 + 0.5 * Math.sin(elapsed * star.twinkleSpeed * twinkleTurb + s);
                     var alpha = star.brightness * twinkle * starAlpha;
                     if (alpha < 0.02) continue;
                     ctx.fillStyle = 'rgba(255,255,255,' + alpha.toFixed(2) + ')';
@@ -2285,25 +2522,43 @@ document.addEventListener('DOMContentLoaded', function () {
                 ctx.restore();
             }
 
-            // ── Cloud overlay ──
+            // ── Cloud overlay (time-aware colours + wind drift) ──
             if (cloud > 5) {
                 var cloudAlpha = (cloud / 100) * 0.8;
                 ctx.save();
 
+                // Time-aware cloud colours
+                var clR, clG, clB, clR2, clG2, clB2;
+                if (isDaylight) {
+                    // Bright grey-white clouds lit by sun
+                    clR = 160 + Math.random() * 40; clG = 165 + Math.random() * 40; clB = 175 + Math.random() * 30;
+                    clR2 = 140 + Math.random() * 40; clG2 = 145 + Math.random() * 40; clB2 = 155 + Math.random() * 30;
+                } else if (isCivilTwilight) {
+                    // Warm-tinted grey for twilight
+                    clR = 80; clG = 70; clB = 75;
+                    clR2 = 65; clG2 = 58; clB2 = 62;
+                } else {
+                    // Night: dark grey
+                    clR = 40; clG = 45; clB = 55;
+                    clR2 = 35; clG2 = 40; clB2 = 50;
+                }
+
+                var cloudDriftSpeed = 0.08 + windFactor * 0.15;
+                var cloudDriftAmp = 30 + windFactor * 50;
+
                 // Draw multiple cloud layers
                 for (var cl = 0; cl < 4; cl++) {
                     var clY = H * 0.15 + cl * H * 0.15;
-                    var clDrift = Math.sin(elapsed * 0.08 + cl * 1.5) * 30;
+                    var clDrift = Math.sin(elapsed * cloudDriftSpeed + cl * 1.5) * cloudDriftAmp;
                     var clAlpha = cloudAlpha * (0.4 + cl * 0.15);
 
-                    // Cloud band
                     var cloudGrad = ctx.createRadialGradient(
                         W / 2 + clDrift + cl * 60, clY, 0,
                         W / 2 + clDrift + cl * 60, clY, W * 0.6
                     );
-                    cloudGrad.addColorStop(0, 'rgba(40, 45, 55, ' + clAlpha.toFixed(3) + ')');
-                    cloudGrad.addColorStop(0.4, 'rgba(35, 40, 50, ' + (clAlpha * 0.7).toFixed(3) + ')');
-                    cloudGrad.addColorStop(1, 'rgba(30, 35, 45, 0)');
+                    cloudGrad.addColorStop(0, 'rgba(' + Math.round(clR) + ',' + Math.round(clG) + ',' + Math.round(clB) + ',' + clAlpha.toFixed(3) + ')');
+                    cloudGrad.addColorStop(0.4, 'rgba(' + Math.round(clR2) + ',' + Math.round(clG2) + ',' + Math.round(clB2) + ',' + (clAlpha * 0.7).toFixed(3) + ')');
+                    cloudGrad.addColorStop(1, 'rgba(' + Math.round(clR2) + ',' + Math.round(clG2) + ',' + Math.round(clB2) + ', 0)');
                     ctx.fillStyle = cloudGrad;
                     ctx.fillRect(0, 0, W, horizonY);
                 }
@@ -2311,7 +2566,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Dense cloud cover
                 if (cloud > 70) {
                     var denseAlpha = ((cloud - 70) / 30) * 0.5;
-                    ctx.fillStyle = 'rgba(25, 30, 40, ' + denseAlpha.toFixed(3) + ')';
+                    if (isDaylight) {
+                        ctx.fillStyle = 'rgba(130, 135, 145, ' + denseAlpha.toFixed(3) + ')';
+                    } else {
+                        ctx.fillStyle = 'rgba(25, 30, 40, ' + denseAlpha.toFixed(3) + ')';
+                    }
                     ctx.fillRect(0, 0, W, horizonY);
                 }
                 ctx.restore();
@@ -2343,16 +2602,120 @@ document.addEventListener('DOMContentLoaded', function () {
                 ctx.restore();
             }
 
-            // ── Ground / Landscape silhouette ──
+            // ── Rain streaks ──
+            if (isRaining || (isThunderstorm && precipIntensity > 0)) {
+                ctx.save();
+                var rainAngle = calculateRainAngle(windSpeed);
+                var rainRad = rainAngle * Math.PI / 180;
+                var activeRain = Math.floor(150 * precipIntensity);
+                var rainR, rainG, rainB;
+                if (isDaylight) { rainR = 180; rainG = 190; rainB = 210; }
+                else { rainR = 140; rainG = 155; rainB = 180; }
+                var rainLW = isDrizzle ? 0.5 : 1;
+
+                for (var rd = 0; rd < activeRain; rd++) {
+                    var drop = auroraViewState.raindrops[rd];
+                    // Update position
+                    drop.y += drop.speed;
+                    drop.x += Math.sin(rainRad) * drop.speed * 0.5;
+                    // Wrap around
+                    if (drop.y > horizonY) { drop.y = -drop.length; drop.x = Math.random() * W; }
+                    if (drop.x > W) drop.x -= W;
+                    if (drop.x < 0) drop.x += W;
+
+                    var endX = drop.x + Math.sin(rainRad) * drop.length;
+                    var endY = drop.y + Math.cos(rainRad) * drop.length;
+
+                    ctx.strokeStyle = 'rgba(' + rainR + ',' + rainG + ',' + rainB + ',' + drop.opacity.toFixed(2) + ')';
+                    ctx.lineWidth = rainLW;
+                    ctx.beginPath();
+                    ctx.moveTo(drop.x, drop.y);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            // ── Snow particles ──
+            if (isSnowing) {
+                ctx.save();
+                var activeSnow = Math.floor(120 * precipIntensity);
+
+                for (var sf = 0; sf < activeSnow; sf++) {
+                    var flake = auroraViewState.snowflakes[sf];
+                    // Update position
+                    flake.y += flake.speed;
+                    flake.x += Math.sin(elapsed * flake.driftSpeed + flake.drift) * 0.3 + windFactor * 1.5;
+                    // Wrap around
+                    if (flake.y > horizonY) { flake.y = -flake.size; flake.x = Math.random() * W; }
+                    if (flake.x > W) flake.x -= W;
+                    if (flake.x < 0) flake.x += W;
+
+                    ctx.fillStyle = 'rgba(240, 245, 255, ' + flake.opacity.toFixed(2) + ')';
+                    ctx.beginPath();
+                    ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // ── Lightning flash (sky overlay) ──
+            if (isThunderstorm) {
+                // Decay existing flash
+                auroraViewState.lightningFlash *= 0.6;
+                if (auroraViewState.lightningFlash < 0.01) auroraViewState.lightningFlash = 0;
+
+                // Cooldown timer
+                var timeSinceLastFlash = elapsed - auroraViewState.lastLightningTime;
+                if (timeSinceLastFlash > auroraViewState.lightningCooldown && auroraViewState.lightningFlash === 0) {
+                    // Random trigger: ~1% chance per frame
+                    if (Math.random() < 0.01) {
+                        auroraViewState.lightningFlash = 0.7 + Math.random() * 0.3;
+                        auroraViewState.lastLightningTime = elapsed;
+                        auroraViewState.lightningCooldown = 8 + Math.random() * 12;
+
+                        // 30% chance of double-flash
+                        if (Math.random() < 0.3) {
+                            setTimeout(function() {
+                                auroraViewState.lightningFlash = 0.5 + Math.random() * 0.3;
+                            }, 100 + Math.random() * 150);
+                        }
+                    }
+                }
+
+                // Render flash overlay
+                if (auroraViewState.lightningFlash > 0.01) {
+                    var flashA = auroraViewState.lightningFlash * 0.7;
+                    ctx.fillStyle = 'rgba(220, 225, 255, ' + flashA.toFixed(3) + ')';
+                    ctx.fillRect(0, 0, W, horizonY);
+                }
+            }
+
+            // ── Ground / Landscape silhouette (time-aware colours) ──
+            var gndR, gndG, gndB, gndR2, gndG2, gndB2;
+            if (isDaylight) {
+                gndR = 42; gndG = 64; gndB = 32; gndR2 = 34; gndG2 = 52; gndB2 = 26;
+            } else if (isCivilTwilight) {
+                gndR = 26; gndG = 42; gndB = 20; gndR2 = 20; gndG2 = 32; gndB2 = 14;
+            } else {
+                gndR = 10; gndG = 14; gndB = 8; gndR2 = 8; gndG2 = 12; gndB2 = 6;
+            }
             var groundGrad = ctx.createLinearGradient(0, horizonY - 5, 0, H);
-            groundGrad.addColorStop(0, '#0a0e08');
-            groundGrad.addColorStop(0.15, '#080c06');
-            groundGrad.addColorStop(1, '#050804');
+            groundGrad.addColorStop(0, 'rgb(' + gndR + ',' + gndG + ',' + gndB + ')');
+            groundGrad.addColorStop(0.15, 'rgb(' + gndR2 + ',' + gndG2 + ',' + gndB2 + ')');
+            var gndBottomR = Math.max(2, Math.round(gndR2 * 0.6));
+            var gndBottomG = Math.max(2, Math.round(gndG2 * 0.6));
+            var gndBottomB = Math.max(2, Math.round(gndB2 * 0.6));
+            groundGrad.addColorStop(1, 'rgb(' + gndBottomR + ',' + gndBottomG + ',' + gndBottomB + ')');
             ctx.fillStyle = groundGrad;
             ctx.fillRect(0, horizonY, W, H - horizonY);
 
-            // Rolling hills silhouette
-            ctx.fillStyle = '#0a0e08';
+            // Rolling hills silhouette (time-aware)
+            var hillR, hillG, hillB;
+            if (isDaylight) { hillR = 30; hillG = 48; hillB = 24; }
+            else if (isCivilTwilight) { hillR = 20; hillG = 30; hillB = 16; }
+            else { hillR = 10; hillG = 14; hillB = 8; }
+            ctx.fillStyle = 'rgb(' + hillR + ',' + hillG + ',' + hillB + ')';
             ctx.beginPath();
             ctx.moveTo(0, horizonY);
             for (var hx = 0; hx <= W; hx += 2) {
@@ -2364,25 +2727,39 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.closePath();
             ctx.fill();
 
-            // Tree silhouettes (small clusters)
-            ctx.fillStyle = '#060a04';
+            // Tree silhouettes with wind sway
+            var treeR, treeG, treeB;
+            if (isDaylight) { treeR = 20; treeG = 36; treeB = 16; }
+            else if (isCivilTwilight) { treeR = 14; treeG = 22; treeB = 10; }
+            else { treeR = 6; treeG = 10; treeB = 4; }
+            ctx.fillStyle = 'rgb(' + treeR + ',' + treeG + ',' + treeB + ')';
             var trees = [40, 95, 150, 280, 350, 420, 510, 580, 650, 720, 760];
             for (var ti = 0; ti < trees.length; ti++) {
                 var tx = trees[ti];
                 var treeH = 8 + Math.sin(ti * 2.3) * 5;
                 var hillOffset = Math.sin(tx * 0.008) * 8 + Math.sin(tx * 0.02 + 1) * 4 + Math.sin(tx * 0.05 + 2) * 2;
                 var tBase = horizonY - hillOffset - 3;
-                // Simple triangular tree
+                // Wind sway: apex moves, base stays fixed
+                var sway = Math.sin(elapsed * (1.5 + windFactor * 2) + ti * 0.7) * windFactor * 3
+                         + Math.sin(elapsed * (3 + windFactor * 3) + ti * 1.05) * windFactor * 0.9;
                 ctx.beginPath();
                 ctx.moveTo(tx - 3, tBase);
-                ctx.lineTo(tx, tBase - treeH);
+                ctx.lineTo(tx + sway, tBase - treeH);
                 ctx.lineTo(tx + 3, tBase);
                 ctx.closePath();
                 ctx.fill();
             }
 
+            // ── Lightning ground reflection ──
+            if (isThunderstorm && auroraViewState.lightningFlash > 0.01) {
+                var gndFlashA = auroraViewState.lightningFlash * 0.15;
+                ctx.fillStyle = 'rgba(180, 190, 210, ' + gndFlashA.toFixed(3) + ')';
+                ctx.fillRect(0, horizonY, W, H - horizonY);
+            }
+
             // ── Compass label ──
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            var compassAlpha = isDaylight ? 0.5 : 0.35;
+            ctx.fillStyle = 'rgba(255,255,255,' + compassAlpha + ')';
             ctx.font = '10px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('N', W / 2, horizonY + 14);
@@ -2390,25 +2767,51 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.fillText('NE', W * 0.85, horizonY + 14);
             ctx.textAlign = 'left';
 
-            // ── "No aurora" message when conditions are poor ──
-            if (auroraIntensity < 0.01 && (isDark || isTwilight)) {
-                ctx.fillStyle = 'rgba(255,255,255,0.25)';
-                ctx.font = '13px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('Aurora activity too low for ' + (data.locationName || 'your location'), W / 2, H * 0.4);
-                ctx.font = '11px sans-serif';
-                ctx.fillText('Kp ' + kp.toFixed(1) + ' \u2014 need Kp ' + threshold + '+ for visible aurora', W / 2, H * 0.4 + 18);
-                if (bortle >= 7) {
-                    ctx.fillText('Heavy light pollution at this location \u2014 only strong aurora visible', W / 2, H * 0.4 + 34);
-                } else if (bortle >= 6) {
-                    ctx.fillText('Moderate light pollution \u2014 find a darker spot for best views', W / 2, H * 0.4 + 34);
+            // ── Status text messages (weather-aware) ──
+            var statusMsg = '';
+            var statusMsg2 = '';
+            var statusMsg3 = '';
+            if (isDaylight) {
+                if (isRaining || isThunderstorm) {
+                    statusMsg = 'Rainy day \u2014 aurora only visible after dark';
+                } else if (isSnowing) {
+                    statusMsg = 'Snowy day \u2014 aurora only visible after dark';
+                } else {
+                    statusMsg = 'Daylight \u2014 aurora only visible after dark';
                 }
-                ctx.textAlign = 'left';
-            } else if (!isDark && !isTwilight) {
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            } else if (isDark || isTwilight) {
+                if (isRaining || isSnowing || isThunderstorm) {
+                    statusMsg = 'Precipitation blocking the sky';
+                    statusMsg2 = (data.weatherDescription || 'Rain/snow') + ' \u2014 wait for clearer skies';
+                } else if (cloud > 80) {
+                    statusMsg = 'Heavy cloud cover blocking the sky';
+                    statusMsg2 = cloud + '% cloud \u2014 aurora may be hidden';
+                } else if (isFog) {
+                    statusMsg = 'Fog reducing visibility';
+                    statusMsg2 = 'Visibility ' + visibilityKm.toFixed(1) + ' km';
+                } else if (auroraIntensity < 0.01) {
+                    statusMsg = 'Aurora activity too low for ' + (data.locationName || 'your location');
+                    statusMsg2 = 'Kp ' + kp.toFixed(1) + ' \u2014 need Kp ' + threshold + '+ for visible aurora';
+                    if (bortle >= 7) {
+                        statusMsg3 = 'Heavy light pollution \u2014 only strong aurora visible';
+                    } else if (bortle >= 6) {
+                        statusMsg3 = 'Moderate light pollution \u2014 find a darker spot for best views';
+                    }
+                }
+            }
+
+            if (statusMsg) {
+                ctx.fillStyle = isDaylight ? 'rgba(40,40,60,0.5)' : 'rgba(255,255,255,0.25)';
                 ctx.font = '13px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('Daylight \u2014 aurora only visible after dark', W / 2, H * 0.4);
+                ctx.fillText(statusMsg, W / 2, H * 0.4);
+                if (statusMsg2) {
+                    ctx.font = '11px sans-serif';
+                    ctx.fillText(statusMsg2, W / 2, H * 0.4 + 18);
+                }
+                if (statusMsg3) {
+                    ctx.fillText(statusMsg3, W / 2, H * 0.4 + 34);
+                }
                 ctx.textAlign = 'left';
             }
 

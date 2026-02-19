@@ -589,7 +589,17 @@
         moonPhase: {{ moon.get('phase_fraction', 0)|tojson }},
         lat: {{ location_lat|tojson }},
         locationName: {{ location_name|tojson }},
-        bortle: {{ lp.get('bortle', 5)|tojson }}
+        bortle: {{ lp.get('bortle', 5)|tojson }},
+        weatherCode: {{ cw.get('weather_code', 0)|tojson }},
+        weatherDescription: {{ cw.get('weather_description', '')|tojson }},
+        windSpeed: {{ cw.get('wind_speed', 0)|tojson }},
+        windDirection: {{ cw.get('wind_direction', 0)|tojson }},
+        windGusts: {{ cw.get('wind_gusts', 0)|tojson }},
+        windLevel: {{ cw.get('wind_classification', 'calm')|tojson }},
+        visibilityKm: {{ cw.get('visibility_km', 10)|tojson }},
+        temperature: {{ cw.get('temperature', 10)|tojson }},
+        sunset: {{ space_weather.get('darkness_info', {}).get('sunset', '')|tojson }},
+        sunrise: {{ space_weather.get('darkness_info', {}).get('sunrise', '')|tojson }}
     };
 </script>
 
