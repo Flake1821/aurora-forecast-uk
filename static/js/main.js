@@ -211,13 +211,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // RADIAL SVG Kp GAUGE
     // ═══════════════════════════════════════════════
 
-    function renderRadialGauge(kp, containerId) {
+    function renderRadialGauge(kp, containerId, options) {
         var container = document.getElementById(containerId || 'radialGauge');
         if (!container) return;
+        options = options || {};
 
-        kp = parseFloat(kp) || 0;
-        if (kp < 0) kp = 0;
-        if (kp > 9) kp = 9;
+        var displayVal = parseFloat(kp) || 0;
+        if (displayVal < 0) displayVal = 0;
+        // Clamp needle position at 9 but show actual value in centre text
+        // (Hp30 can exceed 9 during extreme storms)
+        var clampedVal = Math.min(displayVal, 9);
 
         var cx = 120, cy = 120, r = 95;
         var startAngle = Math.PI;      // 180deg = left (Kp 0)
@@ -234,9 +237,9 @@ document.addEventListener('DOMContentLoaded', function () {
             return 'M ' + x1 + ' ' + y1 + ' A ' + radius + ' ' + radius + ' 0 ' + largeArc + ' ' + sweep + ' ' + x2 + ' ' + y2;
         }
 
-        var frac = kp / 9;
+        var frac = clampedVal / 9;
         var kpAngle = startAngle - frac * totalAngle;
-        var gaugeColour = kpColour(kp);
+        var gaugeColour = kpColour(clampedVal);
         var gradId = 'gaugeGrad_' + (containerId || 'radialGauge');
         var glowId = 'needleGlow_' + (containerId || 'radialGauge');
 
@@ -259,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
         svg += '<path d="' + arcPath(startAngle, endAngle + 0.001, r) + '" stroke="url(#' + gradId + ')" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.3"/>';
         svg += '<path d="' + arcPath(startAngle, endAngle + 0.001, r) + '" stroke="url(#' + gradId + ')" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.7"/>';
 
-        // Tick marks and labels (0-9)
+        // Tick marks and labels (0-9, with 9+ label if value exceeds 9)
         for (var t = 0; t <= 9; t++) {
             var tickAngle = startAngle - (t / 9) * totalAngle;
             var isMajor = (t % 3 === 0);
@@ -274,7 +277,9 @@ document.addEventListener('DOMContentLoaded', function () {
             var labelR = r + 15;
             var lx = cx + labelR * Math.cos(tickAngle);
             var ly = cy - labelR * Math.sin(tickAngle);
-            svg += '<text x="' + lx + '" y="' + ly + '" font-size="' + (isMajor ? '11' : '9') + '" font-weight="' + (isMajor ? '600' : '400') + '" fill="' + (isMajor ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.35)') + '" text-anchor="middle" dy="3.5">' + t + '</text>';
+            // Show "9+" at the max tick when actual value exceeds 9
+            var tickLabel = (t === 9 && displayVal > 9) ? '9+' : String(t);
+            svg += '<text x="' + lx + '" y="' + ly + '" font-size="' + (isMajor ? '11' : '9') + '" font-weight="' + (isMajor ? '600' : '400') + '" fill="' + (isMajor ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.35)') + '" text-anchor="middle" dy="3.5">' + tickLabel + '</text>';
         }
 
         // Needle with glow
@@ -288,40 +293,66 @@ document.addEventListener('DOMContentLoaded', function () {
         svg += '<circle cx="' + cx + '" cy="' + cy + '" r="3.5" fill="#fff"/>';
         svg += '</g>';
 
-        // Centre value text
-        svg += '<text x="' + cx + '" y="' + (cy - 22) + '" font-size="40" font-weight="800" fill="' + gaugeColour + '" text-anchor="middle" dominant-baseline="central">' + kp.toFixed(1) + '</text>';
+        // Centre value text (shows actual value, not clamped — so Hp30 11.3 shows 11.3)
+        svg += '<text x="' + cx + '" y="' + (cy - 22) + '" font-size="40" font-weight="800" fill="' + gaugeColour + '" text-anchor="middle" dominant-baseline="central">' + displayVal.toFixed(1) + '</text>';
 
         svg += '</svg>';
         container.innerHTML = svg;
     }
 
-    // ── Build / update the Kp timeline chart ──
+    // ── Build / update the Kp + Hp30 timeline chart ──
     function renderKpChart(timeline) {
         var canvas = document.getElementById('kpTimelineChart');
         if (!canvas || !timeline || timeline.length === 0) return;
         if (typeof Chart === 'undefined') return;
 
-        // Split into observed and predicted datasets
+        var hp30Timeline = window.__hp30Timeline || [];
+
+        // Build unified timestamp set from both Kp and Hp30 timelines
+        var timeMap = {};  // timestamp → {kp, hp30, type}
+        for (var i = 0; i < timeline.length; i++) {
+            var e = timeline[i];
+            timeMap[e.time] = { kp: e.kp, type: e.type, hp30: null };
+        }
+        for (var j = 0; j < hp30Timeline.length; j++) {
+            var h = hp30Timeline[j];
+            if (timeMap[h.time]) {
+                timeMap[h.time].hp30 = h.hp30;
+            } else {
+                timeMap[h.time] = { kp: null, type: null, hp30: h.hp30 };
+            }
+        }
+
+        // Sort all timestamps chronologically
+        var allTimes = Object.keys(timeMap).sort();
+
+        // Split into observed Kp, predicted Kp, and observed Hp30 datasets
         var observedData = [];
         var predictedData = [];
+        var hp30Data = [];
         var allLabels = [];
         var now = new Date();
         var nowStr = now.toISOString().slice(0, 16).replace('T', ' ');
 
-        // Find the transition point (last observed -> first predicted)
+        // Find the transition point (last observed Kp -> first predicted)
         var lastObservedIdx = -1;
-        for (var i = 0; i < timeline.length; i++) {
-            if (timeline[i].type === 'observed' || timeline[i].type === 'estimated') {
+        for (var i = 0; i < allTimes.length; i++) {
+            var entry = timeMap[allTimes[i]];
+            if (entry.kp !== null && (entry.type === 'observed' || entry.type === 'estimated')) {
                 lastObservedIdx = i;
             }
         }
 
-        for (var i = 0; i < timeline.length; i++) {
-            var entry = timeline[i];
-            var timeLabel = entry.time;
-            allLabels.push(timeLabel);
+        for (var i = 0; i < allTimes.length; i++) {
+            var t = allTimes[i];
+            var entry = timeMap[t];
+            allLabels.push(t);
 
-            if (entry.type === 'observed' || entry.type === 'estimated') {
+            // Hp30 (always observed)
+            hp30Data.push(entry.hp30);
+
+            // Kp observed vs predicted
+            if (entry.kp !== null && (entry.type === 'observed' || entry.type === 'estimated')) {
                 observedData.push(entry.kp);
                 // Bridge: also add last observed point to predicted to connect lines
                 if (i === lastObservedIdx) {
@@ -329,9 +360,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     predictedData.push(null);
                 }
-            } else {
+            } else if (entry.kp !== null) {
                 observedData.push(null);
                 predictedData.push(entry.kp);
+            } else {
+                observedData.push(null);
+                predictedData.push(null);
             }
         }
 
@@ -358,37 +392,65 @@ document.addEventListener('DOMContentLoaded', function () {
             return t;
         });
 
+        // Determine y-axis max (normally 9, but extend if Hp30 exceeds 9)
+        var yMax = 9;
+        for (var i = 0; i < hp30Data.length; i++) {
+            if (hp30Data[i] !== null && hp30Data[i] > yMax) {
+                yMax = Math.ceil(hp30Data[i]);
+            }
+        }
+
+        var datasets = [
+            {
+                label: 'Observed Kp',
+                data: observedData,
+                borderColor: '#00E676',
+                backgroundColor: 'rgba(0, 230, 118, 0.1)',
+                borderWidth: 2.5,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                pointHoverBackgroundColor: '#00E676',
+                fill: true,
+                tension: 0.3,
+                spanGaps: false,
+            },
+            {
+                label: 'Predicted Kp',
+                data: predictedData,
+                borderColor: '#448AFF',
+                backgroundColor: 'rgba(68, 138, 255, 0.05)',
+                borderWidth: 2,
+                borderDash: [6, 3],
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                pointHoverBackgroundColor: '#448AFF',
+                fill: true,
+                tension: 0.3,
+                spanGaps: false,
+            }
+        ];
+
+        // Add Hp30 dataset only if there's data
+        var hasHp30 = hp30Data.some(function (v) { return v !== null; });
+        if (hasHp30) {
+            datasets.push({
+                label: 'Observed Hp30',
+                data: hp30Data,
+                borderColor: '#00BCD4',
+                backgroundColor: 'rgba(0, 188, 212, 0.06)',
+                borderWidth: 1.5,
+                pointRadius: 1,
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: '#00BCD4',
+                fill: false,
+                tension: 0.2,
+                spanGaps: false,
+            });
+        }
+
         var chartData = {
             labels: displayLabels,
-            datasets: [
-                {
-                    label: 'Observed Kp',
-                    data: observedData,
-                    borderColor: '#00E676',
-                    backgroundColor: 'rgba(0, 230, 118, 0.1)',
-                    borderWidth: 2.5,
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    pointHoverBackgroundColor: '#00E676',
-                    fill: true,
-                    tension: 0.3,
-                    spanGaps: false,
-                },
-                {
-                    label: 'Predicted Kp',
-                    data: predictedData,
-                    borderColor: '#448AFF',
-                    backgroundColor: 'rgba(68, 138, 255, 0.05)',
-                    borderWidth: 2,
-                    borderDash: [6, 3],
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    pointHoverBackgroundColor: '#448AFF',
-                    fill: true,
-                    tension: 0.3,
-                    spanGaps: false,
-                }
-            ]
+            datasets: datasets,
         };
 
         // Dynamic threshold line using user's location
@@ -461,6 +523,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
+        // Extend severity zones if Hp30 exceeds 9
+        if (yMax > 9) {
+            annotationBoxes.extremeZone = {
+                type: 'box',
+                yMin: 9, yMax: yMax,
+                backgroundColor: 'rgba(183, 28, 28, 0.08)',
+                borderWidth: 0,
+                drawTime: 'beforeDatasetsDraw',
+            };
+        }
+
         var chartOptions = {
             responsive: true,
             maintainAspectRatio: false,
@@ -485,7 +558,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         label: function (context) {
                             var val = context.parsed.y;
                             if (val === null) return null;
-                            return context.dataset.label + ': Kp ' + val.toFixed(1) + ' (' + kpSeverityLabel(val) + ')';
+                            var prefix = context.dataset.label.indexOf('Hp30') >= 0 ? 'Hp30 ' : 'Kp ';
+                            return context.dataset.label + ': ' + prefix + val.toFixed(1) + ' (' + kpSeverityLabel(val) + ')';
                         }
                     }
                 },
@@ -517,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 y: {
                     min: 0,
-                    max: 9,
+                    max: yMax,
                     grid: {
                         color: 'rgba(255, 255, 255, 0.04)',
                     },
@@ -531,6 +605,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (value === 5) return '5';
                             if (value === 7) return '7';
                             if (value === 9) return '9';
+                            if (value > 9 && value === Math.ceil(value)) return String(value);
                             return '';
                         }
                     }
@@ -541,6 +616,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (kpChart) {
             // Update existing chart
             kpChart.data = chartData;
+            kpChart.options.scales.y.max = yMax;
             kpChart.options.plugins.annotation.annotations.nowLine.xMin = nowIndex;
             kpChart.options.plugins.annotation.annotations.nowLine.xMax = nowIndex;
             kpChart.update('none');
@@ -584,15 +660,31 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
 
-                // ── Kp Index — update radial gauge ──
-                if (data.kp_index !== null && data.kp_index !== undefined) {
-                    var kp = parseFloat(data.kp_index);
+                // ── Hp30/Kp — update left radial gauge ──
+                // Prefer Hp30 (30-min resolution) if available, fall back to Kp
+                var hp30Val = data.hp30_index;
+                if (hp30Val !== null && hp30Val !== undefined) {
+                    renderRadialGauge(parseFloat(hp30Val), 'radialGauge', {isHp30: true});
+                    // Update label to show "Hp30 Now"
+                    var gaugeLabel = document.querySelector('.cond-kp-radial:not(.cond-kp-predicted) .cond-kp-label');
+                    if (gaugeLabel) {
+                        var labelText = gaugeLabel.childNodes[0];
+                        if (labelText && labelText.nodeType === 3) labelText.textContent = 'Hp30 Now ';
+                    }
+                } else if (data.kp_index !== null && data.kp_index !== undefined) {
+                    renderRadialGauge(parseFloat(data.kp_index), 'radialGauge');
+                    // Update label to show "Kp Now" (fallback)
+                    var gaugeLabel = document.querySelector('.cond-kp-radial:not(.cond-kp-predicted) .cond-kp-label');
+                    if (gaugeLabel) {
+                        var labelText = gaugeLabel.childNodes[0];
+                        if (labelText && labelText.nodeType === 3) labelText.textContent = 'Kp Now ';
+                    }
+                }
 
-                    // Render the radial gauge
-                    renderRadialGauge(kp, 'radialGauge');
-
-                    // Update aurora chance indicator (use server's condition-aware label)
-                    var chance = data.aurora_chance || data.cornwall_chance || auroraChanceLabel(kp);
+                // Update aurora chance indicator (uses server's effective_kp-based label)
+                if (data.kp_index !== null || hp30Val !== null) {
+                    var effectiveKp = Math.max(parseFloat(data.kp_index) || 0, parseFloat(hp30Val) || 0);
+                    var chance = data.aurora_chance || data.cornwall_chance || auroraChanceLabel(effectiveKp);
                     var chanceIndicator = document.getElementById('chanceIndicator');
                     var chanceText = document.getElementById('chanceText');
                     if (chanceIndicator) {
@@ -600,6 +692,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     if (chanceText) {
                         chanceText.textContent = chance.text || 'Unknown';
+                    }
+                }
+
+                // Update Hp30 in Aurora Tonight panel
+                var hp30El = document.getElementById('tonightHp30');
+                if (hp30El) {
+                    if (hp30Val !== null && hp30Val !== undefined) {
+                        hp30El.textContent = 'Hp30 ' + parseFloat(hp30Val).toFixed(1);
+                    } else {
+                        hp30El.textContent = '--';
                     }
                 }
 
@@ -1010,6 +1112,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var diData = data.darkness_info || {};
                 var newViewData = {
                     kp: data.kp_index,
+                    hp30: data.hp30_index,
                     kpThreshold: kpThreshold,
                     cloudCover: cwData.cloud_cover || 0,
                     darknessStatus: diData.darkness_status || 'unknown',
@@ -1066,8 +1169,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.__lastUpdateTime = new Date();
                 }
 
-                // ── Update Kp timeline chart ──
+                // ── Update Kp + Hp30 timeline chart ──
                 if (data.kp_timeline) {
+                    // Update Hp30 timeline global so the chart can merge both datasets
+                    window.__hp30Timeline = data.hp30_timeline || [];
                     renderKpChart(data.kp_timeline);
                 }
             })
@@ -2820,6 +2925,9 @@ document.addEventListener('DOMContentLoaded', function () {
         var data = auroraViewState.conditions || {};
 
         var kp = parseFloat(data.kp) || 0;
+        var hp30 = parseFloat(data.hp30) || 0;
+        // Use higher of Kp and Hp30 so rapid geomagnetic surges drive the aurora visualization
+        var effectiveKp = Math.max(kp, hp30);
         var threshold = parseFloat(data.kpThreshold) || 5;
         var cloud = parseFloat(data.cloudCover) || 0;
         var isDark = data.darknessStatus === 'dark';
@@ -2890,8 +2998,8 @@ document.addEventListener('DOMContentLoaded', function () {
             isDusk = !isDawn;
         }
 
-        // Calculate aurora intensity from Kp and threshold
-        var margin = kp - threshold;
+        // Calculate aurora intensity from effective Kp (max of Kp, Hp30) and threshold
+        var margin = effectiveKp - threshold;
         var auroraIntensity = 0;
         if (isDark || isTwilight) {
             if (margin >= 3) auroraIntensity = 1.0;

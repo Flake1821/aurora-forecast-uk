@@ -2869,6 +2869,7 @@ a:hover {
 }
 
 .legend-observed { background: var(--aurora-green); }
+.legend-hp30 { background: #00BCD4; }
 .legend-predicted { background: var(--aurora-blue); }
 
 .legend-line {

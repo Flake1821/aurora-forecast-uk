@@ -18,6 +18,7 @@
 {% set scales = space_weather.get('noaa_scales', {}) %}
 {% set alerts = space_weather.get('swpc_alerts', []) %}
 {% set lp = space_weather.get('light_pollution', {}) %}
+{% set hp30 = space_weather.get('hp30_index') %}
 
 <!-- ═══════ FULL-VIEWPORT AURORA DASHBOARD ═══════ -->
 <section class="dashboard-viewport">
@@ -77,15 +78,15 @@
                     </div>
                 </div>
 
-                <!-- Radial Kp Gauge (centre) -->
+                <!-- Radial Hp30/Kp Gauge (centre) — shows Hp30 if available, falls back to Kp -->
                 <div class="cond-panel cond-kp-radial">
                     <div class="cond-kp-label">
-                        Kp Now
-                        <button class="info-tooltip-btn" aria-label="What is the Kp index?"><i class="bi bi-question-circle-fill"></i></button>
+                        {% if hp30 is not none %}Hp30 Now{% else %}Kp Now{% endif %}
+                        <button class="info-tooltip-btn" aria-label="What is the Hp30 index?"><i class="bi bi-question-circle-fill"></i></button>
                     </div>
-                    <div class="info-tooltip-content">The Kp index measures geomagnetic disturbance on a 0&ndash;9 scale. Higher values mean stronger aurora. {{ location_name }} needs Kp {{ kp_threshold }}+ for visible aurora.</div>
+                    <div class="info-tooltip-content">The Hp30 index is a half-hourly geomagnetic index from GFZ Potsdam &mdash; 6&times; finer resolution than the 3-hourly Kp. Same 0&ndash;9+ scale. {{ location_name }} needs Kp/Hp30 {{ kp_threshold }}+ for visible aurora.</div>
                     <div class="radial-gauge-container" id="radialGauge"
-                         data-kp="{{ '%.1f'|format(kp) if kp is not none else '0' }}"></div>
+                         data-kp="{{ '%.1f'|format(hp30) if hp30 is not none else ('%.1f'|format(kp) if kp is not none else '0') }}"></div>
                 </div>
 
                 <!-- Predicted Kp Gauge -->
@@ -125,6 +126,11 @@
                             <span class="tonight-info-label">Peak Kp Tonight</span>
                             <span class="tonight-info-value" id="tonightPeakKp">Kp {{ tonight.get('tonight_peak_kp', '?') }}{% if tonight.get('peak_kp_time') %} <small>at ~{{ tonight.get('peak_kp_time') }}</small>{% endif %}</span>
                             <span class="tonight-info-detail">Need Kp {{ tonight.get('kp_threshold', '?') }}+ for {{ tonight.get('location_name', 'your location') }}</span>
+                        </div>
+                        <div class="tonight-info-cell">
+                            <span class="tonight-info-label">Hp30 Real-time</span>
+                            <span class="tonight-info-value" id="tonightHp30">{% if hp30 is not none %}Hp30 {{ '%.1f'|format(hp30) }}{% else %}--{% endif %}</span>
+                            <span class="tonight-info-detail">30-min resolution from GFZ</span>
                         </div>
                         <div class="tonight-info-cell">
                             <span class="tonight-info-label">Dark Hours</span>
@@ -435,12 +441,13 @@
                     <button class="info-tooltip-btn" aria-label="About this chart"><i class="bi bi-question-circle-fill"></i></button>
                 </span>
                 <span class="chart-legend">
-                    <span class="legend-item"><span class="legend-dot legend-observed"></span>Observed</span>
-                    <span class="legend-item"><span class="legend-dot legend-predicted"></span>Predicted</span>
+                    <span class="legend-item"><span class="legend-dot legend-observed"></span>Observed Kp</span>
+                    <span class="legend-item"><span class="legend-dot legend-hp30"></span>Observed Hp30</span>
+                    <span class="legend-item"><span class="legend-dot legend-predicted"></span>Predicted Kp</span>
                     <span class="legend-item"><span class="legend-line legend-threshold"></span><span id="chartThresholdLabel">{{ location_name }} (Kp {{ kp_threshold }})</span></span>
                 </span>
             </div>
-            <div class="info-tooltip-content chart-tooltip">Shows measured (observed) and forecast Kp values over the last 2 days and next 3 days. The dashed line shows the minimum Kp needed for aurora at your location.</div>
+            <div class="info-tooltip-content chart-tooltip">Shows measured Kp (3-hourly, green) and Hp30 (30-min, cyan) observed values alongside the NOAA Kp forecast (blue, dashed). The dashed orange line shows the minimum needed for aurora at your location.</div>
             <div class="chart-container">
                 <canvas id="kpTimelineChart"></canvas>
             </div>
@@ -610,6 +617,7 @@
         <div class="dashboard-actions">
             <span class="dashboard-attribution">
                 Data: <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a>
+                &middot; <a href="https://kp.gfz.de/" target="_blank" rel="noopener">GFZ Potsdam</a>
                 &middot; <a href="https://aurorawatch.lancs.ac.uk/" target="_blank" rel="noopener">AuroraWatch UK</a>
                 &middot; <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (Met Office UKMO)
                 &middot; Try <a href="https://aurora-alerts.uk/" target="_blank" rel="noopener">Glendale App</a>
@@ -622,6 +630,8 @@
 <!-- Pass data to JS -->
 <script>
     window.__kpTimeline = {{ space_weather.get('kp_timeline', [])|tojson }};
+    window.__hp30Timeline = {{ space_weather.get('hp30_timeline', [])|tojson }};
+    window.__hp30Index = {{ space_weather.get('hp30_index')|tojson }};
     window.__userLocation = {{ location_name|tojson }};
     window.__userLat = {{ location_lat|tojson }};
     window.__userLon = {{ location_lon|tojson }};
@@ -630,6 +640,7 @@
     // Aurora View conditions
     window.__auroraViewData = {
         kp: {{ kp|tojson }},
+        hp30: {{ hp30|tojson }},
         kpThreshold: {{ kp_threshold|tojson }},
         cloudCover: {{ cw.get('cloud_cover', 0)|tojson }},
         darknessStatus: {{ space_weather.get('darkness_info', {}).get('darkness_status', 'unknown')|tojson }},

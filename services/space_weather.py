@@ -25,6 +25,9 @@ NOAA_MAG_URL = 'https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.js
 NOAA_SCALES_URL = 'https://services.swpc.noaa.gov/products/noaa-scales.json'
 NOAA_ALERTS_URL = 'https://services.swpc.noaa.gov/products/alerts.json'
 
+# GFZ Potsdam — Hp30 half-hourly geomagnetic index
+GFZ_HP30_URL = 'https://kp.gfz.de/app/json/'
+
 # AuroraWatch UK (Lancaster University)
 AURORAWATCH_URL = 'https://aurorawatch-api.lancs.ac.uk/0.2/status/current-status.xml'
 
@@ -119,6 +122,9 @@ def get_current_conditions(lat=None, lon=None, location_name=None, rural_urban='
     # Fetch 3-hourly historical Kp once (shared by timeline builder)
     kp_3hourly = _fetch_noaa_kp_3hourly()
 
+    # GFZ Potsdam — Hp30 half-hourly geomagnetic index (30-min resolution)
+    hp30_data = _fetch_gfz_hp30()
+
     # New: solar wind, IMF, NOAA scales, SWPC alerts (all UK-wide)
     solar_wind = _fetch_solar_wind()
     imf_data = _fetch_imf_data()
@@ -163,21 +169,32 @@ def get_current_conditions(lat=None, lon=None, location_name=None, rural_urban='
     if current_period_kp is not None:
         kp = current_period_kp
 
-    # Novice-friendly labels
-    kp_severity = _kp_severity_label(kp)
+    # Hp30 real-time geomagnetic index (30-min resolution from GFZ Potsdam)
+    current_hp30 = hp30_data.get('current_hp30')
+
+    # effective_kp: the higher of Kp and Hp30, for real-time condition assessment.
+    # Hp30 captures rapid changes that the 3-hour Kp average smooths out.
+    effective_kp = kp
+    if current_hp30 is not None and kp is not None:
+        effective_kp = max(kp, current_hp30)
+    elif current_hp30 is not None:
+        effective_kp = current_hp30
+
+    # Novice-friendly labels (use effective_kp so Hp30 surges are reflected)
+    kp_severity = _kp_severity_label(effective_kp)
 
     # Light pollution estimate from location classification
     light_pollution = _estimate_bortle(rural_urban)
 
-    # Composite "should I go outside?" verdict (now includes IMF Bz + darkness + light pollution)
+    # Composite "should I go outside?" verdict (uses effective_kp so Hp30 surges are reflected)
     go_outside = _go_outside_verdict(
-        kp, current_weather, moon_phase, kp_threshold, location_name, imf_data,
+        effective_kp, current_weather, moon_phase, kp_threshold, location_name, imf_data,
         darkness_info, light_pollution=light_pollution
     )
 
-    # Aurora chance — condition-aware (considers cloud, darkness, moon, light pollution alongside Kp)
+    # Aurora chance — condition-aware (uses effective_kp for real-time accuracy)
     aurora_chance = _aurora_chance_label(
-        kp, kp_threshold, location_name,
+        effective_kp, kp_threshold, location_name,
         current_weather=current_weather,
         darkness_info=darkness_info,
         moon_phase=moon_phase,
@@ -189,12 +206,12 @@ def get_current_conditions(lat=None, lon=None, location_name=None, rural_urban='
         hourly_cloud, kp_timeline, darkness_info, kp_threshold
     )
 
-    # Aurora tonight comprehensive summary (now includes light pollution)
+    # Aurora tonight comprehensive summary (now includes light pollution + Hp30)
     aurora_tonight = _aurora_tonight_summary(
         kp, kp_timeline, darkness_info, current_weather,
         moon_phase, solar_wind, imf_data, hourly_cloud,
         swpc_alerts, kp_threshold, location_name, best_window,
-        light_pollution=light_pollution
+        light_pollution=light_pollution, current_hp30=current_hp30
     )
 
     combined = {
@@ -224,13 +241,21 @@ def get_current_conditions(lat=None, lon=None, location_name=None, rural_urban='
         'light_pollution': light_pollution,
         'best_viewing_window': best_window,
         'aurora_tonight': aurora_tonight,
-        'cornwall_visible': kp is not None and kp >= kp_threshold,
-        'aurora_visible': kp is not None and kp >= kp_threshold,
-        'cornwall_note': _aurora_visibility_note(kp, kp_threshold, location_name,
+        # Hp30 half-hourly index from GFZ Potsdam (30-min resolution)
+        'hp30_index': current_hp30,
+        'hp30_severity': hp30_data.get('hp30_severity', 'Unknown'),
+        'hp30_timestamp': hp30_data.get('hp30_timestamp', ''),
+        'hp30_timeline': hp30_data.get('hp30_timeline', []),
+        'hp30_peak_24h': hp30_data.get('hp30_peak_24h'),
+        'effective_kp': effective_kp,
+        # Visibility uses effective_kp (max of Kp, Hp30) for real-time accuracy
+        'cornwall_visible': effective_kp is not None and effective_kp >= kp_threshold,
+        'aurora_visible': effective_kp is not None and effective_kp >= kp_threshold,
+        'cornwall_note': _aurora_visibility_note(effective_kp, kp_threshold, location_name,
                                                 current_weather=current_weather,
                                                 darkness_info=darkness_info,
                                                 moon_phase=moon_phase),
-        'aurora_note': _aurora_visibility_note(kp, kp_threshold, location_name,
+        'aurora_note': _aurora_visibility_note(effective_kp, kp_threshold, location_name,
                                               current_weather=current_weather,
                                               darkness_info=darkness_info,
                                               moon_phase=moon_phase),
@@ -303,6 +328,87 @@ def _fetch_noaa_kp_3hourly():
     except Exception as e:
         logger.warning(f'NOAA 3-hourly Kp fetch failed: {e}')
         return []
+
+
+def _hp30_defaults():
+    """Return safe defaults when Hp30 data is unavailable."""
+    return {
+        'current_hp30': None,
+        'hp30_severity': 'Unknown',
+        'hp30_timestamp': '',
+        'hp30_timeline': [],
+        'hp30_peak_24h': None,
+    }
+
+
+def _fetch_gfz_hp30():
+    """Fetch last 24h of Hp30 half-hourly geomagnetic index from GFZ Potsdam.
+
+    The Hp30 index has 30-minute resolution (48 entries per day) and uses the
+    same scale as Kp but is open-ended (can exceed 9 during extreme storms).
+
+    Returns dict with current_hp30, hp30_severity, hp30_timestamp,
+    hp30_timeline (list of {time, hp30, type}), hp30_peak_24h.
+    """
+    try:
+        now = datetime.utcnow()
+        start = (now - timedelta(hours=24)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        end = now.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+        resp = requests.get(GFZ_HP30_URL, params={
+            'start': start,
+            'end': end,
+            'index': 'Hp30',
+        }, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+
+        datetimes = data.get('datetime', [])
+        hp30_values = data.get('Hp30', [])
+
+        if not datetimes or not hp30_values or len(datetimes) != len(hp30_values):
+            logger.warning('GFZ Hp30: empty or mismatched arrays')
+            return _hp30_defaults()
+
+        # Build timeline entries (parallel arrays → list of dicts)
+        timeline = []
+        for ts, val in zip(datetimes, hp30_values):
+            if val is None:
+                continue
+            try:
+                hp30_val = float(val)
+                # Normalise: "2024-05-10T00:00:00Z" → "2024-05-10 00:00"
+                time_str = ts.replace('T', ' ')[:16]
+                timeline.append({
+                    'time': time_str,
+                    'hp30': round(hp30_val, 2),
+                    'type': 'observed',
+                })
+            except (ValueError, TypeError):
+                continue
+
+        if not timeline:
+            return _hp30_defaults()
+
+        # Latest entry is current Hp30
+        latest = timeline[-1]
+        current_hp30 = latest['hp30']
+        hp30_timestamp = latest['time']
+
+        # Peak in last 24h
+        peak_24h = max(e['hp30'] for e in timeline)
+
+        return {
+            'current_hp30': current_hp30,
+            'hp30_severity': _kp_severity_label(current_hp30),
+            'hp30_timestamp': hp30_timestamp,
+            'hp30_timeline': timeline,
+            'hp30_peak_24h': round(peak_24h, 2),
+        }
+
+    except Exception as e:
+        logger.warning(f'GFZ Hp30 fetch failed: {e}')
+        return _hp30_defaults()
 
 
 def _fetch_aurorawatch():
@@ -1725,7 +1831,7 @@ def _calculate_best_viewing_window(hourly_cloud, kp_timeline, darkness_info, kp_
 def _aurora_tonight_summary(kp, kp_timeline, darkness_info, current_weather,
                             moon_phase, solar_wind, imf_data, hourly_cloud,
                             swpc_alerts, kp_threshold, location_name,
-                            best_window, light_pollution=None):
+                            best_window, light_pollution=None, current_hp30=None):
     """Build a comprehensive 'Aurora Conditions Tonight' assessment.
 
     Combines all available aurora and weather factors into a structured
@@ -1788,6 +1894,37 @@ def _aurora_tonight_summary(kp, kp_timeline, darkness_info, current_weather,
     else:
         factors.append({'name': 'Kp Activity', 'icon': 'activity',
                         'value': 'No data', 'detail': '', 'status': 'unknown'})
+
+    # ── Factor 1b: Hp30 Real-time Activity ──
+    # Hp30 provides 30-min resolution vs Kp's 3-hour average — captures rapid surges.
+    if current_hp30 is not None:
+        # Hp30 may show a higher current value than the 3-hour Kp
+        if current_hp30 > (tonight_peak_kp or 0):
+            tonight_peak_kp = current_hp30
+
+        hp30_margin = current_hp30 - kp_threshold
+        if hp30_margin >= 2:
+            factors.insert(1, {'name': 'Hp30 Real-time', 'icon': 'lightning-charge',
+                               'value': f'Hp30 {current_hp30:.1f}',
+                               'detail': '30-min index \u2014 storm level',
+                               'status': 'good'})
+            score += 2
+        elif hp30_margin >= 0:
+            factors.insert(1, {'name': 'Hp30 Real-time', 'icon': 'lightning-charge',
+                               'value': f'Hp30 {current_hp30:.1f}',
+                               'detail': '30-min index \u2014 aurora possible',
+                               'status': 'fair'})
+            score += 1
+        elif hp30_margin >= -1:
+            factors.insert(1, {'name': 'Hp30 Real-time', 'icon': 'lightning-charge',
+                               'value': f'Hp30 {current_hp30:.1f}',
+                               'detail': '30-min index \u2014 borderline',
+                               'status': 'fair'})
+        else:
+            factors.insert(1, {'name': 'Hp30 Real-time', 'icon': 'lightning-charge',
+                               'value': f'Hp30 {current_hp30:.1f}',
+                               'detail': '30-min index \u2014 quiet',
+                               'status': 'neutral'})
 
     # ── Factor 2: IMF Bz ──
     bz = imf_data.get('bz')
