@@ -696,6 +696,52 @@ document.addEventListener('DOMContentLoaded', function () {
                     var currentCloudBar = document.getElementById('currentCloudBar');
                     if (currentCloudBar) currentCloudBar.style.width = (cw.cloud_cover || 0) + '%';
 
+                    // Update cloud layer breakdown
+                    var layersMini = document.getElementById('cloudLayersMini');
+                    if (cw.cloud_cover_high !== null && cw.cloud_cover_high !== undefined) {
+                        if (!layersMini) {
+                            // Create layers element if it doesn't exist yet (first UKMO response after generic)
+                            var cloudStat = currentCloudBar ? currentCloudBar.closest('.weather-stat') : null;
+                            if (cloudStat) {
+                                var layersHtml = '<div class="cloud-layers-mini" id="cloudLayersMini">';
+                                layersHtml += '<div class="cloud-layer-row"><span class="cloud-layer-label">High</span><div class="cloud-layer-bar"><div class="cloud-layer-fill cloud-layer-high" id="cloudLayerHighFill" style="width:0%"></div></div><span class="cloud-layer-pct" id="cloudLayerHighPct">--%</span></div>';
+                                layersHtml += '<div class="cloud-layer-row"><span class="cloud-layer-label">Mid</span><div class="cloud-layer-bar"><div class="cloud-layer-fill cloud-layer-mid" id="cloudLayerMidFill" style="width:0%"></div></div><span class="cloud-layer-pct" id="cloudLayerMidPct">--%</span></div>';
+                                layersHtml += '<div class="cloud-layer-row"><span class="cloud-layer-label">Low</span><div class="cloud-layer-bar"><div class="cloud-layer-fill cloud-layer-low" id="cloudLayerLowFill" style="width:0%"></div></div><span class="cloud-layer-pct" id="cloudLayerLowPct">--%</span></div>';
+                                layersHtml += '</div>';
+                                var barMini = cloudStat.querySelector('.cloud-bar-mini');
+                                if (barMini) barMini.insertAdjacentHTML('afterend', layersHtml);
+                                layersMini = document.getElementById('cloudLayersMini');
+                            }
+                        }
+                        if (layersMini) {
+                            var hFill = document.getElementById('cloudLayerHighFill');
+                            var mFill = document.getElementById('cloudLayerMidFill');
+                            var lFill = document.getElementById('cloudLayerLowFill');
+                            var hPct = document.getElementById('cloudLayerHighPct');
+                            var mPct = document.getElementById('cloudLayerMidPct');
+                            var lPct = document.getElementById('cloudLayerLowPct');
+                            if (hFill) hFill.style.width = (cw.cloud_cover_high || 0) + '%';
+                            if (mFill) mFill.style.width = (cw.cloud_cover_mid || 0) + '%';
+                            if (lFill) lFill.style.width = (cw.cloud_cover_low || 0) + '%';
+                            if (hPct) hPct.textContent = (cw.cloud_cover_high !== null ? cw.cloud_cover_high + '%' : '--%');
+                            if (mPct) mPct.textContent = (cw.cloud_cover_mid !== null ? cw.cloud_cover_mid + '%' : '--%');
+                            if (lPct) lPct.textContent = (cw.cloud_cover_low !== null ? cw.cloud_cover_low + '%' : '--%');
+                        }
+                    }
+
+                    // Update model badge
+                    var modelBadge = document.getElementById('cloudModelBadge');
+                    if (cw.cloud_model) {
+                        if (!modelBadge) {
+                            var cloudStat2 = currentCloudBar ? currentCloudBar.closest('.weather-stat') : null;
+                            if (cloudStat2) {
+                                cloudStat2.insertAdjacentHTML('beforeend', '<span class="cloud-model-badge" id="cloudModelBadge">' + cw.cloud_model + '</span>');
+                            }
+                        } else {
+                            modelBadge.textContent = cw.cloud_model;
+                        }
+                    }
+
                     var currentTemp = document.getElementById('currentTemp');
                     if (currentTemp) currentTemp.innerHTML = (cw.temperature !== null ? cw.temperature + '&deg;C' : '--&deg;C');
 
@@ -742,7 +788,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         var cHtml = '';
                         for (var ci = 0; ci < data.hourly_cloud_forecast.length; ci++) {
                             var ch = data.hourly_cloud_forecast[ci];
-                            cHtml += '<div class="hourly-bar-col" title="' + ch.hour + ': ' + ch.cloud_pct + '% cloud">';
+                            var tooltip = ch.hour + ': ' + ch.cloud_pct + '% cloud';
+                            if (ch.cloud_high !== null && ch.cloud_high !== undefined) {
+                                tooltip += ' (H:' + ch.cloud_high + '% M:' + ch.cloud_mid + '% L:' + ch.cloud_low + '%)';
+                            }
+                            cHtml += '<div class="hourly-bar-col" title="' + tooltip + '">';
                             cHtml += '<span class="hourly-bar-pct">' + ch.cloud_pct + '</span>';
                             cHtml += '<div class="hourly-bar-bg"><div class="hourly-bar-fill" style="height:' + ch.cloud_pct + '%"></div></div>';
                             cHtml += '<span class="hourly-bar-time">' + ch.hour.slice(0, 2) + '</span>';

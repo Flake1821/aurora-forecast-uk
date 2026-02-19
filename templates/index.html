@@ -189,6 +189,28 @@
                                 <div class="cloud-bar-fill" id="currentCloudBar"
                                      style="width: {{ cw.get('cloud_cover', 0) or 0 }}%"></div>
                             </div>
+                            {% if cw.get('cloud_cover_high') is not none or cw.get('cloud_cover_mid') is not none or cw.get('cloud_cover_low') is not none %}
+                            <div class="cloud-layers-mini" id="cloudLayersMini">
+                                <div class="cloud-layer-row">
+                                    <span class="cloud-layer-label">High</span>
+                                    <div class="cloud-layer-bar"><div class="cloud-layer-fill cloud-layer-high" id="cloudLayerHighFill" style="width: {{ cw.get('cloud_cover_high', 0) }}%"></div></div>
+                                    <span class="cloud-layer-pct" id="cloudLayerHighPct">{{ cw.get('cloud_cover_high', '--') }}%</span>
+                                </div>
+                                <div class="cloud-layer-row">
+                                    <span class="cloud-layer-label">Mid</span>
+                                    <div class="cloud-layer-bar"><div class="cloud-layer-fill cloud-layer-mid" id="cloudLayerMidFill" style="width: {{ cw.get('cloud_cover_mid', 0) }}%"></div></div>
+                                    <span class="cloud-layer-pct" id="cloudLayerMidPct">{{ cw.get('cloud_cover_mid', '--') }}%</span>
+                                </div>
+                                <div class="cloud-layer-row">
+                                    <span class="cloud-layer-label">Low</span>
+                                    <div class="cloud-layer-bar"><div class="cloud-layer-fill cloud-layer-low" id="cloudLayerLowFill" style="width: {{ cw.get('cloud_cover_low', 0) }}%"></div></div>
+                                    <span class="cloud-layer-pct" id="cloudLayerLowPct">{{ cw.get('cloud_cover_low', '--') }}%</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if cw.get('cloud_model') %}
+                            <span class="cloud-model-badge" id="cloudModelBadge">{{ cw.get('cloud_model') }}</span>
+                            {% endif %}
                         </div>
                         <div class="weather-stat">
                             <span class="weather-stat-value" id="currentTemp">{{ cw.get('temperature', '--') }}&deg;C</span>
@@ -219,7 +241,7 @@
                         <div class="hourly-cloud-title">Next 12 Hours Cloud Cover</div>
                         <div class="hourly-cloud-bars" id="hourlyCloudBars">
                             {% for h in hourly_cloud %}
-                            <div class="hourly-bar-col" title="{{ h.hour }}: {{ h.cloud_pct }}% cloud">
+                            <div class="hourly-bar-col" title="{{ h.hour }}: {{ h.cloud_pct }}% cloud{% if h.get('cloud_high') is not none %} (H:{{ h.cloud_high }}% M:{{ h.cloud_mid }}% L:{{ h.cloud_low }}%){% endif %}">
                                 <span class="hourly-bar-pct">{{ h.cloud_pct }}</span>
                                 <div class="hourly-bar-bg">
                                     <div class="hourly-bar-fill" style="height: {{ h.cloud_pct }}%"></div>
@@ -542,6 +564,25 @@
                         <div class="day-cloud-fill" style="width: {{ night.night_avg_cloud }}%"></div>
                     </div>
                     {% endif %}
+                    {% if night and night.get('night_avg_cloud_high') is not none %}
+                    <div class="day-cloud-layers">
+                        <div class="day-cloud-layer">
+                            <span class="dcl-label">H</span>
+                            <div class="dcl-bar"><div class="dcl-fill dcl-high" style="width: {{ night.night_avg_cloud_high }}%"></div></div>
+                            <span class="dcl-pct">{{ night.night_avg_cloud_high }}%</span>
+                        </div>
+                        <div class="day-cloud-layer">
+                            <span class="dcl-label">M</span>
+                            <div class="dcl-bar"><div class="dcl-fill dcl-mid" style="width: {{ night.night_avg_cloud_mid }}%"></div></div>
+                            <span class="dcl-pct">{{ night.night_avg_cloud_mid }}%</span>
+                        </div>
+                        <div class="day-cloud-layer">
+                            <span class="dcl-label">L</span>
+                            <div class="dcl-bar"><div class="dcl-fill dcl-low" style="width: {{ night.night_avg_cloud_low }}%"></div></div>
+                            <span class="dcl-pct">{{ night.night_avg_cloud_low }}%</span>
+                        </div>
+                    </div>
+                    {% endif %}
                     {% if night and night.get('viewing_label') %}
                     <div class="day-viewing day-viewing-{{ night.get('viewing_level', 'unknown') }}">
                         {{ night.viewing_label }}
@@ -563,7 +604,7 @@
             <span class="dashboard-attribution">
                 Data: <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a>
                 &middot; <a href="https://aurorawatch.lancs.ac.uk/" target="_blank" rel="noopener">AuroraWatch UK</a>
-                &middot; <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
+                &middot; <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (Met Office UKMO)
                 &middot; Try <a href="https://aurora-alerts.uk/" target="_blank" rel="noopener">Glendale App</a>
             </span>
         </div>

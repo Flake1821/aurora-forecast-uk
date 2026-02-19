@@ -30,6 +30,9 @@ AURORAWATCH_URL = 'https://aurorawatch-api.lancs.ac.uk/0.2/status/current-status
 
 # Open-Meteo (free, no API key)
 OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast'
+# UK Met Office models via Open-Meteo — much higher resolution for UK
+UKMO_MODEL_2KM = 'ukmo_uk_deterministic_2km'        # 2km UKV, ~2 day range, hourly updates
+UKMO_MODEL_SEAMLESS = 'ukmo_seamless'                # Blends 2km near + 10km extended, 7 days
 
 # Default location (Central England) used when user hasn't chosen one
 DEFAULT_LAT = 52.5
@@ -447,25 +450,39 @@ def _group_forecast_by_day(forecast_entries, kp_threshold=5, location_name='your
 
 
 def _fetch_cloud_cover(lat=DEFAULT_LAT, lon=DEFAULT_LON):
-    """Fetch 3-day cloud cover forecast from Open-Meteo.
+    """Fetch 3-day cloud cover forecast from Open-Meteo using Met Office UKMO seamless model.
 
-    Returns night-time summaries (20:00-06:00) for the next 3 nights.
+    Returns night-time summaries (20:00-06:00) for the next 3 nights,
+    including high/mid/low cloud layer breakdowns.
+    Falls back to generic forecast if UKMO model is unavailable.
     """
     try:
         params = {
             'latitude': lat,
             'longitude': lon,
-            'hourly': 'cloud_cover',
+            'hourly': 'cloud_cover,cloud_cover_high,cloud_cover_mid,cloud_cover_low',
             'forecast_days': 4,  # 4 days to cover 3 full nights
             'timezone': 'Europe/London',
+            'models': UKMO_MODEL_SEAMLESS,
         }
-        resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
-        resp.raise_for_status()
+        try:
+            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp.raise_for_status()
+        except Exception:
+            logger.info('UKMO seamless model unavailable for cloud forecast, falling back')
+            params.pop('models', None)
+            params['hourly'] = 'cloud_cover'
+            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp.raise_for_status()
+
         data = resp.json()
 
         hourly = data.get('hourly', {})
         times = hourly.get('time', [])
         cloud = hourly.get('cloud_cover', [])
+        cloud_high = hourly.get('cloud_cover_high', [])
+        cloud_mid = hourly.get('cloud_cover_mid', [])
+        cloud_low = hourly.get('cloud_cover_low', [])
 
         if not times or not cloud:
             return []
@@ -481,20 +498,21 @@ def _fetch_cloud_cover(lat=DEFAULT_LAT, lon=DEFAULT_LON):
             try:
                 dt = datetime.strptime(time_str, '%Y-%m-%dT%H:%M')
                 hour = dt.hour
+                entry = {
+                    'hour': dt.strftime('%H:%M'),
+                    'cloud_pct': cloud[i],
+                    'cloud_high': int(cloud_high[i]) if i < len(cloud_high) and cloud_high[i] is not None else None,
+                    'cloud_mid': int(cloud_mid[i]) if i < len(cloud_mid) and cloud_mid[i] is not None else None,
+                    'cloud_low': int(cloud_low[i]) if i < len(cloud_low) and cloud_low[i] is not None else None,
+                }
                 # Night hours: 20-23 belong to that date's night
                 # Night hours: 00-06 belong to previous date's night
                 if 20 <= hour <= 23:
                     night_date = dt.strftime('%Y-%m-%d')
-                    nights[night_date].append({
-                        'hour': dt.strftime('%H:%M'),
-                        'cloud_pct': cloud[i],
-                    })
+                    nights[night_date].append(entry)
                 elif 0 <= hour <= 6:
                     prev_date = (dt - timedelta(days=1)).strftime('%Y-%m-%d')
-                    nights[prev_date].append({
-                        'hour': dt.strftime('%H:%M'),
-                        'cloud_pct': cloud[i],
-                    })
+                    nights[prev_date].append(entry)
             except ValueError:
                 continue
 
@@ -509,9 +527,19 @@ def _fetch_cloud_cover(lat=DEFAULT_LAT, lon=DEFAULT_LON):
                 pcts = [h['cloud_pct'] for h in hours]
                 avg_cloud = round(sum(pcts) / len(pcts))
                 min_cloud = min(pcts)
+                # Cloud layer averages
+                high_vals = [h['cloud_high'] for h in hours if h.get('cloud_high') is not None]
+                mid_vals = [h['cloud_mid'] for h in hours if h.get('cloud_mid') is not None]
+                low_vals = [h['cloud_low'] for h in hours if h.get('cloud_low') is not None]
+                avg_high = round(sum(high_vals) / len(high_vals)) if high_vals else None
+                avg_mid = round(sum(mid_vals) / len(mid_vals)) if mid_vals else None
+                avg_low = round(sum(low_vals) / len(low_vals)) if low_vals else None
             else:
                 avg_cloud = None
                 min_cloud = None
+                avg_high = None
+                avg_mid = None
+                avg_low = None
 
             # Determine cloud description and icon
             if avg_cloud is None:
@@ -561,6 +589,9 @@ def _fetch_cloud_cover(lat=DEFAULT_LAT, lon=DEFAULT_LON):
                 'date_label': date_label,
                 'night_avg_cloud': avg_cloud,
                 'night_min_cloud': min_cloud,
+                'night_avg_cloud_high': avg_high,
+                'night_avg_cloud_mid': avg_mid,
+                'night_avg_cloud_low': avg_low,
                 'description': desc,
                 'icon': icon,
                 'viewing_label': viewing_label,
@@ -1107,15 +1138,20 @@ def _weather_code_to_description(code):
 
 
 def _fetch_current_weather(lat=DEFAULT_LAT, lon=DEFAULT_LON):
-    """Fetch current weather conditions from Open-Meteo.
+    """Fetch current weather conditions from Open-Meteo using Met Office UKMO 2km model.
 
-    Returns dict with cloud_cover, temperature, weather_code,
-    weather_description, weather_icon, visibility_km.
+    Returns dict with cloud_cover (total + high/mid/low layers), temperature,
+    weather_code, weather_description, weather_icon, visibility_km.
+    Falls back to generic forecast if UKMO model is unavailable.
     """
     default = {
         'cloud_cover': None,
+        'cloud_cover_high': None,
+        'cloud_cover_mid': None,
+        'cloud_cover_low': None,
         'cloud_label': 'No data',
         'cloud_level': 'unknown',
+        'cloud_model': '',
         'temperature': None,
         'weather_code': None,
         'weather_description': 'Unknown',
@@ -1132,15 +1168,30 @@ def _fetch_current_weather(lat=DEFAULT_LAT, lon=DEFAULT_LON):
         params = {
             'latitude': lat,
             'longitude': lon,
-            'current': 'cloud_cover,temperature_2m,weather_code,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
+            'current': 'cloud_cover,cloud_cover_high,cloud_cover_mid,cloud_cover_low,temperature_2m,weather_code,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
             'timezone': 'Europe/London',
+            'models': UKMO_MODEL_2KM,
         }
-        resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
-        resp.raise_for_status()
+        cloud_model = 'Met Office UKV 2km'
+        try:
+            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp.raise_for_status()
+        except Exception:
+            # UKMO model unavailable — fall back to generic forecast
+            logger.info('UKMO 2km model unavailable, falling back to generic forecast')
+            params.pop('models', None)
+            params['current'] = 'cloud_cover,temperature_2m,weather_code,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m'
+            cloud_model = ''
+            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp.raise_for_status()
+
         data = resp.json()
 
         current = data.get('current', {})
         cloud = current.get('cloud_cover')
+        cloud_high = current.get('cloud_cover_high')
+        cloud_mid = current.get('cloud_cover_mid')
+        cloud_low = current.get('cloud_cover_low')
         temp = current.get('temperature_2m')
         weather_code = current.get('weather_code')
         visibility = current.get('visibility')
@@ -1176,8 +1227,12 @@ def _fetch_current_weather(lat=DEFAULT_LAT, lon=DEFAULT_LON):
 
         return {
             'cloud_cover': cloud,
+            'cloud_cover_high': round(cloud_high) if cloud_high is not None else None,
+            'cloud_cover_mid': round(cloud_mid) if cloud_mid is not None else None,
+            'cloud_cover_low': round(cloud_low) if cloud_low is not None else None,
             'cloud_label': cloud_label,
             'cloud_level': cloud_level,
+            'cloud_model': cloud_model,
             'temperature': temp,
             'weather_code': weather_code,
             'weather_description': desc,
@@ -1196,26 +1251,38 @@ def _fetch_current_weather(lat=DEFAULT_LAT, lon=DEFAULT_LON):
 
 
 def _fetch_hourly_cloud_forecast(lat, lon):
-    """Fetch next 12 hours of hourly cloud cover for a mini-chart.
+    """Fetch next 12 hours of hourly cloud cover using Met Office UKMO 2km model.
 
-    Returns list of {hour: 'HH:MM', cloud_pct: int}.
-    Uses Open-Meteo forecast_hours parameter for a lightweight call.
+    Returns list of {hour, cloud_pct, cloud_high, cloud_mid, cloud_low}.
+    Falls back to generic forecast if UKMO model is unavailable.
     """
     try:
         params = {
             'latitude': lat,
             'longitude': lon,
-            'hourly': 'cloud_cover',
+            'hourly': 'cloud_cover,cloud_cover_high,cloud_cover_mid,cloud_cover_low',
             'forecast_hours': 12,
             'timezone': 'Europe/London',
+            'models': UKMO_MODEL_2KM,
         }
-        resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
-        resp.raise_for_status()
+        try:
+            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp.raise_for_status()
+        except Exception:
+            logger.info('UKMO 2km model unavailable for hourly forecast, falling back')
+            params.pop('models', None)
+            params['hourly'] = 'cloud_cover'
+            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp.raise_for_status()
+
         data = resp.json()
 
         hourly = data.get('hourly', {})
         times = hourly.get('time', [])
         cloud = hourly.get('cloud_cover', [])
+        cloud_high = hourly.get('cloud_cover_high', [])
+        cloud_mid = hourly.get('cloud_cover_mid', [])
+        cloud_low = hourly.get('cloud_cover_low', [])
 
         result = []
         for i, time_str in enumerate(times):
@@ -1226,6 +1293,9 @@ def _fetch_hourly_cloud_forecast(lat, lon):
                 result.append({
                     'hour': dt.strftime('%H:%M'),
                     'cloud_pct': int(cloud[i]) if cloud[i] is not None else 0,
+                    'cloud_high': int(cloud_high[i]) if i < len(cloud_high) and cloud_high[i] is not None else None,
+                    'cloud_mid': int(cloud_mid[i]) if i < len(cloud_mid) and cloud_mid[i] is not None else None,
+                    'cloud_low': int(cloud_low[i]) if i < len(cloud_low) and cloud_low[i] is not None else None,
                 })
             except (ValueError, TypeError):
                 continue
