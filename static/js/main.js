@@ -1297,55 +1297,145 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ═══════════════════════════════════════════════
-    // SKY EVENTS — expand/collapse + filter
+    // SKY EVENTS 2026 — Grid expand/collapse + filter
     // ═══════════════════════════════════════════════
 
-    // Accordion: click to expand/collapse event cards
-    document.querySelectorAll('.event-card').forEach(function(card) {
-        card.addEventListener('click', function() {
-            // Close any other expanded card (accordion)
-            document.querySelectorAll('.event-card.expanded').forEach(function(other) {
-                if (other !== card) other.classList.remove('expanded');
+    (function() {
+        var grid = document.getElementById('skyGrid');
+        if (!grid) return;
+
+        var detailPanel = document.getElementById('skyDetailPanel');
+        var detailContent = detailPanel.querySelector('.sky-detail-content');
+        var closeBtn = detailPanel.querySelector('.sky-detail-close');
+        var activeCard = null;
+
+        function getColumnCount() {
+            var cols = getComputedStyle(grid).gridTemplateColumns;
+            return cols.split(' ').length;
+        }
+
+        function getVisibleCards() {
+            return Array.from(grid.querySelectorAll('.sky-card')).filter(function(c) {
+                return c.style.display !== 'none';
             });
-            card.classList.toggle('expanded');
+        }
+
+        function closeDetail(animate) {
+            if (activeCard) {
+                activeCard.classList.remove('active');
+                activeCard = null;
+            }
+            if (!animate) {
+                detailPanel.style.transition = 'none';
+                detailPanel.classList.remove('open');
+                detailPanel.offsetHeight; // force reflow
+                detailPanel.style.transition = '';
+            } else {
+                detailPanel.classList.remove('open');
+            }
+        }
+
+        function openDetail(card) {
+            var visibleCards = getVisibleCards();
+            var cardIndex = visibleCards.indexOf(card);
+            if (cardIndex === -1) return;
+
+            var colCount = getColumnCount();
+            var rowStart = Math.floor(cardIndex / colCount) * colCount;
+            var rowEnd = Math.min(rowStart + colCount - 1, visibleCards.length - 1);
+            var lastCardInRow = visibleCards[rowEnd];
+
+            // Get detail HTML from the card's hidden data div
+            var dataDiv = card.querySelector('.sky-card-detail-data');
+            if (!dataDiv) return;
+
+            var title = card.querySelector('.sky-card-title').textContent;
+            var date = card.querySelector('.sky-card-date').textContent;
+            var badge = card.querySelector('.event-type-badge').outerHTML;
+
+            detailContent.innerHTML =
+                '<div class="sky-detail-header">' +
+                    badge +
+                    '<h5>' + title + '</h5>' +
+                    '<span class="sky-card-date">' + date + '</span>' +
+                '</div>' +
+                dataDiv.innerHTML;
+
+            // Move detail panel after the last card in the row
+            lastCardInRow.insertAdjacentElement('afterend', detailPanel);
+
+            card.classList.add('active');
+            activeCard = card;
+
+            // Trigger open animation on next frame
+            requestAnimationFrame(function() {
+                detailPanel.classList.add('open');
+                setTimeout(function() {
+                    detailPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 350);
+            });
+        }
+
+        // Card click handler (delegated)
+        grid.addEventListener('click', function(e) {
+            if (e.target.closest('.sky-detail-close')) return;
+            if (e.target.closest('.sky-detail-panel')) return;
+            var card = e.target.closest('.sky-card');
+            if (!card) return;
+
+            if (activeCard === card) {
+                closeDetail(true);
+            } else {
+                closeDetail(false);
+                openDetail(card);
+            }
         });
-    });
 
-    // Filter buttons: show/hide events by type
-    document.querySelectorAll('.event-filter-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var filter = btn.getAttribute('data-filter');
+        // Close button
+        closeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeDetail(true);
+        });
 
-            // Update active button
-            document.querySelectorAll('.event-filter-btn').forEach(function(b) {
-                b.classList.remove('active');
-            });
-            btn.classList.add('active');
+        // Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && activeCard) closeDetail(true);
+        });
 
-            // Show/hide event cards
-            document.querySelectorAll('.event-card').forEach(function(card) {
-                if (filter === 'all' || card.getAttribute('data-event-type') === filter) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                    card.classList.remove('expanded');
-                }
-            });
+        // Filter buttons
+        document.querySelectorAll('.event-filter-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var filter = btn.getAttribute('data-filter');
+                document.querySelectorAll('.event-filter-btn').forEach(function(b) {
+                    b.classList.remove('active');
+                });
+                btn.classList.add('active');
 
-            // Show/hide month headings if all events in that month are hidden
-            document.querySelectorAll('.event-month').forEach(function(heading) {
-                var next = heading.nextElementSibling;
-                var hasVisible = false;
-                while (next && !next.classList.contains('event-month')) {
-                    if (next.classList.contains('event-card') && next.style.display !== 'none') {
-                        hasVisible = true;
+                closeDetail(false);
+
+                grid.querySelectorAll('.sky-card').forEach(function(card) {
+                    if (filter === 'all' || card.getAttribute('data-event-type') === filter) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
                     }
-                    next = next.nextElementSibling;
-                }
-                heading.style.display = hasVisible ? '' : 'none';
+                });
             });
         });
-    });
+
+        // Reposition detail on resize
+        var resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                if (activeCard) {
+                    var card = activeCard;
+                    closeDetail(false);
+                    openDetail(card);
+                }
+            }, 200);
+        });
+    })();
 
     // ═══════════════════════════════════════════════
     // DATA FRESHNESS — relative time display

@@ -3712,57 +3712,10 @@ a:hover {
 
 
 /* ═══════════════════════════════════════════════
-   SKY EVENTS PAGE
+   SKY EVENTS 2026 — Card Grid
    ═══════════════════════════════════════════════ */
 
-/* Month heading */
-.event-month {
-    color: var(--aurora-green);
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 1.5rem 0 0.5rem;
-    padding-left: 0.5rem;
-    border-left: 3px solid var(--aurora-green);
-}
-.event-month:first-of-type { margin-top: 0; }
-
-/* Event card — extends cond-panel */
-.event-card {
-    cursor: pointer;
-    margin-bottom: 6px;
-    transition: border-color 0.2s, background 0.2s;
-}
-.event-card:hover {
-    border-color: rgba(255,255,255,0.18);
-    background: var(--glass-bg-hover);
-}
-
-/* Header row inside card */
-.event-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-/* Date column */
-.event-date {
-    color: var(--text-secondary);
-    font-size: 0.82rem;
-    min-width: 80px;
-    flex-shrink: 0;
-}
-
-/* Event name */
-.event-name {
-    flex: 1;
-    font-weight: 600;
-    font-size: 0.92rem;
-    color: var(--text-primary);
-}
-
-/* Type badge */
+/* Type badge (shared) */
 .event-type-badge {
     font-size: 0.68rem;
     font-weight: 600;
@@ -3770,44 +3723,13 @@ a:hover {
     border-radius: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    flex-shrink: 0;
+    display: inline-block;
 }
 .badge-meteor   { background: rgba(0,230,118,0.15);  color: #00E676; }
 .badge-eclipse  { background: rgba(68,138,255,0.15);  color: #448AFF; }
 .badge-fullmoon { background: rgba(255,193,7,0.15);   color: #FFC107; }
 .badge-planet   { background: rgba(124,77,255,0.15);  color: #7C4DFF; }
 .badge-equinox  { background: rgba(29,233,182,0.15);  color: #1DE9B6; }
-
-/* Chevron rotation */
-.event-chevron {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    transition: transform 0.3s ease;
-    flex-shrink: 0;
-}
-.event-card.expanded .event-chevron {
-    transform: rotate(180deg);
-}
-
-/* Expanded details (hidden by default) */
-.event-details {
-    display: none;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    line-height: 1.7;
-}
-.event-card.expanded .event-details {
-    display: block;
-}
-.event-details strong {
-    color: var(--text-primary);
-}
-.event-details p:last-child {
-    margin-bottom: 0;
-}
 
 /* Filter buttons */
 .event-filters {
@@ -3833,10 +3755,156 @@ a:hover {
     color: var(--aurora-green);
 }
 
-/* Responsive */
-@media (max-width: 576px) {
-    .event-header { flex-wrap: wrap; }
-    .event-date { min-width: 70px; font-size: 0.75rem; }
-    .event-name { font-size: 0.85rem; }
-    .event-type-badge { font-size: 0.62rem; }
+/* ── Grid container ── */
+.sky-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+/* ── Individual card ── */
+.sky-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--dashboard-radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sky-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,255,255,0.18);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+.sky-card.active {
+    border-color: rgba(255,255,255,0.25);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
+    transform: none;
+}
+
+/* Per-type colour accents on hover/active */
+.sky-card[data-event-type="meteor"]:hover,
+.sky-card[data-event-type="meteor"].active  { border-color: rgba(0,230,118,0.3); }
+.sky-card[data-event-type="eclipse"]:hover,
+.sky-card[data-event-type="eclipse"].active { border-color: rgba(68,138,255,0.3); }
+.sky-card[data-event-type="fullmoon"]:hover,
+.sky-card[data-event-type="fullmoon"].active { border-color: rgba(255,193,7,0.3); }
+.sky-card[data-event-type="planet"]:hover,
+.sky-card[data-event-type="planet"].active  { border-color: rgba(124,77,255,0.3); }
+.sky-card[data-event-type="equinox"]:hover,
+.sky-card[data-event-type="equinox"].active { border-color: rgba(29,233,182,0.3); }
+
+/* SVG illustration area */
+.sky-card-illustration {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.sky-card-illustration svg,
+.sky-card-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Card body (text below image) */
+.sky-card-body {
+    padding: 0.85rem;
+}
+.sky-card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0.4rem 0 0.25rem;
+    line-height: 1.3;
+}
+.sky-card-date {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+/* Hidden detail data inside each card */
+.sky-card-detail-data { display: none !important; }
+
+/* ── Detail Panel (full-width, inserted between grid rows) ── */
+.sky-detail-panel {
+    grid-column: 1 / -1;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--dashboard-radius);
+    position: relative;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    padding: 0 1.5rem;
+    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+}
+.sky-detail-panel.open {
+    max-height: 600px;
+    opacity: 1;
+    padding: 1.5rem;
+}
+.sky-detail-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    font-size: 0.85rem;
+}
+.sky-detail-close:hover {
+    background: rgba(255,255,255,0.12);
+    color: var(--text-primary);
+}
+.sky-detail-content {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 800px;
+}
+.sky-detail-content strong { color: var(--text-primary); }
+.sky-detail-content p:last-child { margin-bottom: 0; }
+
+.sky-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-right: 2.5rem;
+}
+.sky-detail-header h5 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+.sky-detail-header .sky-card-date {
+    font-size: 0.85rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+    .sky-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+    .sky-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .sky-card-title { font-size: 0.85rem; }
+}
+@media (max-width: 480px) {
+    .sky-grid { grid-template-columns: 1fr; }
+    .sky-card-body { padding: 0.75rem; }
+    .sky-detail-panel.open { padding: 1rem; }
 }
