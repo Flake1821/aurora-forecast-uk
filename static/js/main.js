@@ -2068,8 +2068,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: W / curtainCount * (0.6 + Math.random() * 0.6),
                 phase: Math.random() * Math.PI * 2,
                 speed: 0.3 + Math.random() * 0.4,
-                drift: 0.2 + Math.random() * 0.3
+                drift: 0.2 + Math.random() * 0.3,
+                // Per-curtain colour variation for realism
+                hueShift: (Math.random() - 0.5) * 0.3,
+                redBias: Math.random(),
+                brightnessVar: 0.85 + Math.random() * 0.3
             });
+        }
+
+        // Helper: apply per-curtain colour variation (hue shift + brightness)
+        function variedRGBA(r, g, b, alpha, cur) {
+            var shift = cur.hueShift;
+            var nr = Math.round(Math.min(255, Math.max(0, r)));
+            var ng = Math.round(Math.min(255, Math.max(0, g * (1 - shift * 0.5))));
+            var nb = Math.round(Math.min(255, Math.max(0, b * (1 + shift))));
+            var na = Math.max(0, alpha * cur.brightnessVar);
+            return 'rgba(' + nr + ',' + ng + ',' + nb + ',' + na.toFixed(3) + ')';
         }
 
         function frame(timestamp) {
@@ -2170,26 +2184,44 @@ document.addEventListener('DOMContentLoaded', function () {
                     var aGrad = ctx.createLinearGradient(0, auroraTop, 0, horizonY);
                     var intensity = auroraIntensity * cloudFactor;
 
-                    // Colour varies by curtain and intensity
+                    // Colour varies by curtain and intensity — based on real aurora emission lines
+                    // Oxygen green (557.7nm), Oxygen red (630nm), Nitrogen blue (427.8nm)
+                    var a = intensity;
+                    var cur = curtains[ci];
+
                     if (margin >= 2) {
-                        // Strong: green/cyan with purple tops
-                        aGrad.addColorStop(0, 'rgba(160, 60, 200, ' + (intensity * 0.15).toFixed(3) + ')');
-                        aGrad.addColorStop(0.15, 'rgba(100, 40, 180, ' + (intensity * 0.2).toFixed(3) + ')');
-                        aGrad.addColorStop(0.3, 'rgba(0, 200, 120, ' + (intensity * 0.35).toFixed(3) + ')');
-                        aGrad.addColorStop(0.5, 'rgba(0, 230, 130, ' + (intensity * 0.5).toFixed(3) + ')');
-                        aGrad.addColorStop(0.7, 'rgba(0, 210, 150, ' + (intensity * 0.4).toFixed(3) + ')');
-                        aGrad.addColorStop(1, 'rgba(0, 180, 100, ' + (intensity * 0.05).toFixed(3) + ')');
+                        // Strong: crimson-red tops (O 630nm) → warm green core (O 557.7nm) → pink lower edge (N₂+)
+                        var rb = 0.5 + 0.5 * cur.redBias; // per-curtain red intensity at top
+                        aGrad.addColorStop(0.0,  variedRGBA(180, 40, 50,   a * 0.10 * rb, cur));  // crimson red at extreme top
+                        aGrad.addColorStop(0.05, variedRGBA(170, 35, 55,   a * 0.14 * rb, cur));  // deepening red
+                        aGrad.addColorStop(0.10, variedRGBA(155, 30, 60,   a * 0.18 * rb, cur));  // red with slight magenta
+                        aGrad.addColorStop(0.18, variedRGBA(120, 80, 55,   a * 0.22, cur));       // warm amber transition
+                        aGrad.addColorStop(0.25, variedRGBA(80, 140, 50,   a * 0.30, cur));       // olive-green, red fading
+                        aGrad.addColorStop(0.35, variedRGBA(60, 200, 70,   a * 0.42, cur));       // brightening natural green
+                        aGrad.addColorStop(0.45, variedRGBA(70, 220, 75,   a * 0.52, cur));       // peak green
+                        aGrad.addColorStop(0.50, variedRGBA(140, 240, 130, a * 0.55, cur));       // white-green core (brightest)
+                        aGrad.addColorStop(0.55, variedRGBA(100, 230, 90,  a * 0.52, cur));       // bright, slightly less white
+                        aGrad.addColorStop(0.65, variedRGBA(60, 200, 70,   a * 0.40, cur));       // returning to natural green
+                        aGrad.addColorStop(0.80, variedRGBA(80, 130, 75,   a * 0.22, cur));       // green transitioning
+                        aGrad.addColorStop(0.90, variedRGBA(140, 70, 100,  a * 0.12, cur));       // pink/magenta lower edge (N₂+)
+                        aGrad.addColorStop(1.0,  variedRGBA(120, 50, 80,   a * 0.03, cur));       // fading magenta at horizon
                     } else if (margin >= 0) {
-                        // Moderate: green/teal
-                        aGrad.addColorStop(0, 'rgba(0, 160, 100, ' + (intensity * 0.08).toFixed(3) + ')');
-                        aGrad.addColorStop(0.3, 'rgba(0, 200, 110, ' + (intensity * 0.3).toFixed(3) + ')');
-                        aGrad.addColorStop(0.6, 'rgba(0, 220, 130, ' + (intensity * 0.35).toFixed(3) + ')');
-                        aGrad.addColorStop(1, 'rgba(0, 150, 80, ' + (intensity * 0.03).toFixed(3) + ')');
+                        // Moderate: subtle lavender hint at top → natural green body
+                        aGrad.addColorStop(0.0,  variedRGBA(70, 70, 90,    a * 0.04, cur));       // faint cool lavender
+                        aGrad.addColorStop(0.10, variedRGBA(50, 100, 70,   a * 0.08, cur));       // grey-green transition
+                        aGrad.addColorStop(0.25, variedRGBA(45, 160, 60,   a * 0.18, cur));       // green emerging
+                        aGrad.addColorStop(0.40, variedRGBA(55, 190, 65,   a * 0.28, cur));       // natural green, warming
+                        aGrad.addColorStop(0.55, variedRGBA(60, 200, 70,   a * 0.32, cur));       // peak natural green
+                        aGrad.addColorStop(0.70, variedRGBA(50, 175, 60,   a * 0.24, cur));       // green dimming
+                        aGrad.addColorStop(0.85, variedRGBA(40, 140, 55,   a * 0.12, cur));       // dim green
+                        aGrad.addColorStop(1.0,  variedRGBA(30, 100, 45,   a * 0.02, cur));       // barely visible fade
                     } else {
-                        // Faint: dim green glow
-                        aGrad.addColorStop(0, 'rgba(0, 120, 60, ' + (intensity * 0.04).toFixed(3) + ')');
-                        aGrad.addColorStop(0.4, 'rgba(0, 160, 80, ' + (intensity * 0.12).toFixed(3) + ')');
-                        aGrad.addColorStop(1, 'rgba(0, 100, 50, ' + (intensity * 0.02).toFixed(3) + ')');
+                        // Faint: desaturated grey-green, barely perceptible
+                        aGrad.addColorStop(0.0,  variedRGBA(30, 50, 35,    a * 0.02, cur));       // barely there grey-green
+                        aGrad.addColorStop(0.30, variedRGBA(35, 80, 45,    a * 0.06, cur));       // slight green tint
+                        aGrad.addColorStop(0.50, variedRGBA(40, 100, 50,   a * 0.09, cur));       // peak — desaturated green
+                        aGrad.addColorStop(0.70, variedRGBA(35, 80, 45,    a * 0.06, cur));       // fading
+                        aGrad.addColorStop(1.0,  variedRGBA(25, 55, 35,    a * 0.01, cur));       // nearly invisible
                     }
 
                     // Draw curtain as a wide soft column
@@ -2221,15 +2253,33 @@ document.addEventListener('DOMContentLoaded', function () {
                     ctx.fill();
                 }
 
-                // Add a subtle overall aurora glow near horizon
+                // Add a subtle overall aurora glow near horizon — colour varies with intensity
                 if (auroraIntensity > 0.2) {
-                    var glowGrad = ctx.createLinearGradient(0, horizonY - H * 0.15, 0, horizonY);
+                    var glowH = margin >= 2 ? 0.18 : 0.15;
+                    var glowGrad = ctx.createLinearGradient(0, horizonY - H * glowH, 0, horizonY);
                     var glowA = auroraIntensity * cloudFactor * 0.15;
-                    glowGrad.addColorStop(0, 'rgba(0, 200, 120, 0)');
-                    glowGrad.addColorStop(0.5, 'rgba(0, 200, 120, ' + (glowA * 0.5).toFixed(3) + ')');
-                    glowGrad.addColorStop(1, 'rgba(0, 200, 120, ' + glowA.toFixed(3) + ')');
+
+                    if (margin >= 2) {
+                        // Strong: warm green glow with pink-tinted horizon
+                        glowGrad.addColorStop(0, 'rgba(60, 180, 65, 0)');
+                        glowGrad.addColorStop(0.3, 'rgba(70, 190, 70, ' + (glowA * 0.25).toFixed(3) + ')');
+                        glowGrad.addColorStop(0.6, 'rgba(90, 180, 75, ' + (glowA * 0.5).toFixed(3) + ')');
+                        glowGrad.addColorStop(0.85, 'rgba(110, 140, 80, ' + (glowA * 0.7).toFixed(3) + ')');
+                        glowGrad.addColorStop(1, 'rgba(130, 100, 85, ' + glowA.toFixed(3) + ')');
+                    } else if (margin >= 0) {
+                        // Moderate: clean natural green glow
+                        glowGrad.addColorStop(0, 'rgba(50, 170, 60, 0)');
+                        glowGrad.addColorStop(0.5, 'rgba(55, 180, 65, ' + (glowA * 0.4).toFixed(3) + ')');
+                        glowGrad.addColorStop(1, 'rgba(50, 160, 60, ' + (glowA * 0.8).toFixed(3) + ')');
+                    } else {
+                        // Faint: very subtle grey-green glow
+                        glowGrad.addColorStop(0, 'rgba(35, 80, 45, 0)');
+                        glowGrad.addColorStop(0.5, 'rgba(38, 90, 48, ' + (glowA * 0.3).toFixed(3) + ')');
+                        glowGrad.addColorStop(1, 'rgba(35, 80, 45, ' + (glowA * 0.5).toFixed(3) + ')');
+                    }
+
                     ctx.fillStyle = glowGrad;
-                    ctx.fillRect(0, horizonY - H * 0.15, W, H * 0.15);
+                    ctx.fillRect(0, horizonY - H * glowH, W, H * glowH);
                 }
 
                 ctx.restore();
@@ -2375,6 +2425,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Render aurora oval (initial + refresh every 5 minutes)
     renderAuroraOval();
     setInterval(renderAuroraOval, 300000);
+    window.renderAuroraOval = renderAuroraOval;  // expose for demo/testing
 
     // Render aurora horizon view
     initAuroraView();
