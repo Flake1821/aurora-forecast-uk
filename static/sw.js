@@ -1,5 +1,5 @@
 // Service Worker for UK Aurora & Night Sky — lightweight cache strategy
-var CACHE_NAME = 'aurora-v4';
+var CACHE_NAME = 'aurora-v5';
 var PRECACHE = [
     '/',
     '/static/css/style.css',

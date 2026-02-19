@@ -3860,9 +3860,14 @@ a:hover {
     z-index: 1;
     pointer-events: none;
 }
-/* star twinkle overlay */
+/* star twinkle overlay + streak hints */
 .sky-anim-meteor .sky-ambient-overlay {
     background:
+        /* extra streak hints (thin gradient lines) */
+        linear-gradient(38deg, transparent 10%, rgba(0,230,118,0.25) 10.5%, rgba(255,255,255,0.15) 11%, transparent 11.3%),
+        linear-gradient(28deg, transparent 30%, rgba(255,255,255,0.2) 30.3%, rgba(0,230,118,0.12) 30.6%, transparent 30.8%),
+        linear-gradient(45deg, transparent 55%, rgba(0,230,118,0.18) 55.3%, rgba(255,255,255,0.1) 55.5%, transparent 55.7%),
+        /* twinkling stars */
         radial-gradient(1.5px 1.5px at 15% 20%, rgba(255,255,255,0.9) 50%, transparent 100%),
         radial-gradient(1px 1px   at 45% 35%, rgba(255,255,255,0.7) 50%, transparent 100%),
         radial-gradient(1.2px 1.2px at 72% 55%, rgba(200,255,200,0.8) 50%, transparent 100%),
@@ -3938,13 +3943,22 @@ a:hover {
     pointer-events: none;
     animation: sky-clouds-drift 20s ease-in-out infinite;
 }
-/* moon disc */
+/* moon disc with surface texture */
 .sky-anim-fullmoon .sky-ambient-overlay {
     background:
-        /* bright core */
+        /* crater hints (small dark spots) */
+        radial-gradient(circle at 46% 38%, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.08) 1.5%, transparent 2.5%),
+        radial-gradient(circle at 54% 46%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.06) 1%, transparent 2%),
+        radial-gradient(circle at 48% 50%, rgba(0,0,0,0.08) 0%, transparent 1.2%),
+        /* mare patches (dark elliptical areas) */
+        radial-gradient(ellipse 6% 4% at 47% 40%, rgba(60,50,30,0.15) 0%, transparent 100%),
+        radial-gradient(ellipse 4% 5% at 52% 35%, rgba(60,50,30,0.12) 0%, transparent 100%),
+        radial-gradient(ellipse 5% 3% at 50% 48%, rgba(60,50,30,0.10) 0%, transparent 100%),
+        /* bright core with defined edge */
         radial-gradient(circle at 50% 42%,
-            rgba(255,245,220,0.95) 0%,
-            rgba(255,235,180,0.85) 8%,
+            rgba(255,250,235,0.98) 0%,
+            rgba(255,245,220,0.95) 6%,
+            rgba(255,235,180,0.85) 9%,
             rgba(255,220,130,0.5) 14%,
             rgba(255,193,7,0.2) 22%,
             rgba(255,193,7,0.06) 35%,
@@ -4236,6 +4250,510 @@ a:hover {
 @keyframes sky-light-rays {
     0%, 100% { opacity: 0.3; transform: scaleX(1); }
     50% { opacity: 0.7; transform: scaleX(1.1); }
+}
+
+/* ════════════════════════════════════════════════════
+   ECLIPSE SUB-TYPES
+   ════════════════════════════════════════════════════ */
+
+/* ── Annular Solar Eclipse — "Ring of Fire" ── */
+.sky-anim-eclipse.eclipse-annular-solar::before {
+    background:
+        conic-gradient(from 0deg at 50% 50%,
+            transparent 0deg, rgba(255,180,60,0.08) 10deg, transparent 20deg,
+            rgba(255,180,60,0.05) 30deg, transparent 40deg, rgba(255,180,60,0.08) 50deg,
+            transparent 60deg, rgba(255,180,60,0.06) 70deg, transparent 80deg,
+            rgba(255,180,60,0.08) 90deg, transparent 100deg, rgba(255,180,60,0.05) 110deg,
+            transparent 120deg, rgba(255,180,60,0.08) 130deg, transparent 140deg,
+            rgba(255,180,60,0.06) 150deg, transparent 160deg, rgba(255,180,60,0.08) 170deg,
+            transparent 180deg, rgba(255,180,60,0.05) 190deg, transparent 200deg,
+            rgba(255,180,60,0.08) 210deg, transparent 220deg, rgba(255,180,60,0.06) 230deg,
+            transparent 240deg, rgba(255,180,60,0.08) 250deg, transparent 260deg,
+            rgba(255,180,60,0.05) 270deg, transparent 280deg, rgba(255,180,60,0.08) 290deg,
+            transparent 300deg, rgba(255,180,60,0.06) 310deg, transparent 320deg,
+            rgba(255,180,60,0.08) 330deg, transparent 340deg, rgba(255,180,60,0.05) 350deg,
+            transparent 360deg);
+}
+.sky-anim-eclipse.eclipse-annular-solar .sky-ambient-overlay {
+    background:
+        /* dark moon disc (slightly smaller than sun) */
+        radial-gradient(circle at 50% 50%,
+            #030308 0%, #030308 8.5%, transparent 9%),
+        /* bright golden annulus ring */
+        radial-gradient(circle at 50% 50%,
+            transparent 7.5%,
+            rgba(255,200,60,0.9) 9.5%,
+            rgba(255,180,40,0.7) 11%,
+            rgba(255,160,30,0.4) 14%,
+            rgba(255,140,20,0.15) 20%,
+            rgba(255,120,10,0.05) 30%,
+            transparent 45%);
+    animation: sky-eclipse-corona 7s ease-in-out infinite;
+}
+.sky-anim-eclipse.eclipse-annular-solar::after {
+    background: rgba(255,140,30,0.0);
+    animation: sky-eclipse-annular-tint 8s ease-in-out infinite;
+}
+
+/* ── Total Lunar Eclipse — Blood Moon ── */
+.sky-anim-eclipse.eclipse-total-lunar {
+    background:
+        radial-gradient(1px 1px at 8% 20%, rgba(255,255,255,0.5) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 25% 75%, rgba(255,255,255,0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 40% 10%, rgba(255,255,255,0.4) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 70% 80%, rgba(255,255,255,0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 90% 35%, rgba(255,255,255,0.4) 50%, transparent 100%),
+        radial-gradient(1px 1px at 55% 55%, rgba(255,255,255,0.3) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 15% 45%, rgba(255,255,255,0.35) 50%, transparent 100%),
+        linear-gradient(180deg, #040210 0%, #0a0518 50%, #0c0620 100%);
+}
+.sky-anim-eclipse.eclipse-total-lunar::before {
+    background: none;
+    animation: none;
+}
+.sky-anim-eclipse.eclipse-total-lunar .sky-ambient-overlay {
+    background:
+        /* earthshine highlight on upper-left edge */
+        radial-gradient(circle at 45% 44%,
+            transparent 9%,
+            rgba(180,200,220,0.08) 10%,
+            transparent 13%),
+        /* copper-red moon disc */
+        radial-gradient(circle at 50% 50%,
+            rgba(180,60,30,0.95) 0%,
+            rgba(160,45,20,0.9) 6%,
+            rgba(140,35,15,0.7) 10%,
+            rgba(120,25,10,0.3) 15%,
+            rgba(100,20,10,0.08) 22%,
+            transparent 35%);
+    animation: sky-blood-moon-glow 6s ease-in-out infinite;
+}
+.sky-anim-eclipse.eclipse-total-lunar::after {
+    background: rgba(120,20,10,0.0);
+    animation: sky-blood-tint 8s ease-in-out infinite;
+}
+
+/* ── Partial Solar Eclipse — Bite out of the sun ── */
+.sky-anim-eclipse.eclipse-partial-solar .sky-ambient-overlay {
+    background:
+        /* dark moon disc offset to upper-right */
+        radial-gradient(circle at 54% 46%,
+            #030308 0%, #030308 9%, transparent 9.5%),
+        /* bright sun */
+        radial-gradient(circle at 50% 50%,
+            rgba(255,240,200,0.95) 0%,
+            rgba(255,225,150,0.85) 8%,
+            rgba(255,200,80,0.5) 13%,
+            rgba(255,180,40,0.2) 20%,
+            rgba(255,160,30,0.06) 30%,
+            transparent 50%);
+    animation: sky-eclipse-corona 7s ease-in-out infinite;
+}
+.sky-anim-eclipse.eclipse-partial-solar::after {
+    background: rgba(255,180,60,0.0);
+    animation: sky-eclipse-annular-tint 8s ease-in-out infinite;
+}
+
+/* ── Partial Lunar Eclipse — Partial shadow on moon ── */
+.sky-anim-eclipse.eclipse-partial-lunar::before {
+    background: none;
+    animation: none;
+}
+.sky-anim-eclipse.eclipse-partial-lunar .sky-ambient-overlay {
+    background:
+        /* Earth's umbral shadow (dark arc from upper-left) */
+        radial-gradient(circle at 38% 38%,
+            rgba(5,5,15,0.9) 0%,
+            rgba(5,5,15,0.7) 10%,
+            rgba(5,5,15,0.3) 14%,
+            transparent 20%),
+        /* bright moon disc */
+        radial-gradient(circle at 50% 50%,
+            rgba(240,235,220,0.95) 0%,
+            rgba(230,225,210,0.85) 8%,
+            rgba(200,195,180,0.5) 13%,
+            rgba(180,175,160,0.2) 20%,
+            rgba(150,145,130,0.06) 30%,
+            transparent 45%);
+    animation: sky-eclipse-corona 7s ease-in-out infinite;
+}
+.sky-anim-eclipse.eclipse-partial-lunar::after {
+    background: rgba(160,40,20,0.0);
+    animation: sky-blood-tint 6s ease-in-out infinite;
+}
+
+/* ════════════════════════════════════════════════════
+   PLANET SUB-TYPES
+   ════════════════════════════════════════════════════ */
+
+/* ── Jupiter — warm gold disc with cloud bands ── */
+.sky-anim-planet.planet-jupiter .sky-ambient-overlay {
+    background:
+        /* Great Red Spot hint */
+        radial-gradient(ellipse 2.5% 1.5% at 54% 52%,
+            rgba(180,80,40,0.4) 0%, transparent 100%),
+        /* cloud band 1 */
+        radial-gradient(ellipse 20% 1% at 50% 44%,
+            rgba(160,120,60,0.3) 0%, transparent 100%),
+        /* cloud band 2 */
+        radial-gradient(ellipse 18% 0.8% at 50% 56%,
+            rgba(140,100,50,0.25) 0%, transparent 100%),
+        /* planet disc */
+        radial-gradient(circle at 50% 48%,
+            rgba(255,220,140,0.95) 0%,
+            rgba(240,200,110,0.85) 7%,
+            rgba(220,175,80,0.5) 12%,
+            rgba(200,150,50,0.2) 18%,
+            rgba(180,130,30,0.06) 28%,
+            transparent 45%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+.sky-anim-planet.planet-jupiter::after {
+    background: radial-gradient(circle at 50% 48%,
+        rgba(255,200,80,0.08) 0%, transparent 50%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+
+/* ── Saturn — warm gold disc with edge-on rings ── */
+.sky-anim-planet.planet-saturn .sky-ambient-overlay {
+    background:
+        /* thin ring (nearly edge-on in 2026) */
+        radial-gradient(ellipse 28% 1.2% at 50% 48%,
+            transparent 30%,
+            rgba(220,200,160,0.4) 42%,
+            rgba(200,180,140,0.25) 55%,
+            rgba(180,160,120,0.1) 70%,
+            transparent 100%),
+        /* planet disc */
+        radial-gradient(circle at 50% 48%,
+            rgba(240,215,150,0.95) 0%,
+            rgba(225,200,130,0.85) 5.5%,
+            rgba(200,175,100,0.5) 9%,
+            rgba(180,150,70,0.2) 15%,
+            rgba(160,130,50,0.06) 25%,
+            transparent 42%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+.sky-anim-planet.planet-saturn::after {
+    background: radial-gradient(circle at 50% 48%,
+        rgba(240,210,130,0.06) 0%, transparent 50%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+
+/* ── Neptune — tiny blue-green disc ── */
+.sky-anim-planet.planet-neptune .sky-ambient-overlay {
+    background:
+        radial-gradient(circle at 50% 48%,
+            rgba(80,140,200,0.8) 0%,
+            rgba(60,120,180,0.6) 2.5%,
+            rgba(40,100,160,0.3) 4%,
+            rgba(30,80,140,0.1) 6%,
+            transparent 12%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+.sky-anim-planet.planet-neptune::after {
+    background: radial-gradient(circle at 50% 48%,
+        rgba(60,120,200,0.05) 0%, transparent 35%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+
+/* ── Uranus — pale blue-green featureless disc ── */
+.sky-anim-planet.planet-uranus .sky-ambient-overlay {
+    background:
+        radial-gradient(circle at 50% 48%,
+            rgba(160,220,220,0.85) 0%,
+            rgba(130,200,200,0.65) 3%,
+            rgba(100,180,180,0.35) 5.5%,
+            rgba(80,160,160,0.12) 8%,
+            transparent 16%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+.sky-anim-planet.planet-uranus::after {
+    background: radial-gradient(circle at 50% 48%,
+        rgba(130,200,200,0.05) 0%, transparent 35%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+
+/* ── Saturn–Neptune Conjunction ── */
+.sky-anim-planet.planet-conjunction-sn .sky-ambient-overlay {
+    background:
+        /* Saturn (brighter, left) with ring hint */
+        radial-gradient(ellipse 14% 1% at 38% 48%,
+            transparent 30%, rgba(220,200,160,0.3) 50%, transparent 80%),
+        radial-gradient(circle at 38% 48%,
+            rgba(240,215,150,0.9) 0%, rgba(225,200,130,0.7) 3%,
+            rgba(200,175,100,0.3) 5%, rgba(180,150,70,0.1) 8%, transparent 18%),
+        /* Neptune (small blue, right) */
+        radial-gradient(circle at 62% 52%,
+            rgba(80,140,200,0.7) 0%, rgba(60,120,180,0.4) 2%,
+            rgba(40,100,160,0.15) 3.5%, transparent 8%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+.sky-anim-planet.planet-conjunction-sn::after {
+    background:
+        radial-gradient(circle at 38% 48%, rgba(240,210,130,0.04) 0%, transparent 35%),
+        radial-gradient(circle at 62% 52%, rgba(60,120,200,0.03) 0%, transparent 30%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+
+/* ── Venus–Saturn Conjunction ── */
+.sky-anim-planet.planet-conjunction-vs .sky-ambient-overlay {
+    background:
+        /* Venus (brilliant white, left) */
+        radial-gradient(circle at 38% 46%,
+            rgba(255,255,245,0.95) 0%, rgba(255,250,230,0.8) 3%,
+            rgba(255,240,200,0.4) 6%, rgba(255,230,180,0.12) 10%, transparent 22%),
+        /* Saturn (dimmer, right) with ring hint */
+        radial-gradient(ellipse 14% 1% at 62% 52%,
+            transparent 30%, rgba(220,200,160,0.25) 50%, transparent 80%),
+        radial-gradient(circle at 62% 52%,
+            rgba(240,215,150,0.75) 0%, rgba(225,200,130,0.55) 3%,
+            rgba(200,175,100,0.25) 5%, rgba(180,150,70,0.08) 8%, transparent 18%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+.sky-anim-planet.planet-conjunction-vs::after {
+    background:
+        radial-gradient(circle at 38% 46%, rgba(255,255,230,0.06) 0%, transparent 35%),
+        radial-gradient(circle at 62% 52%, rgba(240,210,130,0.04) 0%, transparent 30%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+
+/* ── Venus–Jupiter Conjunction — two bright discs ── */
+.sky-anim-planet.planet-conjunction-vj .sky-ambient-overlay {
+    background:
+        /* Venus (brilliant white, left) */
+        radial-gradient(circle at 40% 46%,
+            rgba(255,255,248,0.95) 0%, rgba(255,250,235,0.8) 4%,
+            rgba(255,240,210,0.4) 7%, rgba(255,230,190,0.12) 12%, transparent 25%),
+        /* Jupiter (warm gold, right) */
+        radial-gradient(circle at 60% 52%,
+            rgba(255,225,150,0.9) 0%, rgba(245,210,120,0.75) 4%,
+            rgba(225,185,80,0.35) 7%, rgba(200,160,50,0.1) 12%, transparent 25%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+.sky-anim-planet.planet-conjunction-vj::after {
+    background:
+        radial-gradient(circle at 40% 46%, rgba(255,255,230,0.06) 0%, transparent 35%),
+        radial-gradient(circle at 60% 52%, rgba(255,200,80,0.05) 0%, transparent 35%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+
+/* ── Six-Planet Alignment — 6 dots in an arc ── */
+.sky-anim-planet.planet-alignment .sky-ambient-overlay {
+    background:
+        /* ecliptic line hint */
+        linear-gradient(165deg, transparent 44%, rgba(124,77,255,0.06) 49%, rgba(124,77,255,0.06) 51%, transparent 56%),
+        /* Mercury (small, low-left) */
+        radial-gradient(circle at 12% 82%,
+            rgba(200,180,160,0.7) 0%, rgba(180,160,140,0.3) 1.5%, transparent 3.5%),
+        /* Venus (bright, lower-left) */
+        radial-gradient(circle at 25% 72%,
+            rgba(255,255,240,0.9) 0%, rgba(255,245,220,0.5) 2.5%, transparent 5%),
+        /* Saturn (medium, center-left) */
+        radial-gradient(circle at 38% 58%,
+            rgba(240,215,150,0.75) 0%, rgba(220,195,120,0.35) 2%, transparent 4.5%),
+        /* Neptune (tiny blue, center) */
+        radial-gradient(circle at 52% 46%,
+            rgba(80,140,200,0.5) 0%, rgba(60,120,180,0.2) 1.2%, transparent 3%),
+        /* Uranus (small pale, center-right) */
+        radial-gradient(circle at 66% 36%,
+            rgba(160,220,220,0.55) 0%, rgba(130,200,200,0.25) 1.5%, transparent 3.5%),
+        /* Jupiter (bright warm, upper-right) */
+        radial-gradient(circle at 82% 22%,
+            rgba(255,220,140,0.9) 0%, rgba(240,200,110,0.5) 2.5%, transparent 5.5%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+.sky-anim-planet.planet-alignment::after {
+    background: linear-gradient(165deg,
+        transparent 42%, rgba(124,77,255,0.04) 49%, transparent 56%);
+    animation: sky-planet-glow 6s ease-in-out infinite;
+}
+
+/* ════════════════════════════════════════════════════
+   SEASON SUB-TYPES
+   ════════════════════════════════════════════════════ */
+
+/* ── Spring Equinox — fresh green/pink dawn ── */
+.sky-anim-equinox.equinox-spring {
+    background:
+        radial-gradient(1px 1px at 10% 8%, rgba(255,255,255,0.4) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 25% 12%, rgba(255,255,255,0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 45% 6%, rgba(255,255,255,0.35) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 70% 10%, rgba(255,255,255,0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 88% 14%, rgba(255,255,255,0.25) 50%, transparent 100%),
+        linear-gradient(180deg,
+            #0a0a18 0%,
+            #102030 20%,
+            rgba(40,120,110,0.7) 50%,
+            rgba(180,130,140,0.85) 75%,
+            rgba(240,170,150,0.95) 90%,
+            rgba(255,190,170,1) 100%);
+}
+.sky-anim-equinox.equinox-spring::before {
+    background:
+        linear-gradient(5deg, transparent 40%, rgba(255,180,180,0.06) 60%, transparent 65%),
+        linear-gradient(-8deg, transparent 45%, rgba(255,200,180,0.05) 62%, transparent 68%),
+        linear-gradient(10deg, transparent 50%, rgba(255,170,170,0.04) 65%, transparent 72%);
+}
+.sky-anim-equinox.equinox-spring .sky-ambient-overlay {
+    background:
+        radial-gradient(ellipse 35% 20% at 50% 95%,
+            rgba(255,180,170,0.9) 0%,
+            rgba(255,150,140,0.6) 25%,
+            rgba(240,120,120,0.3) 45%,
+            rgba(180,130,140,0.08) 70%,
+            transparent 100%);
+    animation: sky-horizon-glow 6s ease-in-out infinite;
+}
+.sky-anim-equinox.equinox-spring::after {
+    bottom: 0; left: 0;
+    width: 100%; height: 45%;
+    background: linear-gradient(0deg,
+        rgba(255,170,160,0.12) 0%,
+        rgba(255,180,170,0.04) 40%,
+        transparent 100%);
+}
+
+/* ── Summer Solstice — bright golden sky ── */
+.sky-anim-equinox.equinox-summer {
+    background:
+        /* no stars — too bright */
+        linear-gradient(180deg,
+            #1a1820 0%,
+            rgba(60,60,40,0.9) 15%,
+            rgba(180,150,50,0.85) 40%,
+            rgba(240,200,60,0.9) 65%,
+            rgba(255,220,80,0.95) 85%,
+            rgba(255,230,100,1) 100%);
+}
+.sky-anim-equinox.equinox-summer::before {
+    background:
+        linear-gradient(6deg, transparent 35%, rgba(255,230,120,0.1) 55%, transparent 62%),
+        linear-gradient(-4deg, transparent 40%, rgba(255,240,150,0.08) 58%, transparent 65%),
+        linear-gradient(10deg, transparent 45%, rgba(255,220,100,0.07) 60%, transparent 70%);
+}
+.sky-anim-equinox.equinox-summer .sky-ambient-overlay {
+    background:
+        radial-gradient(ellipse 40% 25% at 50% 92%,
+            rgba(255,240,160,0.95) 0%,
+            rgba(255,220,100,0.75) 20%,
+            rgba(255,200,60,0.4) 40%,
+            rgba(255,180,40,0.12) 65%,
+            transparent 100%);
+    animation: sky-horizon-glow 6s ease-in-out infinite;
+}
+.sky-anim-equinox.equinox-summer::after {
+    bottom: 0; left: 0;
+    width: 100%; height: 50%;
+    background: linear-gradient(0deg,
+        rgba(255,220,80,0.15) 0%,
+        rgba(255,200,60,0.06) 40%,
+        transparent 100%);
+}
+
+/* ── Autumn Equinox — amber/russet twilight ── */
+.sky-anim-equinox.equinox-autumn {
+    background:
+        radial-gradient(1px 1px at 8% 10%, rgba(255,255,255,0.4) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 22% 18%, rgba(255,255,255,0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 50% 8%, rgba(255,255,255,0.35) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 72% 15%, rgba(255,255,255,0.3) 50%, transparent 100%),
+        radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.25) 50%, transparent 100%),
+        linear-gradient(180deg,
+            #080812 0%,
+            #1a0f20 25%,
+            rgba(80,40,50,0.8) 50%,
+            rgba(160,80,40,0.9) 75%,
+            rgba(200,100,30,0.95) 90%,
+            rgba(220,110,30,1) 100%);
+}
+.sky-anim-equinox.equinox-autumn::before {
+    background:
+        linear-gradient(8deg, transparent 40%, rgba(220,120,40,0.06) 58%, transparent 64%),
+        linear-gradient(-5deg, transparent 45%, rgba(200,100,30,0.05) 60%, transparent 68%),
+        linear-gradient(12deg, transparent 50%, rgba(180,80,20,0.04) 63%, transparent 70%);
+}
+.sky-anim-equinox.equinox-autumn .sky-ambient-overlay {
+    background:
+        radial-gradient(ellipse 35% 20% at 50% 95%,
+            rgba(220,120,40,0.9) 0%,
+            rgba(200,100,30,0.6) 25%,
+            rgba(180,80,20,0.3) 45%,
+            rgba(120,50,20,0.08) 70%,
+            transparent 100%);
+    animation: sky-horizon-glow 6s ease-in-out infinite;
+}
+.sky-anim-equinox.equinox-autumn::after {
+    bottom: 0; left: 0;
+    width: 100%; height: 45%;
+    background: linear-gradient(0deg,
+        rgba(200,100,30,0.12) 0%,
+        rgba(180,80,20,0.04) 40%,
+        transparent 100%);
+}
+
+/* ── Winter Solstice — cold blue/violet long night ── */
+.sky-anim-equinox.equinox-winter {
+    background:
+        /* many stars — deep winter sky */
+        radial-gradient(1.2px 1.2px at 5% 12%, rgba(200,210,255,0.7) 50%, transparent 100%),
+        radial-gradient(1px 1px at 12% 35%, rgba(255,255,255,0.5) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 18% 65%, rgba(200,210,255,0.4) 50%, transparent 100%),
+        radial-gradient(1.3px 1.3px at 28% 20%, rgba(255,255,255,0.6) 50%, transparent 100%),
+        radial-gradient(1px 1px at 35% 50%, rgba(200,210,255,0.5) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 42% 8%, rgba(255,255,255,0.4) 50%, transparent 100%),
+        radial-gradient(1.2px 1.2px at 52% 42%, rgba(200,210,255,0.55) 50%, transparent 100%),
+        radial-gradient(1px 1px at 60% 18%, rgba(255,255,255,0.5) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 68% 60%, rgba(200,210,255,0.35) 50%, transparent 100%),
+        radial-gradient(1.3px 1.3px at 75% 30%, rgba(255,255,255,0.55) 50%, transparent 100%),
+        radial-gradient(1px 1px at 82% 70%, rgba(200,210,255,0.4) 50%, transparent 100%),
+        radial-gradient(0.8px 0.8px at 90% 15%, rgba(255,255,255,0.45) 50%, transparent 100%),
+        radial-gradient(1px 1px at 95% 55%, rgba(200,210,255,0.35) 50%, transparent 100%),
+        linear-gradient(180deg,
+            #05051a 0%,
+            #0a0a28 40%,
+            #0e0e30 70%,
+            #101038 90%,
+            #121240 100%);
+}
+.sky-anim-equinox.equinox-winter::before {
+    background:
+        linear-gradient(3deg, transparent 50%, rgba(140,150,200,0.03) 70%, transparent 75%),
+        linear-gradient(-5deg, transparent 55%, rgba(130,140,190,0.02) 72%, transparent 78%);
+}
+.sky-anim-equinox.equinox-winter .sky-ambient-overlay {
+    background:
+        /* barely-there pale disc at horizon (moon-like) */
+        radial-gradient(ellipse 20% 12% at 50% 98%,
+            rgba(180,190,220,0.3) 0%,
+            rgba(150,160,200,0.15) 30%,
+            rgba(120,130,180,0.05) 60%,
+            transparent 100%);
+    animation: sky-horizon-glow 8s ease-in-out infinite;
+}
+.sky-anim-equinox.equinox-winter::after {
+    bottom: 0; left: 0;
+    width: 100%; height: 30%;
+    background: linear-gradient(0deg,
+        rgba(100,110,180,0.06) 0%,
+        rgba(80,90,160,0.02) 50%,
+        transparent 100%);
+}
+
+/* ════════════════════════════════════════════════════
+   NEW @keyframes for sub-types
+   ════════════════════════════════════════════════════ */
+@keyframes sky-eclipse-annular-tint {
+    0%, 100% { background: rgba(255,140,30,0.0); }
+    50% { background: rgba(255,140,30,0.06); }
+}
+@keyframes sky-blood-moon-glow {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+@keyframes sky-blood-tint {
+    0%, 100% { background: rgba(120,20,10,0.0); }
+    50% { background: rgba(120,20,10,0.06); }
 }
 
 /* Respect reduced motion preference */

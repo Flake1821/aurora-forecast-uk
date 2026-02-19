@@ -27,15 +27,51 @@
         </div>
 
         <div class="glass-card mt-4">
-            <h4 class="mb-3">Data Sources</h4>
+            <h4 class="mb-3"><i class="bi bi-database me-2"></i>Data Sources</h4>
             <ul class="list-unstyled mb-0">
-                <li class="mb-2">
-                    <strong>NOAA SWPC</strong> — Kp index, geomagnetic forecasts, and solar wind data
-                    from the <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">Space Weather Prediction Center</a>.
+                <li class="mb-3">
+                    <strong><i class="bi bi-sun me-1"></i> <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA Space Weather Prediction Center</a></strong>
+                    <br><small class="text-secondary">National Oceanic and Atmospheric Administration, USA</small>
+                    <ul class="mt-1 mb-0 small">
+                        <li>Planetary Kp index (current and 3-day forecast)</li>
+                        <li>Solar wind plasma density and speed</li>
+                        <li>Interplanetary Magnetic Field (IMF Bz component)</li>
+                        <li>NOAA G-scale geomagnetic storm alerts</li>
+                    </ul>
+                </li>
+                <li class="mb-3">
+                    <strong><i class="bi bi-broadcast me-1"></i> <a href="https://aurorawatch.lancs.ac.uk/" target="_blank" rel="noopener">AuroraWatch UK</a></strong>
+                    <br><small class="text-secondary">Lancaster University, UK</small>
+                    <ul class="mt-1 mb-0 small">
+                        <li>Real-time UK geomagnetic activity status (green/yellow/amber/red)</li>
+                        <li>UK-specific aurora alert level</li>
+                    </ul>
+                </li>
+                <li class="mb-3">
+                    <strong><i class="bi bi-cloud me-1"></i> <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></strong>
+                    <br><small class="text-secondary">UK Met Office data via UKMO Seamless models</small>
+                    <ul class="mt-1 mb-0 small">
+                        <li>Cloud cover forecasts (low, mid, high cloud layers)</li>
+                        <li>UKMO 2km high-resolution model for UK locations</li>
+                        <li>Hourly weather data for observing conditions</li>
+                    </ul>
+                </li>
+                <li class="mb-3">
+                    <strong><i class="bi bi-geo-alt me-1"></i> <a href="https://postcodes.io/" target="_blank" rel="noopener">Postcodes.io</a></strong>
+                    <br><small class="text-secondary">Open-source UK postcode and geolocation API</small>
+                    <ul class="mt-1 mb-0 small">
+                        <li>UK postcode geocoding (latitude and longitude)</li>
+                        <li>Rural-Urban Classification (RUC11) for light pollution estimation</li>
+                    </ul>
                 </li>
                 <li>
-                    <strong>AuroraWatch UK</strong> — Real-time UK geomagnetic activity status from
-                    <a href="https://aurorawatch.lancs.ac.uk/" target="_blank" rel="noopener">Lancaster University</a>.
+                    <strong><i class="bi bi-moon-stars me-1"></i> <a href="https://rhodesmill.org/pyephem/" target="_blank" rel="noopener">PyEphem</a></strong>
+                    <br><small class="text-secondary">Astronomical ephemeris library for Python</small>
+                    <ul class="mt-1 mb-0 small">
+                        <li>Moon phase calculations and illumination percentage</li>
+                        <li>Astronomical, nautical and civil twilight times</li>
+                        <li>Sunrise and sunset times for UK locations</li>
+                    </ul>
                 </li>
             </ul>
         </div>
