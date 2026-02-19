@@ -466,6 +466,13 @@
                     <span class="oval-legend-item"><span class="oval-swatch" style="background:#00cc66"></span>Low</span>
                     <span class="oval-legend-item"><span class="oval-swatch" style="background:#00ddbb"></span>Medium</span>
                     <span class="oval-legend-item"><span class="oval-swatch" style="background:#cc44ff"></span>High</span>
+                    <span class="oval-legend-item" id="cloudLegend" style="display:none"><span class="oval-swatch" style="background:rgba(200,210,220,0.5)"></span>Cloud</span>
+                </div>
+                <div class="cloud-hour-slider" id="cloudHourSlider" style="display:none;">
+                    <label class="slider-label">
+                        <i class="bi bi-clock me-1"></i>Cloud forecast: <span id="cloudHourLabel">Now</span>
+                    </label>
+                    <input type="range" id="cloudHourRange" min="0" max="11" value="0" class="cloud-range">
                 </div>
             </div>
         </div>

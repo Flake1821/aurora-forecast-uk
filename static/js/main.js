@@ -1038,6 +1038,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 initAuroraView();
 
+                // ── Update aurora oval map darkness status for time-of-day rendering ──
+                var prevDarkness = auroraState.darknessStatus;
+                auroraState.darknessStatus = diData.darkness_status || 'dark';
+                if (auroraState.darknessStatus !== prevDarkness) {
+                    // Rebuild static layers with new palette
+                    var ovalCanvas = document.getElementById('auroraOvalCanvas');
+                    if (ovalCanvas) {
+                        var ow = ovalCanvas.width, oh = ovalCanvas.height;
+                        var oLatMin = 40, oLatMax = 72, oLonMin = -30, oLonMax = 30;
+                        function oLonToX(lon) { return ((lon - oLonMin) / (oLonMax - oLonMin)) * ow; }
+                        function oLatToY(lat) { return ((oLatMax - lat) / (oLatMax - oLatMin)) * oh; }
+                        buildLandLayer(ow, oh, oLonToX, oLatToY);
+                        buildOverlayLayer(ow, oh, oLonToX, oLatToY, oLatMin, oLatMax, oLonMin, oLonMax);
+                        if (cloudGridState.data) {
+                            buildCloudLayer(ow, oh);
+                        }
+                    }
+                }
+
                 // ── Live timestamp (with relative time) ──
                 var tsEl = document.getElementById('liveTimestamp');
                 if (tsEl && data.kp_timestamp) {
@@ -1316,14 +1335,106 @@ document.addEventListener('DOMContentLoaded', function () {
         auroraCanvas: null,   // offscreen: blurred aurora texture
         landCanvas: null,     // offscreen: land fills (below aurora)
         overlayCanvas: null,  // offscreen: coastlines + grid + marker
+        cloudCanvas: null,    // offscreen: cloud overlay + wind arrows
         animFrameId: null,    // requestAnimationFrame handle
-        animStartTime: 0      // for sinusoidal shimmer timing
+        animStartTime: 0,     // for sinusoidal shimmer timing
+        darknessStatus: 'dark' // updated from API: dark/astronomical_twilight/nautical_twilight/civil_twilight/daylight
+    };
+
+    // Cloud grid state for map overlay
+    var cloudGridState = {
+        data: null,           // raw API response from /api/cloud-grid
+        lastFetch: 0,         // timestamp of last successful fetch
+        hourOffset: 0         // slider position (0 = now, up to 11)
     };
 
     function createOffscreen(w, h) {
         var c = document.createElement('canvas');
         c.width = w; c.height = h;
         return c;
+    }
+
+    // Time-of-day colour palettes for aurora map
+    function getTimeOfDayPalette(darknessStatus) {
+        switch (darknessStatus) {
+            case 'dark':
+                return {
+                    seaTop: '#040a14', seaMid: '#081220', seaBot: '#0c1628',
+                    ukLand: 'rgba(22, 32, 20, 0.85)',
+                    ireLand: 'rgba(20, 30, 18, 0.82)',
+                    euroLand: 'rgba(18, 24, 16, 0.88)',
+                    iceLand: 'rgba(25, 28, 30, 0.85)',
+                    norLand: 'rgba(20, 26, 22, 0.86)',
+                    ukCoastColor: 'rgba(255,255,255,0.55)', ukCoastWidth: 1.5,
+                    euroCoastColor: 'rgba(255,255,255,0.35)', euroCoastWidth: 1,
+                    gridColor: 'rgba(255,255,255,0.06)',
+                    gridLabelColor: 'rgba(255,255,255,0.2)',
+                    vignetteColor: 'rgba(0,0,0,0.15)',
+                    ambientGlow: null
+                };
+            case 'astronomical_twilight':
+                return {
+                    seaTop: '#060e1c', seaMid: '#0a1626', seaBot: '#101c30',
+                    ukLand: 'rgba(25, 35, 22, 0.82)',
+                    ireLand: 'rgba(23, 33, 20, 0.80)',
+                    euroLand: 'rgba(20, 26, 18, 0.85)',
+                    iceLand: 'rgba(28, 30, 32, 0.83)',
+                    norLand: 'rgba(22, 28, 24, 0.84)',
+                    ukCoastColor: 'rgba(255,255,255,0.50)', ukCoastWidth: 1.5,
+                    euroCoastColor: 'rgba(255,255,255,0.32)', euroCoastWidth: 1,
+                    gridColor: 'rgba(255,255,255,0.06)',
+                    gridLabelColor: 'rgba(255,255,255,0.2)',
+                    vignetteColor: 'rgba(0,0,0,0.12)',
+                    ambientGlow: null
+                };
+            case 'nautical_twilight':
+                return {
+                    seaTop: '#0c1830', seaMid: '#122240', seaBot: '#1a2c48',
+                    ukLand: 'rgba(30, 42, 28, 0.78)',
+                    ireLand: 'rgba(28, 40, 25, 0.76)',
+                    euroLand: 'rgba(24, 32, 22, 0.80)',
+                    iceLand: 'rgba(35, 38, 42, 0.78)',
+                    norLand: 'rgba(26, 34, 28, 0.80)',
+                    ukCoastColor: 'rgba(255,255,255,0.45)', ukCoastWidth: 1.5,
+                    euroCoastColor: 'rgba(255,255,255,0.30)', euroCoastWidth: 1,
+                    gridColor: 'rgba(255,255,255,0.07)',
+                    gridLabelColor: 'rgba(255,255,255,0.22)',
+                    vignetteColor: 'rgba(0,0,0,0.08)',
+                    ambientGlow: {color: 'rgba(40, 30, 60, 0.08)', y: 1.0}
+                };
+            case 'civil_twilight':
+                return {
+                    seaTop: '#1a2848', seaMid: '#243858', seaBot: '#2e4460',
+                    ukLand: 'rgba(38, 50, 32, 0.72)',
+                    ireLand: 'rgba(35, 48, 30, 0.70)',
+                    euroLand: 'rgba(30, 38, 26, 0.75)',
+                    iceLand: 'rgba(42, 44, 48, 0.72)',
+                    norLand: 'rgba(32, 40, 34, 0.74)',
+                    ukCoastColor: 'rgba(255,255,240,0.40)', ukCoastWidth: 1.5,
+                    euroCoastColor: 'rgba(255,255,240,0.28)', euroCoastWidth: 1,
+                    gridColor: 'rgba(255,255,255,0.08)',
+                    gridLabelColor: 'rgba(255,255,255,0.25)',
+                    vignetteColor: 'rgba(0,0,0,0.05)',
+                    ambientGlow: {color: 'rgba(80, 50, 30, 0.12)', y: 1.0}
+                };
+            case 'daylight':
+                return {
+                    seaTop: '#1e3a5c', seaMid: '#2a4e72', seaBot: '#365e82',
+                    ukLand: 'rgba(48, 68, 40, 0.65)',
+                    ireLand: 'rgba(45, 65, 38, 0.63)',
+                    euroLand: 'rgba(40, 52, 34, 0.68)',
+                    iceLand: 'rgba(55, 58, 62, 0.65)',
+                    norLand: 'rgba(42, 54, 44, 0.66)',
+                    ukCoastColor: 'rgba(255,255,255,0.35)', ukCoastWidth: 1.5,
+                    euroCoastColor: 'rgba(255,255,255,0.22)', euroCoastWidth: 1,
+                    gridColor: 'rgba(255,255,255,0.10)',
+                    gridLabelColor: 'rgba(255,255,255,0.28)',
+                    vignetteColor: 'rgba(0,0,0,0.0)',
+                    ambientGlow: {color: 'rgba(180, 160, 120, 0.06)', y: 0.0}
+                };
+            default:
+                return getTimeOfDayPalette('dark');
+        }
     }
 
     // Interpolated aurora colour palette (real aurora colours)
@@ -1420,7 +1531,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var lc = auroraState.landCanvas;
         var lctx = lc.getContext('2d');
         lctx.clearRect(0, 0, W, H);
-        drawLandFills(lctx, lonToX, latToY);
+        var palette = getTimeOfDayPalette(auroraState.darknessStatus);
+        drawLandFills(lctx, lonToX, latToY, palette);
     }
 
     function buildOverlayLayer(W, H, lonToX, latToY, latMin, latMax, lonMin, lonMax) {
@@ -1429,18 +1541,20 @@ document.addEventListener('DOMContentLoaded', function () {
         var octx = oc.getContext('2d');
         octx.clearRect(0, 0, W, H);
 
+        var palette = getTimeOfDayPalette(auroraState.darknessStatus);
+
         // Coastline strokes (land fills are on separate layer below aurora)
-        drawCoastlines(octx, lonToX, latToY);
+        drawCoastlines(octx, lonToX, latToY, palette);
 
         // Grid lines
-        octx.strokeStyle = 'rgba(255,255,255,0.06)';
+        octx.strokeStyle = palette.gridColor;
         octx.lineWidth = 0.5;
         for (var gLat = 45; gLat <= 70; gLat += 5) {
             octx.beginPath();
             octx.moveTo(0, latToY(gLat));
             octx.lineTo(W, latToY(gLat));
             octx.stroke();
-            octx.fillStyle = 'rgba(255,255,255,0.2)';
+            octx.fillStyle = palette.gridLabelColor;
             octx.font = '9px sans-serif';
             octx.fillText(gLat + '\u00b0N', 3, latToY(gLat) - 2);
         }
@@ -1496,17 +1610,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
             ctx.clearRect(0, 0, W, H);
 
-            // Ocean background — dark blue gradient
+            // Ocean background — time-of-day aware
+            var palette = getTimeOfDayPalette(auroraState.darknessStatus);
             var seaGrad = ctx.createLinearGradient(0, 0, 0, H);
-            seaGrad.addColorStop(0, '#060d18');   // deep navy at top (high latitudes)
-            seaGrad.addColorStop(0.4, '#0a1422'); // mid ocean blue
-            seaGrad.addColorStop(1, '#0c1628');   // slightly lighter at bottom
+            seaGrad.addColorStop(0, palette.seaTop);
+            seaGrad.addColorStop(0.4, palette.seaMid);
+            seaGrad.addColorStop(1, palette.seaBot);
             ctx.fillStyle = seaGrad;
             ctx.fillRect(0, 0, W, H);
+
+            // Subtle depth variation — lighter patch in mid-ocean
+            var depthGrad = ctx.createRadialGradient(W * 0.3, H * 0.6, 0, W * 0.3, H * 0.6, W * 0.6);
+            depthGrad.addColorStop(0, 'rgba(20, 40, 80, 0.06)');
+            depthGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = depthGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Ambient glow at horizon (twilight states)
+            if (palette.ambientGlow) {
+                var glowY = palette.ambientGlow.y * H;
+                var glow = ctx.createRadialGradient(W / 2, glowY, 0, W / 2, glowY, W * 0.8);
+                glow.addColorStop(0, palette.ambientGlow.color);
+                glow.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = glow;
+                ctx.fillRect(0, 0, W, H);
+            }
+
+            // Vignette for depth
+            if (palette.vignetteColor && palette.vignetteColor !== 'rgba(0,0,0,0.0)') {
+                var vig = ctx.createRadialGradient(W / 2, H / 2, W * 0.3, W / 2, H / 2, W * 0.8);
+                vig.addColorStop(0, 'rgba(0,0,0,0)');
+                vig.addColorStop(1, palette.vignetteColor);
+                ctx.fillStyle = vig;
+                ctx.fillRect(0, 0, W, H);
+            }
 
             // Land fills below aurora (so aurora glows over land)
             if (auroraState.landCanvas) {
                 ctx.drawImage(auroraState.landCanvas, 0, 0);
+            }
+
+            // Cloud overlay (between land and aurora)
+            if (auroraState.cloudCanvas) {
+                ctx.save();
+                ctx.globalAlpha = 0.8;
+                ctx.drawImage(auroraState.cloudCanvas, 0, 0);
+                ctx.restore();
             }
 
             // Aurora layer with shimmer + drift
@@ -1562,6 +1711,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Build overlay (coastlines, grid, user marker)
                 buildOverlayLayer(W, H, lonToX, latToY, latMin, latMax, lonMin, lonMax);
 
+                // Fetch cloud grid overlay (async, non-blocking)
+                fetchCloudGrid();
+                // Refresh cloud grid every 30 minutes
+                setInterval(fetchCloudGrid, 1800000);
+
                 // Show forecast time
                 var timeEl = document.getElementById('ovalForecastTime');
                 if (timeEl && data['Forecast Time']) {
@@ -1577,10 +1731,9 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // Fill land masses as solid polygons (subtle dark land colour)
-    function drawLandFills(ctx, lonToX, latToY) {
-        var landColor = 'rgba(22, 28, 20, 0.85)';       // dark earthy green-grey
-        var landColorBright = 'rgba(28, 35, 25, 0.80)';  // UK/Ireland slightly brighter
+    // Fill land masses as solid polygons (time-of-day palette colours)
+    function drawLandFills(ctx, lonToX, latToY, palette) {
+        palette = palette || getTimeOfDayPalette(auroraState.darknessStatus);
 
         function fillPoly(points, color) {
             if (points.length < 3) return;
@@ -1659,32 +1812,32 @@ document.addEventListener('DOMContentLoaded', function () {
             [-5.18,50.70],[-5.28,50.58],[-5.38,50.48],[-5.48,50.38],[-5.55,50.28],
             [-5.62,50.18],[-5.68,50.12],[-5.72,50.07]
         ];
-        fillPoly(uk, landColorBright);
+        fillPoly(uk, palette.ukLand);
 
         // Islands
         var shetland = [[-1.30,60.15],[-1.20,60.10],[-1.08,60.15],[-1.02,60.25],[-1.10,60.35],[-1.05,60.43],[-1.10,60.50],[-1.22,60.50],[-1.30,60.45],[-1.35,60.38],[-1.32,60.30],[-1.28,60.22],[-1.30,60.15]];
-        fillPoly(shetland, landColorBright);
+        fillPoly(shetland, palette.ukLand);
 
         var orkney = [[-2.95,58.88],[-2.82,58.85],[-2.78,58.90],[-2.85,58.98],[-2.95,59.00],[-3.10,59.02],[-3.18,58.98],[-3.22,58.92],[-3.15,58.88],[-2.95,58.88]];
-        fillPoly(orkney, landColorBright);
+        fillPoly(orkney, palette.ukLand);
 
         var hebrides = [[-6.15,57.18],[-6.08,57.28],[-6.15,57.38],[-6.22,57.48],[-6.18,57.58],[-6.25,57.72],[-6.18,57.82],[-6.30,57.92],[-6.35,58.05],[-6.42,58.15],[-6.38,58.25],[-6.30,58.28],[-6.22,58.22],[-6.32,58.12],[-6.28,58.02],[-6.38,57.90],[-6.30,57.78],[-6.35,57.65],[-6.28,57.55],[-6.35,57.42],[-6.22,57.30],[-6.15,57.18]];
-        fillPoly(hebrides, landColorBright);
+        fillPoly(hebrides, palette.ukLand);
 
         var skye = [[-5.80,57.08],[-5.72,57.12],[-5.65,57.18],[-5.75,57.25],[-5.88,57.28],[-6.02,57.30],[-6.12,57.27],[-6.18,57.22],[-6.12,57.15],[-5.98,57.10],[-5.88,57.08],[-5.80,57.08]];
-        fillPoly(skye, landColorBright);
+        fillPoly(skye, palette.ukLand);
 
         var mull = [[-5.72,56.42],[-5.62,56.45],[-5.55,56.50],[-5.65,56.55],[-5.78,56.52],[-5.90,56.48],[-5.92,56.42],[-5.85,56.38],[-5.72,56.42]];
-        fillPoly(mull, landColorBright);
+        fillPoly(mull, palette.ukLand);
 
         var iom = [[-4.35,54.08],[-4.30,54.12],[-4.32,54.20],[-4.38,54.28],[-4.42,54.35],[-4.48,54.38],[-4.55,54.35],[-4.58,54.28],[-4.55,54.20],[-4.50,54.12],[-4.42,54.08],[-4.35,54.08]];
-        fillPoly(iom, landColorBright);
+        fillPoly(iom, palette.ukLand);
 
         var anglesey = [[-4.08,53.22],[-4.15,53.25],[-4.22,53.28],[-4.32,53.30],[-4.42,53.28],[-4.48,53.25],[-4.52,53.22],[-4.45,53.18],[-4.35,53.18],[-4.22,53.20],[-4.12,53.22],[-4.08,53.22]];
-        fillPoly(anglesey, landColorBright);
+        fillPoly(anglesey, palette.ukLand);
 
         var iow = [[-1.10,50.65],[-1.18,50.68],[-1.28,50.70],[-1.42,50.70],[-1.52,50.68],[-1.55,50.65],[-1.48,50.63],[-1.38,50.62],[-1.25,50.62],[-1.15,50.63],[-1.10,50.65]];
-        fillPoly(iow, landColorBright);
+        fillPoly(iow, palette.ukLand);
 
         // Ireland
         var ire = [
@@ -1711,7 +1864,7 @@ document.addEventListener('DOMContentLoaded', function () {
             [-5.98,54.32],[-6.02,54.22],[-6.08,54.12],[-6.12,54.02],[-6.08,53.88],
             [-6.02,53.72],[-6.05,53.58],[-6.10,53.48],[-6.05,53.35]
         ];
-        fillPoly(ire, landColorBright);
+        fillPoly(ire, palette.ireLand);
 
         // European landmasses — fill with dimmer colour
         // Norway (simplified filled shape extending to map edge)
@@ -1723,7 +1876,7 @@ document.addEventListener('DOMContentLoaded', function () {
             [18.0,69.0],[20.0,69.5],[22.0,69.8],[25.0,70.0],[28.0,70.5],[30.0,70.0],
             [30.0,72.0],[5.0,72.0]
         ];
-        fillPoly(norFill, landColor);
+        fillPoly(norFill, palette.norLand);
 
         // Sweden/Finland
         var sweFill = [
@@ -1731,7 +1884,7 @@ document.addEventListener('DOMContentLoaded', function () {
             [12.0,59.0],[11.5,59.5],[11.0,60.0],[10.5,60.5],[11.0,60.0],[12.0,59.5],
             [13.0,59.0],[14.0,58.5],[14.5,58.0],[14.0,57.5],[13.0,56.5],[12.0,56.0]
         ];
-        fillPoly(sweFill, landColor);
+        fillPoly(sweFill, palette.euroLand);
 
         // NW Europe coast — fill below the coastline to bottom of map
         var eurFill = [
@@ -1742,7 +1895,7 @@ document.addEventListener('DOMContentLoaded', function () {
             [10.0,54.5],[9.5,54.5],[9.0,54.0],[8.5,53.5],[8.0,54.0],[7.0,53.5],
             [7.0,40.0],[-30.0,40.0]
         ];
-        fillPoly(eurFill, landColor);
+        fillPoly(eurFill, palette.euroLand);
 
         // Iceland
         var ice = [
@@ -1750,13 +1903,14 @@ document.addEventListener('DOMContentLoaded', function () {
             [-14.0,64.5],[-14.0,65.5],[-15.0,66.0],[-17.0,66.3],[-19.0,66.5],
             [-21.0,66.3],[-23.0,66.0],[-24.0,65.5],[-23.0,64.5],[-22.0,64.0]
         ];
-        fillPoly(ice, landColor);
+        fillPoly(ice, palette.iceLand);
     }
 
-    function drawCoastlines(ctx, lonToX, latToY) {
+    function drawCoastlines(ctx, lonToX, latToY, palette) {
+        palette = palette || getTimeOfDayPalette(auroraState.darknessStatus);
         // ── UK & Ireland (brighter, thicker) ──
-        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = palette.ukCoastColor;
+        ctx.lineWidth = palette.ukCoastWidth;
 
         // UK mainland — detailed coastline (~180 points)
         var uk = [
@@ -1944,8 +2098,8 @@ document.addEventListener('DOMContentLoaded', function () {
         drawPath(ctx, ire, lonToX, latToY);
 
         // ── European coastlines (dimmer, thinner) ──
-        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = palette.euroCoastColor;
+        ctx.lineWidth = palette.euroCoastWidth;
 
         // Norway
         var nor = [
@@ -1986,6 +2140,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function drawPath(ctx, points, lonToX, latToY) {
         if (points.length < 2) return;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         ctx.beginPath();
         ctx.moveTo(lonToX(points[0][0]), latToY(points[0][1]));
         for (var i = 1; i < points.length; i++) {
@@ -1993,6 +2149,145 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         ctx.stroke();
     }
+
+    // ═══════════════════════════════════════════════
+    // CLOUD GRID OVERLAY FOR AURORA MAP
+    // Fetches 48-point cloud + wind grid from backend
+    // ═══════════════════════════════════════════════
+
+    function fetchCloudGrid() {
+        fetch('/api/cloud-grid')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.grid && data.grid.length > 0) {
+                    cloudGridState.data = data;
+                    cloudGridState.lastFetch = Date.now();
+                    var canvas = document.getElementById('auroraOvalCanvas');
+                    if (canvas) {
+                        buildCloudLayer(canvas.width, canvas.height);
+                    }
+                    // Show the cloud slider and legend
+                    var slider = document.getElementById('cloudHourSlider');
+                    if (slider) slider.style.display = 'block';
+                    var legend = document.getElementById('cloudLegend');
+                    if (legend) legend.style.display = '';
+                }
+            })
+            .catch(function(err) {
+                console.warn('Cloud grid fetch failed:', err);
+            });
+    }
+
+    function buildCloudLayer(W, H) {
+        if (!cloudGridState.data) return;
+        if (!auroraState.cloudCanvas) auroraState.cloudCanvas = createOffscreen(W, H);
+
+        var cc = auroraState.cloudCanvas;
+        var cctx = cc.getContext('2d');
+        cctx.clearRect(0, 0, W, H);
+
+        var latMin = 40, latMax = 72, lonMin = -30, lonMax = 30;
+        function cLonToX(lon) { return ((lon - lonMin) / (lonMax - lonMin)) * W; }
+        function cLatToY(lat) { return ((latMax - lat) / (latMax - latMin)) * H; }
+
+        var grid = cloudGridState.data.grid;
+        var hourIdx = cloudGridState.hourOffset;
+
+        // Calculate grid cell sizes for patch overlap
+        var gridLonStep = 8;  // degrees between grid points
+        var gridLatStep = 6;
+        var patchRadiusX = (gridLonStep / (lonMax - lonMin)) * W * 0.8;
+        var patchRadiusY = (gridLatStep / (latMax - latMin)) * H * 0.8;
+        var patchRadius = Math.max(patchRadiusX, patchRadiusY);
+
+        for (var i = 0; i < grid.length; i++) {
+            var point = grid[i];
+            var hourData = point.hours && point.hours[hourIdx];
+            if (!hourData) continue;
+
+            var cloudPct = hourData.cloud_cover;
+            if (cloudPct <= 5) continue;  // skip clear cells
+
+            var x = cLonToX(point.lon);
+            var y = cLatToY(point.lat);
+
+            // Cloud opacity scales with coverage, max 0.35 to not obscure aurora
+            var opacity = (cloudPct / 100) * 0.28;
+
+            var grad = cctx.createRadialGradient(x, y, 0, x, y, patchRadius);
+            grad.addColorStop(0, 'rgba(200, 210, 220, ' + opacity + ')');
+            grad.addColorStop(0.5, 'rgba(180, 190, 200, ' + (opacity * 0.6) + ')');
+            grad.addColorStop(1, 'rgba(160, 170, 180, 0)');
+            cctx.fillStyle = grad;
+            cctx.beginPath();
+            cctx.arc(x, y, patchRadius, 0, Math.PI * 2);
+            cctx.fill();
+        }
+
+        // Blur for natural softness
+        try {
+            var temp = createOffscreen(W, H);
+            var tctx = temp.getContext('2d');
+            tctx.filter = 'blur(8px)';
+            tctx.drawImage(cc, 0, 0);
+            cctx.clearRect(0, 0, W, H);
+            cctx.drawImage(temp, 0, 0);
+        } catch (e) {
+            // blur not supported, radial gradients are soft enough
+        }
+
+        // Draw wind direction arrows on top
+        drawWindArrows(cctx, grid, hourIdx, cLonToX, cLatToY);
+    }
+
+    function drawWindArrows(ctx, grid, hourIdx, lonToX, latToY) {
+        for (var i = 0; i < grid.length; i++) {
+            var point = grid[i];
+            var hourData = point.hours && point.hours[hourIdx];
+            if (!hourData || hourData.wind_speed < 2) continue;
+
+            var x = lonToX(point.lon);
+            var y = latToY(point.lat);
+
+            // Wind direction is FROM, arrow should point TO (add 180°)
+            var dirRad = ((hourData.wind_direction + 180) % 360) * Math.PI / 180;
+
+            // Arrow length scales with wind speed (5–20px)
+            var len = Math.min(20, Math.max(5, hourData.wind_speed * 0.8));
+
+            // Arrow opacity scales with wind speed
+            var alpha = Math.min(0.6, 0.2 + hourData.wind_speed / 50);
+            ctx.strokeStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+            ctx.fillStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+            ctx.lineWidth = 1.2;
+            ctx.lineCap = 'round';
+
+            // Shaft
+            var endX = x + Math.sin(dirRad) * len;
+            var endY = y - Math.cos(dirRad) * len;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+
+            // Arrowhead
+            var headLen = 4;
+            var headAngle = Math.PI / 6;
+            ctx.beginPath();
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(
+                endX - headLen * Math.sin(dirRad - headAngle),
+                endY + headLen * Math.cos(dirRad - headAngle)
+            );
+            ctx.lineTo(
+                endX - headLen * Math.sin(dirRad + headAngle),
+                endY + headLen * Math.cos(dirRad + headAngle)
+            );
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+
 
     // ═══════════════════════════════════════════════
     // AURORA HORIZON VIEW — Realistic simulated view
@@ -2879,6 +3174,22 @@ document.addEventListener('DOMContentLoaded', function () {
     renderAuroraOval();
     setInterval(renderAuroraOval, 300000);
     window.renderAuroraOval = renderAuroraOval;  // expose for demo/testing
+
+    // Cloud forecast slider — hourly stepping
+    var cloudRange = document.getElementById('cloudHourRange');
+    if (cloudRange) {
+        cloudRange.addEventListener('input', function() {
+            cloudGridState.hourOffset = parseInt(this.value, 10);
+            var label = document.getElementById('cloudHourLabel');
+            if (label) {
+                label.textContent = this.value === '0' ? 'Now' : '+' + this.value + 'h';
+            }
+            var canvas = document.getElementById('auroraOvalCanvas');
+            if (canvas) {
+                buildCloudLayer(canvas.width, canvas.height);
+            }
+        });
+    }
 
     // Render aurora horizon view
     initAuroraView();

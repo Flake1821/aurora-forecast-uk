@@ -2944,6 +2944,51 @@ a:hover {
     color: var(--text-muted);
 }
 
+/* ── Cloud Forecast Slider (below aurora map) ── */
+.cloud-hour-slider {
+    padding: 0.4rem 1rem 0.6rem;
+    text-align: center;
+}
+.cloud-hour-slider .slider-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 0.3rem;
+}
+.cloud-hour-slider .slider-label span {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+.cloud-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    max-width: 300px;
+    height: 4px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+.cloud-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--aurora-green);
+    border: 2px solid rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+.cloud-range::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--aurora-green);
+    border: 2px solid rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+
 
 /* ── Aurora Horizon View Panel ── */
 

@@ -253,3 +253,14 @@ def latest_alert():
             'excerpt': post.excerpt,
         }
     })
+
+
+@api_bp.route('/cloud-grid')
+def cloud_grid():
+    """Cloud cover + wind grid for aurora map overlay (48 points, 12 hours)."""
+    try:
+        from services.space_weather import _fetch_cloud_grid
+        data = _fetch_cloud_grid()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'grid': [], 'error': str(e)})

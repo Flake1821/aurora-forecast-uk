@@ -1306,6 +1306,110 @@ def _fetch_hourly_cloud_forecast(lat, lon):
         return []
 
 
+# In-memory cache for cloud grid data (location-independent)
+_cloud_grid_cache = {'data': None, 'timestamp': 0}
+
+def _fetch_cloud_grid():
+    """Fetch cloud cover + wind grid for aurora map overlay.
+
+    Returns a 6×8 grid of 48 points covering 40-72°N, -30 to +30°E.
+    Each point has 12 hours of cloud_cover, wind_speed, wind_direction.
+    Uses UKMO seamless model with fallback to generic.
+    Cached for 30 minutes (grid is location-independent).
+    """
+    import time as _time
+
+    # Check cache (30 minutes = 1800 seconds)
+    now = _time.time()
+    if _cloud_grid_cache['data'] and (now - _cloud_grid_cache['timestamp']) < 1800:
+        return _cloud_grid_cache['data']
+
+    grid_lats = [42, 48, 54, 58, 62, 68]
+    grid_lons = [-27, -19, -11, -3, 5, 13, 21, 29]
+
+    # Open-Meteo requires paired lat/lon arrays of equal length
+    # Generate all 48 combinations (6 lats × 8 lons)
+    all_lats = []
+    all_lons = []
+    for lat in grid_lats:
+        for lon in grid_lons:
+            all_lats.append(str(lat))
+            all_lons.append(str(lon))
+
+    lat_str = ','.join(all_lats)
+    lon_str = ','.join(all_lons)
+
+    params = {
+        'latitude': lat_str,
+        'longitude': lon_str,
+        'hourly': 'cloud_cover,wind_speed_10m,wind_direction_10m',
+        'forecast_hours': 12,
+        'timezone': 'UTC',
+        'models': UKMO_MODEL_SEAMLESS,
+    }
+
+    try:
+        try:
+            resp = requests.get(OPEN_METEO_URL, params=params, timeout=15)
+            resp.raise_for_status()
+        except Exception:
+            logger.info('UKMO seamless unavailable for cloud grid, falling back to generic')
+            params.pop('models', None)
+            resp = requests.get(OPEN_METEO_URL, params=params, timeout=15)
+            resp.raise_for_status()
+
+        raw = resp.json()
+
+        # Open-Meteo multi-location returns a list of objects
+        # Each element corresponds to one (lat, lon) pair
+        if not isinstance(raw, list):
+            raw = [raw]
+
+        grid = []
+        for i, entry in enumerate(raw):
+            lat = entry.get('latitude', grid_lats[i] if i < len(grid_lats) else 0)
+            lon = entry.get('longitude', grid_lons[i] if i < len(grid_lons) else 0)
+            hourly = entry.get('hourly', {})
+            times = hourly.get('time', [])
+            clouds = hourly.get('cloud_cover', [])
+            winds = hourly.get('wind_speed_10m', [])
+            dirs = hourly.get('wind_direction_10m', [])
+
+            hours = []
+            for h in range(min(12, len(times))):
+                hours.append({
+                    'hour_offset': h,
+                    'time': times[h] if h < len(times) else '',
+                    'cloud_cover': int(clouds[h]) if h < len(clouds) and clouds[h] is not None else 0,
+                    'wind_speed': round(float(winds[h]), 1) if h < len(winds) and winds[h] is not None else 0,
+                    'wind_direction': int(dirs[h]) if h < len(dirs) and dirs[h] is not None else 0,
+                })
+
+            grid.append({
+                'lat': lat,
+                'lon': lon,
+                'hours': hours,
+            })
+
+        result = {
+            'grid': grid,
+            'grid_lats': grid_lats,
+            'grid_lons': grid_lons,
+            'generated_at': datetime.utcnow().isoformat() + 'Z',
+        }
+
+        _cloud_grid_cache['data'] = result
+        _cloud_grid_cache['timestamp'] = now
+        return result
+
+    except Exception as e:
+        logger.warning(f'Cloud grid fetch failed: {e}')
+        # Return cached data if available, else empty
+        if _cloud_grid_cache['data']:
+            return _cloud_grid_cache['data']
+        return {'grid': [], 'grid_lats': grid_lats, 'grid_lons': grid_lons, 'error': str(e)}
+
+
 def _go_outside_verdict(kp, current_weather, moon_phase, kp_threshold=5,
                         location_name='your location', imf_data=None,
                         darkness_info=None, light_pollution=None):
