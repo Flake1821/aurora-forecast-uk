@@ -734,18 +734,19 @@ a:hover {
     margin-bottom: 0.1rem;
 }
 .cloud-layer-label {
-    font-size: 0.55rem;
-    color: var(--text-muted);
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.75);
     width: 1.6rem;
     text-align: right;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    font-weight: 600;
 }
 .cloud-layer-bar {
     flex: 1;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 1.5px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
     overflow: hidden;
 }
 .cloud-layer-fill {
@@ -753,22 +754,24 @@ a:hover {
     border-radius: 1.5px;
     transition: width 0.5s ease;
 }
-.cloud-layer-high { background: #9FA8DA; }
-.cloud-layer-mid  { background: #78909C; }
-.cloud-layer-low  { background: #546E7A; }
+.cloud-layer-high { background: #B0BEC5; }
+.cloud-layer-mid  { background: #90A4AE; }
+.cloud-layer-low  { background: #78909C; }
 .cloud-layer-pct {
-    font-size: 0.55rem;
-    color: var(--text-secondary);
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.85);
     width: 2rem;
     text-align: right;
+    font-weight: 500;
 }
 .cloud-model-badge {
-    font-size: 0.5rem;
-    color: var(--aurora-blue);
-    opacity: 0.65;
+    font-size: 0.55rem;
+    color: var(--aurora-green);
+    opacity: 0.9;
     display: block;
-    margin-top: 0.2rem;
+    margin-top: 0.25rem;
     letter-spacing: 0.02em;
+    font-weight: 500;
 }
 
 /* 3-Day forecast cloud layers */
@@ -783,32 +786,33 @@ a:hover {
     margin-bottom: 0.1rem;
 }
 .dcl-label {
-    font-size: 0.55rem;
-    color: var(--text-muted);
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.75);
     width: 0.8rem;
     text-align: right;
     font-weight: 600;
 }
 .dcl-bar {
     flex: 1;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 1.5px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
     overflow: hidden;
 }
 .dcl-fill {
     height: 100%;
-    border-radius: 1.5px;
+    border-radius: 2px;
     transition: width 0.5s ease;
 }
-.dcl-high { background: #9FA8DA; }
-.dcl-mid  { background: #78909C; }
-.dcl-low  { background: #546E7A; }
+.dcl-high { background: #B0BEC5; }
+.dcl-mid  { background: #90A4AE; }
+.dcl-low  { background: #78909C; }
 .dcl-pct {
-    font-size: 0.5rem;
-    color: var(--text-secondary);
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.85);
     width: 2rem;
     text-align: right;
+    font-weight: 500;
 }
 
 .weather-viewing-label {
@@ -2005,6 +2009,23 @@ a:hover {
 .cond-weather-now.weather-time-daylight .cloud-bar-mini {
     background: rgba(0, 0, 0, 0.12);
 }
+/* Daylight: cloud layers need dark text too */
+.cond-weather-now.weather-time-daylight .cloud-layer-label {
+    color: rgba(0, 0, 0, 0.55);
+}
+.cond-weather-now.weather-time-daylight .cloud-layer-pct {
+    color: rgba(0, 0, 0, 0.7);
+}
+.cond-weather-now.weather-time-daylight .cloud-layer-bar {
+    background: rgba(0, 0, 0, 0.1);
+}
+.cond-weather-now.weather-time-daylight .cloud-layer-high { background: #5C6BC0; }
+.cond-weather-now.weather-time-daylight .cloud-layer-mid  { background: #546E7A; }
+.cond-weather-now.weather-time-daylight .cloud-layer-low  { background: #37474F; }
+.cond-weather-now.weather-time-daylight .cloud-model-badge {
+    color: #2E7D32;
+    opacity: 0.8;
+}
 
 /* Civil twilight: warm white on dusky background */
 .cond-weather-now.weather-time-civil_twilight .weather-now-label,
@@ -2120,6 +2141,44 @@ a:hover {
 .cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .cloud-bar-mini,
 .cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .cloud-bar-mini {
     background: rgba(255, 255, 255, 0.15);
+}
+/* Bad weather daylight: cloud layers revert to light text */
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .cloud-layer-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .cloud-layer-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .cloud-layer-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .cloud-layer-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .cloud-layer-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .cloud-layer-label,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .cloud-layer-label {
+    color: rgba(255, 255, 255, 0.7);
+}
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .cloud-layer-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .cloud-layer-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .cloud-layer-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .cloud-layer-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .cloud-layer-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .cloud-layer-pct,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .cloud-layer-pct {
+    color: rgba(255, 255, 255, 0.85);
+}
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .cloud-layer-bar,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .cloud-layer-bar,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .cloud-layer-bar,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .cloud-layer-bar,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .cloud-layer-bar,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .cloud-layer-bar,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .cloud-layer-bar {
+    background: rgba(255, 255, 255, 0.12);
+}
+.cond-weather-now.weather-time-daylight.weather-wmo-3 .cloud-model-badge,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-4"] .cloud-model-badge,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-5"] .cloud-model-badge,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-6"] .cloud-model-badge,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-7"] .cloud-model-badge,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-8"] .cloud-model-badge,
+.cond-weather-now.weather-time-daylight[class*="weather-wmo-9"] .cloud-model-badge {
+    color: var(--aurora-green);
+    opacity: 0.85;
 }
 
 /* ── Boost civil twilight secondary text contrast ── */
