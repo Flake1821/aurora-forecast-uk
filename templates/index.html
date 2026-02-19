@@ -50,11 +50,12 @@
                 <!-- AuroraWatch + Aurora Chance -->
                 <div class="cond-panel cond-status">
                     <div class="cond-status-header">
-                        <span class="cond-label">AuroraWatch UK</span>
+                        <span class="cond-label">UK Aurora Activity Now</span>
                         <span id="awStatus" class="weather-status-badge status-{{ aw_status }}">{{ aw_status|capitalize }}</span>
-                        <button class="info-tooltip-btn" aria-label="What is AuroraWatch?"><i class="bi bi-question-circle-fill"></i></button>
+                        <button class="info-tooltip-btn" aria-label="What is UK Aurora Activity?"><i class="bi bi-question-circle-fill"></i></button>
                     </div>
-                    <div class="info-tooltip-content">AuroraWatch UK monitors geomagnetic activity from Lancaster University. Green = quiet, Yellow = minor activity, Amber = possible aurora, Red = aurora likely.</div>
+                    <p id="awMeaning" class="aw-meaning">{% if aw_status == 'green' %}Aurora unlikely for most of the UK.{% elif aw_status == 'yellow' %}Best chance in Scotland if skies are clear.{% elif aw_status == 'amber' %}Good chance in northern UK &mdash; look north.{% elif aw_status == 'red' %}Possible much farther south &mdash; find a dark spot.{% else %}Status unavailable{% endif %}</p>
+                    <div class="info-tooltip-content">Live UK magnetometer readings &mdash; higher means aurora is more likely.</div>
 
                     <!-- Aurora Chance -->
                     <div class="cornwall-chance" id="cornwallChance">
@@ -81,10 +82,11 @@
                 <!-- Radial Hp30/Kp Gauge (centre) — shows Hp30 if available, falls back to Kp -->
                 <div class="cond-panel cond-kp-radial">
                     <div class="cond-kp-label">
-                        {% if hp30 is not none %}Hp30 Now{% else %}Kp Now{% endif %}
+                        <span id="gaugeMainLabel">{% if hp30 is not none %}Global Activity (30-min){% else %}Global Activity (Now){% endif %}</span>
+                        <span class="metric-tag" id="gaugeMetricTag">{% if hp30 is not none %}Hp30{% else %}Kp{% endif %}</span>
                         <button class="info-tooltip-btn" aria-label="What is the Hp30 index?"><i class="bi bi-question-circle-fill"></i></button>
                     </div>
-                    <div class="info-tooltip-content">The Hp30 index is a half-hourly geomagnetic index from GFZ Potsdam &mdash; 6&times; finer resolution than the 3-hourly Kp. Same 0&ndash;9+ scale. {{ location_name }} needs Kp/Hp30 {{ kp_threshold }}+ for visible aurora.</div>
+                    <div class="info-tooltip-content">Global magnetic activity updated every 30 minutes.</div>
                     <div class="radial-gauge-container" id="radialGauge"
                          data-kp="{{ '%.1f'|format(hp30) if hp30 is not none else ('%.1f'|format(kp) if kp is not none else '0') }}"></div>
                 </div>
@@ -94,10 +96,11 @@
                 <div class="cond-panel cond-kp-radial cond-kp-predicted">
                     <div class="cond-kp-label">
                         {% set pred_hours = space_weather.get('kp_predicted_hours', 3) %}
-                        <span id="kpPredictedLabel">Kp Next</span>
-                        <button class="info-tooltip-btn" aria-label="What is the predicted Kp?"><i class="bi bi-question-circle-fill"></i></button>
+                        <span id="kpPredictedLabel">Storm Strength (3-hour)</span>
+                        <span class="metric-tag">Kp</span>
+                        <button class="info-tooltip-btn" aria-label="What is storm strength?"><i class="bi bi-question-circle-fill"></i></button>
                     </div>
-                    <div class="info-tooltip-content">NOAA forecast Kp for the next 3-hour period (starting in ~{{ pred_hours }} hour{{ 's' if pred_hours != 1 else '' }}). Shows expected geomagnetic activity soon.</div>
+                    <div class="info-tooltip-content">Global storm level averaged over 3 hours.</div>
                     <div class="radial-gauge-container" id="radialGaugePredicted"
                          data-kp="{{ '%.1f'|format(pred_kp) if pred_kp is not none else '0' }}"></div>
                 </div>

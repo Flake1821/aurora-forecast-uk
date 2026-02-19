@@ -332,6 +332,20 @@ a:hover {
     color: var(--text-secondary);
 }
 
+.metric-tag {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
+    padding: 0.1rem 0.3rem;
+    margin-left: 0.25rem;
+    vertical-align: middle;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
 .cond-kp-value {
     font-size: 2.8rem;
     font-weight: 800;
@@ -385,6 +399,21 @@ a:hover {
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.35rem;
+}
+
+.aw-meaning {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin: 0 0 0.25rem 0;
+    line-height: 1.4;
+    transition: opacity 0.25s ease;
+}
+@keyframes aw-meaning-fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.aw-meaning-fade {
+    animation: aw-meaning-fadein 0.25s ease;
 }
 
 .cond-label {
@@ -1328,23 +1357,31 @@ a:hover {
     color: var(--aurora-green);
 }
 .info-tooltip-content {
-    display: none;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
     font-size: 0.72rem;
     color: var(--text-muted);
     background: rgba(0, 0, 0, 0.35);
     border-radius: 6px;
-    padding: 0.45rem 0.6rem;
-    margin: 0.35rem 0 0.25rem;
+    padding: 0 0.6rem;
+    margin: 0;
     line-height: 1.45;
     border-left: 2px solid var(--aurora-green);
+    transition: max-height 0.25s ease, opacity 0.25s ease, padding 0.25s ease, margin 0.25s ease;
 }
 .info-tooltip-content.expanded {
-    display: block;
+    max-height: 200px;
+    opacity: 1;
+    padding: 0.45rem 0.6rem;
+    margin: 0.35rem 0 0.25rem;
 }
 .chart-tooltip.expanded,
 .forecast-tooltip.expanded {
-    display: block;
-    margin-bottom: 0.5rem;
+    max-height: 200px;
+    opacity: 1;
+    padding: 0.45rem 0.6rem;
+    margin: 0 0 0.5rem;
 }
 
 /* ── Panel Header Row (for mini panels) ── */
@@ -4763,6 +4800,12 @@ a:hover {
     .sky-ambient-overlay::before,
     .sky-card-illustration::before,
     [class*="sky-anim-"]::after {
+        animation: none !important;
+    }
+    .info-tooltip-content {
+        transition: none !important;
+    }
+    .aw-meaning-fade {
         animation: none !important;
     }
 }

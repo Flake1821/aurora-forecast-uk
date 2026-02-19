@@ -630,6 +630,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // AuroraWatch status → plain-English meaning
+    var AW_MEANINGS = {
+        green:   'Aurora unlikely for most of the UK.',
+        yellow:  'Best chance in Scotland if skies are clear.',
+        amber:   'Good chance in northern UK \u2014 look north.',
+        red:     'Possible much farther south \u2014 find a dark spot.',
+        unknown: 'Status unavailable'
+    };
+
     // ── Fetch space weather status ──
     function updateAuroraStatus() {
         fetch('/api/space-weather')
@@ -663,22 +672,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 // ── Hp30/Kp — update left radial gauge ──
                 // Prefer Hp30 (30-min resolution) if available, fall back to Kp
                 var hp30Val = data.hp30_index;
+                var mainLabel = document.getElementById('gaugeMainLabel');
+                var metricTag = document.getElementById('gaugeMetricTag');
                 if (hp30Val !== null && hp30Val !== undefined) {
                     renderRadialGauge(parseFloat(hp30Val), 'radialGauge', {isHp30: true});
-                    // Update label to show "Hp30 Now"
-                    var gaugeLabel = document.querySelector('.cond-kp-radial:not(.cond-kp-predicted) .cond-kp-label');
-                    if (gaugeLabel) {
-                        var labelText = gaugeLabel.childNodes[0];
-                        if (labelText && labelText.nodeType === 3) labelText.textContent = 'Hp30 Now ';
-                    }
+                    if (mainLabel) mainLabel.textContent = 'Global Activity (30-min)';
+                    if (metricTag) metricTag.textContent = 'Hp30';
                 } else if (data.kp_index !== null && data.kp_index !== undefined) {
                     renderRadialGauge(parseFloat(data.kp_index), 'radialGauge');
-                    // Update label to show "Kp Now" (fallback)
-                    var gaugeLabel = document.querySelector('.cond-kp-radial:not(.cond-kp-predicted) .cond-kp-label');
-                    if (gaugeLabel) {
-                        var labelText = gaugeLabel.childNodes[0];
-                        if (labelText && labelText.nodeType === 3) labelText.textContent = 'Kp Now ';
-                    }
+                    if (mainLabel) mainLabel.textContent = 'Global Activity (Now)';
+                    if (metricTag) metricTag.textContent = 'Kp';
                 }
 
                 // Update aurora chance indicator (uses server's effective_kp-based label)
@@ -720,6 +723,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     awEl.textContent = st.charAt(0).toUpperCase() + st.slice(1);
                     awEl.className = 'weather-status-badge';
                     if (st) awEl.classList.add('status-' + st);
+
+                    // ── AuroraWatch "what it means" line ──
+                    var awMeaningEl = document.getElementById('awMeaning');
+                    if (awMeaningEl) {
+                        var meaningText = AW_MEANINGS[st] || AW_MEANINGS.unknown;
+                        awMeaningEl.textContent = meaningText;
+                        awMeaningEl.classList.remove('aw-meaning-fade');
+                        void awMeaningEl.offsetWidth; // force reflow to restart animation
+                        awMeaningEl.classList.add('aw-meaning-fade');
+                    }
                 }
 
                 // ── Aurora note ──
