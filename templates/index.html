@@ -154,12 +154,12 @@
                         </div>
                     </div>
 
-                    {% if tonight.get('best_window', {}).get('window') %}
+                    {% if (tonight.get('best_window') or {}).get('window') %}
                     <div class="tonight-window">
                         <i class="bi bi-clock-fill me-1"></i>
-                        Best window: <strong>{{ tonight.get('best_window', {}).get('window', '') }}</strong>
-                        {% if tonight.get('best_window', {}).get('avg_cloud') is not none %}
-                        <span class="tonight-window-cloud">(~{{ tonight.get('best_window', {}).get('avg_cloud') }}% cloud)</span>
+                        Best window: <strong>{{ (tonight.get('best_window') or {}).get('window', '') }}</strong>
+                        {% if (tonight.get('best_window') or {}).get('avg_cloud') is not none %}
+                        <span class="tonight-window-cloud">(~{{ (tonight.get('best_window') or {}).get('avg_cloud') }}% cloud)</span>
                         {% endif %}
                     </div>
                     {% endif %}
@@ -182,7 +182,7 @@
 
                 <!-- Current Weather (Right Now) -->
                 {% set wcode = cw.get('weather_code') %}
-                {% set dstatus = space_weather.get('darkness_info', {}).get('darkness_status', 'unknown') %}
+                {% set dstatus = (space_weather.get('darkness_info') or {}).get('darkness_status', 'unknown') %}
                 <div class="cond-panel cond-weather-now weather-time-{{ dstatus }}{% if wcode is not none %} weather-wmo-{{ wcode }}{% endif %}" data-weather-code="{{ wcode }}" data-darkness="{{ dstatus }}" data-wind-speed="{{ cw.get('wind_speed', 0) or 0 }}" data-wind-dir="{{ cw.get('wind_direction', 0) or 0 }}" style="--rain-angle: 8deg;">
                     <div class="weather-now-header">
                         <i class="bi bi-{{ cw.get('weather_icon', 'question-circle') }}" id="weatherIcon"></i>
@@ -650,7 +650,7 @@
         hp30: {{ hp30|tojson }},
         kpThreshold: {{ kp_threshold|tojson }},
         cloudCover: {{ cw.get('cloud_cover', 0)|tojson }},
-        darknessStatus: {{ space_weather.get('darkness_info', {}).get('darkness_status', 'unknown')|tojson }},
+        darknessStatus: {{ (space_weather.get('darkness_info') or {}).get('darkness_status', 'unknown')|tojson }},
         moonIllumination: {{ moon.get('illumination', 0)|tojson }},
         moonPhase: {{ moon.get('phase_fraction', 0)|tojson }},
         lat: {{ location_lat|tojson }},
@@ -664,8 +664,8 @@
         windLevel: {{ cw.get('wind_classification', 'calm')|tojson }},
         visibilityKm: {{ cw.get('visibility_km', 10)|tojson }},
         temperature: {{ cw.get('temperature', 10)|tojson }},
-        sunset: {{ space_weather.get('darkness_info', {}).get('sunset', '')|tojson }},
-        sunrise: {{ space_weather.get('darkness_info', {}).get('sunrise', '')|tojson }}
+        sunset: {{ (space_weather.get('darkness_info') or {}).get('sunset', '')|tojson }},
+        sunrise: {{ (space_weather.get('darkness_info') or {}).get('sunrise', '')|tojson }}
     };
 </script>
 
