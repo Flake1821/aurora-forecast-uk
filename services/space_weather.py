@@ -1,6 +1,7 @@
 import json
 import logging
 import math
+import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -11,6 +12,12 @@ from models import db
 from models.space_weather import SpaceWeatherReading
 
 logger = logging.getLogger(__name__)
+
+# Shared HTTP session with proper User-Agent for Open-Meteo
+_http_session = requests.Session()
+_http_session.headers.update({
+    'User-Agent': 'AuroraForecastUK/1.0 (https://aurora-forecast-uk.onrender.com)',
+})
 
 CACHE_SECONDS = 300  # 5 minutes
 
@@ -586,13 +593,14 @@ def _fetch_cloud_cover(lat=DEFAULT_LAT, lon=DEFAULT_LON):
             'models': UKMO_MODEL_SEAMLESS,
         }
         try:
-            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp = _http_session.get(OPEN_METEO_URL, params=params, timeout=10)
             resp.raise_for_status()
-        except Exception:
-            logger.info('UKMO seamless model unavailable for cloud forecast, falling back')
+        except Exception as e:
+            logger.warning(f'UKMO seamless cloud forecast failed: {e}')
+            time.sleep(1)
             params.pop('models', None)
             params['hourly'] = 'cloud_cover'
-            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp = _http_session.get(OPEN_METEO_URL, params=params, timeout=10)
             resp.raise_for_status()
 
         data = resp.json()
@@ -1296,13 +1304,14 @@ def _fetch_current_weather(lat=DEFAULT_LAT, lon=DEFAULT_LON):
         resp = None
         for attempt in range(2):
             try:
-                resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+                resp = _http_session.get(OPEN_METEO_URL, params=params, timeout=10)
                 resp.raise_for_status()
                 break
-            except Exception:
+            except Exception as e:
+                logger.warning(f'Open-Meteo attempt {attempt + 1} failed: {e}')
                 if attempt == 0:
-                    # UKMO model unavailable — fall back to generic forecast
-                    logger.info('UKMO 2km model unavailable, falling back to generic forecast')
+                    # UKMO model unavailable — fall back to generic forecast after brief pause
+                    time.sleep(1)
                     params.pop('models', None)
                     params['current'] = 'cloud_cover,temperature_2m,weather_code,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m'
                     cloud_model = ''
@@ -1390,13 +1399,14 @@ def _fetch_hourly_cloud_forecast(lat, lon):
             'models': UKMO_MODEL_2KM,
         }
         try:
-            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp = _http_session.get(OPEN_METEO_URL, params=params, timeout=10)
             resp.raise_for_status()
-        except Exception:
-            logger.info('UKMO 2km model unavailable for hourly forecast, falling back')
+        except Exception as e:
+            logger.warning(f'UKMO 2km hourly forecast failed: {e}')
+            time.sleep(1)
             params.pop('models', None)
             params['hourly'] = 'cloud_cover'
-            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+            resp = _http_session.get(OPEN_METEO_URL, params=params, timeout=10)
             resp.raise_for_status()
 
         data = resp.json()
@@ -1474,12 +1484,13 @@ def _fetch_cloud_grid():
 
     try:
         try:
-            resp = requests.get(OPEN_METEO_URL, params=params, timeout=15)
+            resp = _http_session.get(OPEN_METEO_URL, params=params, timeout=15)
             resp.raise_for_status()
-        except Exception:
-            logger.info('UKMO seamless unavailable for cloud grid, falling back to generic')
+        except Exception as e:
+            logger.warning(f'UKMO seamless cloud grid failed: {e}')
+            time.sleep(1)
             params.pop('models', None)
-            resp = requests.get(OPEN_METEO_URL, params=params, timeout=15)
+            resp = _http_session.get(OPEN_METEO_URL, params=params, timeout=15)
             resp.raise_for_status()
 
         raw = resp.json()
