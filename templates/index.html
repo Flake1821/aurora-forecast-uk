@@ -56,7 +56,7 @@
                         <span id="awStatus" class="weather-status-badge status-{{ aw_status }}">{{ aw_status|capitalize }}</span>
                         <button class="info-tooltip-btn" aria-label="What is UK Aurora Activity?"><i class="bi bi-question-circle-fill"></i></button>
                     </div>
-                    <p id="awMeaning" class="aw-meaning">{% if aw_status == 'green' %}Quiet &mdash; aurora unlikely here.{% elif aw_status == 'yellow' %}Minor activity &mdash; possible in far north.{% elif aw_status == 'amber' %}Active &mdash; possible if skies clear.{% elif aw_status == 'red' %}Strong activity &mdash; good chance tonight.{% else %}Status unavailable{% endif %}</p>
+                    <p id="awMeaning" class="aw-meaning">{% if aw_status == 'green' %}Quiet &mdash; no UK magnetometer alert.{% elif aw_status == 'yellow' %}Minor activity &mdash; possible in far north.{% elif aw_status == 'amber' %}Active &mdash; possible if skies clear.{% elif aw_status == 'red' %}Strong activity &mdash; good chance tonight.{% else %}Status unavailable{% endif %}</p>
                     <div class="info-tooltip-content">Live UK magnetometer readings &mdash; best indicator of aurora right now.</div>
 
                     <!-- Aurora Chance -->

@@ -667,7 +667,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // AuroraWatch status → plain-English meaning
     var AW_MEANINGS = {
-        green:   'Quiet \u2014 aurora unlikely here.',
+        green:   'Quiet \u2014 no UK magnetometer alert.',
         yellow:  'Minor activity \u2014 possible in far north.',
         amber:   'Active \u2014 possible if skies clear.',
         red:     'Strong activity \u2014 good chance tonight.',
