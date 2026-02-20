@@ -1491,6 +1491,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (hasPast) {
                 pastSection.style.display = '';
+                var futureHeading = document.getElementById('futureEventsHeading');
+                if (futureHeading) futureHeading.style.display = '';
             }
         }
 

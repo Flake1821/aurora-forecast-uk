@@ -4972,7 +4972,8 @@ a:hover {
 .past-events-section {
     margin-bottom: 1.5rem;
 }
-.past-events-heading {
+.past-events-heading,
+.future-events-heading {
     color: var(--text-muted);
     font-size: 0.85rem;
     font-weight: 600;
