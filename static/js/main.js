@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var datasets = [
             {
-                label: 'Observed Kp',
+                label: 'Storm Strength (recent)',
                 data: observedData,
                 borderColor: '#00E676',
                 backgroundColor: 'rgba(0, 230, 118, 0.1)',
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 spanGaps: false,
             },
             {
-                label: 'Predicted Kp',
+                label: 'Storm Strength (forecast)',
                 data: predictedData,
                 borderColor: '#448AFF',
                 backgroundColor: 'rgba(68, 138, 255, 0.05)',
@@ -434,13 +434,14 @@ document.addEventListener('DOMContentLoaded', function () {
         var hasHp30 = hp30Data.some(function (v) { return v !== null; });
         if (hasHp30) {
             datasets.push({
-                label: 'Observed Hp30',
+                label: 'Global Activity (recent)',
                 data: hp30Data,
                 borderColor: '#00BCD4',
                 backgroundColor: 'rgba(0, 188, 212, 0.06)',
-                borderWidth: 1.5,
-                pointRadius: 1,
-                pointHoverRadius: 3,
+                borderWidth: 2.5,
+                pointRadius: 2.5,
+                pointBackgroundColor: '#00BCD4',
+                pointHoverRadius: 5,
                 pointHoverBackgroundColor: '#00BCD4',
                 fill: false,
                 tension: 0.2,
@@ -558,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         label: function (context) {
                             var val = context.parsed.y;
                             if (val === null) return null;
-                            var prefix = context.dataset.label.indexOf('Hp30') >= 0 ? 'Hp30 ' : 'Kp ';
+                            var prefix = context.dataset.label.indexOf('Global') >= 0 ? 'Hp30 ' : 'Kp ';
                             return context.dataset.label + ': ' + prefix + val.toFixed(1) + ' (' + kpSeverityLabel(val) + ')';
                         }
                     }
@@ -630,6 +631,39 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Hp30 gauge → plain-English meaning
+    var HP30_MEANINGS = [
+        { max: 2, text: 'Quiet globally' },
+        { max: 4, text: 'Unsettled globally' },
+        { max: 6, text: 'Active storm conditions' },
+        { max: Infinity, text: 'Strong geomagnetic storm' }
+    ];
+
+    // Kp predicted gauge → plain-English meaning
+    var KP_PRED_MEANINGS = [
+        { max: 2, text: 'Quiet' },
+        { max: 4, text: 'Low' },
+        { max: 6, text: 'Moderate' },
+        { max: Infinity, text: 'Strong' }
+    ];
+
+    function gaugeMeaningText(value, mappings) {
+        if (value === null || value === undefined) return 'Unavailable';
+        for (var i = 0; i < mappings.length; i++) {
+            if (value < mappings[i].max) return mappings[i].text;
+        }
+        return mappings[mappings.length - 1].text;
+    }
+
+    function updateGaugeMeaning(elementId, text) {
+        var el = document.getElementById(elementId);
+        if (!el) return;
+        el.textContent = text;
+        el.classList.remove('gauge-meaning-fade');
+        void el.offsetWidth;
+        el.classList.add('gauge-meaning-fade');
+    }
+
     // AuroraWatch status → plain-English meaning
     var AW_MEANINGS = {
         green:   'Aurora unlikely for most of the UK.',
@@ -676,12 +710,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 var metricTag = document.getElementById('gaugeMetricTag');
                 if (hp30Val !== null && hp30Val !== undefined) {
                     renderRadialGauge(parseFloat(hp30Val), 'radialGauge', {isHp30: true});
-                    if (mainLabel) mainLabel.textContent = 'Global Activity (30-min)';
-                    if (metricTag) metricTag.textContent = 'Hp30';
+                    if (mainLabel) mainLabel.textContent = 'Global Magnetic Activity';
+                    if (metricTag) metricTag.textContent = 'Hp30 \u2022 30-min';
+                    updateGaugeMeaning('hp30Meaning', gaugeMeaningText(parseFloat(hp30Val), HP30_MEANINGS));
                 } else if (data.kp_index !== null && data.kp_index !== undefined) {
                     renderRadialGauge(parseFloat(data.kp_index), 'radialGauge');
-                    if (mainLabel) mainLabel.textContent = 'Global Activity (Now)';
+                    if (mainLabel) mainLabel.textContent = 'Global Magnetic Activity';
                     if (metricTag) metricTag.textContent = 'Kp';
+                    updateGaugeMeaning('hp30Meaning', gaugeMeaningText(parseFloat(data.kp_index), HP30_MEANINGS));
                 }
 
                 // Update aurora chance indicator (uses server's effective_kp-based label)
@@ -712,8 +748,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.kp_predicted_next !== null && data.kp_predicted_next !== undefined) {
                     var predKp = parseFloat(data.kp_predicted_next);
                     renderRadialGauge(predKp, 'radialGaugePredicted');
+                    updateGaugeMeaning('kpPredictedMeaning', gaugeMeaningText(predKp, KP_PRED_MEANINGS));
                 } else {
                     renderRadialGauge(0, 'radialGaugePredicted');
+                    updateGaugeMeaning('kpPredictedMeaning', 'Unavailable');
                 }
 
                 // ── AuroraWatch badge ──

@@ -1550,10 +1550,10 @@ def _go_outside_verdict(kp, current_weather, moon_phase, kp_threshold=5,
     dark_status = darkness_info.get('darkness_status', 'unknown')
     if dark_status in ('daylight', 'civil_twilight'):
         sunset = darkness_info.get('sunset', '??')
-        reasons.append(darkness_info.get('darkness_label', 'Too bright for aurora'))
-        reasons.append(f'Check back after sunset ({sunset})')
+        reasons.append('It is still too bright outside for aurora.')
+        reasons.append(f'Darkness begins after sunset at {sunset}.')
         if kp is not None and kp >= kp_threshold:
-            reasons.append(f'Aurora activity is {_kp_desc(kp).lower()} (Kp {kp:.1f}) \u2014 conditions will improve after dark')
+            reasons.append('Aurora activity is present \u2014 check back after dark.')
         return {
             'verdict': f'Still too bright \u2014 sunset at {sunset}',
             'level': 'no',
@@ -1562,15 +1562,15 @@ def _go_outside_verdict(kp, current_weather, moon_phase, kp_threshold=5,
 
     # ── Hard cloud blocker — 90%+ overcast means nothing is visible ──
     if cloud is not None and cloud >= 90:
-        reasons.append('Completely overcast \u2014 nothing visible through cloud')
+        reasons.append('Completely overcast \u2014 cloud is blocking the sky.')
         if kp is not None and kp >= kp_threshold:
-            reasons.append(f'Aurora activity is {_kp_desc(kp).lower()} (Kp {kp:.1f}) \u2014 check back if skies clear')
+            reasons.append('Aurora activity is present \u2014 check back if skies clear.')
         elif kp is not None and kp >= kp_threshold - 1:
-            reasons.append('Minor aurora activity \u2014 check back if skies clear')
+            reasons.append('Minor aurora activity \u2014 check back if skies clear.')
         else:
-            reasons.append('Quiet conditions \u2014 no aurora expected')
+            reasons.append('Aurora activity is low right now.')
         if weather_code is not None and weather_code >= 51:
-            reasons.append('Rain or precipitation forecast')
+            reasons.append('Rain is forecast.')
         return {
             'verdict': 'Not tonight \u2014 completely overcast',
             'level': 'no',
@@ -1580,47 +1580,47 @@ def _go_outside_verdict(kp, current_weather, moon_phase, kp_threshold=5,
     # Factor 1: Aurora activity (most important, scaled by latitude threshold)
     margin = (kp - kp_threshold) if kp is not None else None
     if kp is None:
-        reasons.append('Kp data unavailable')
+        reasons.append('Activity data is temporarily unavailable.')
     elif margin >= 2:
         score += 4
-        reasons.append(f'{_kp_desc(kp)} (Kp {kp:.1f}) \u2014 aurora very likely from {location_name}')
+        reasons.append(f'Aurora is very likely from {location_name}.')
     elif margin >= 0:
         score += 3
-        reasons.append(f'{_kp_desc(kp)} (Kp {kp:.1f}) \u2014 aurora possible from {location_name}')
+        reasons.append(f'Aurora is possible from {location_name}.')
     elif margin >= -1:
         score += 1
-        reasons.append(f'{_kp_desc(kp)} (Kp {kp:.1f}) \u2014 faint aurora possible from very dark sites')
+        reasons.append('A faint glow may be possible from very dark sites.')
     else:
-        reasons.append(f'{_kp_desc(kp)} (Kp {kp:.1f}) \u2014 aurora not expected from {location_name}')
+        reasons.append('Aurora activity is low right now.')
 
     # Factor 2: Cloud cover
     if cloud is None:
-        reasons.append('Cloud data unavailable')
+        reasons.append('Cloud data is temporarily unavailable.')
     elif cloud <= 25:
         score += 2
-        reasons.append('Clear skies overhead')
+        reasons.append('Skies are clear overhead.')
     elif cloud <= 50:
         score += 1
-        reasons.append('Partly cloudy \u2014 gaps in cloud')
+        reasons.append('Partly cloudy with gaps to see through.')
     elif cloud <= 75:
-        reasons.append('Mostly cloudy \u2014 limited viewing')
+        reasons.append('Mostly cloudy \u2014 limited viewing.')
         score -= 2
     else:
         # 75-89% cloud (90%+ is handled by the hard blocker above)
-        reasons.append('Heavy cloud \u2014 very limited visibility')
+        reasons.append('Heavy cloud will block the view.')
         score -= 3
 
     # Factor 3: Rain/weather
     if weather_code is not None and weather_code >= 51:
-        reasons.append('Rain or precipitation \u2014 not ideal')
+        reasons.append('Rain or precipitation is falling.')
         score -= 1
 
     # Factor 4: Moon brightness
     if moon_illum < 30:
-        reasons.append('Dark skies \u2014 moon not interfering')
+        reasons.append('Moon brightness is not a concern.')
         score += 1
     elif moon_illum > 70:
-        reasons.append('Bright moon \u2014 may wash out faint aurora')
+        reasons.append('Bright moonlight may wash out faint aurora.')
         score -= 1
 
     # Factor 5: IMF Bz (southward = good for aurora)
@@ -1628,25 +1628,25 @@ def _go_outside_verdict(kp, current_weather, moon_phase, kp_threshold=5,
     if bz is not None:
         if bz <= -10:
             score += 2
-            reasons.append('IMF Bz strongly southward \u2014 excellent for aurora')
+            reasons.append('Magnetic conditions are excellent for aurora.')
         elif bz <= -5:
             score += 1
-            reasons.append('IMF Bz southward \u2014 favourable for aurora')
+            reasons.append('Magnetic conditions favour aurora.')
         elif bz > 0:
-            reasons.append('IMF Bz northward \u2014 less favourable')
+            reasons.append('Magnetic conditions are less favourable right now.')
 
     # Factor 6: Light pollution
     bortle = light_pollution.get('bortle', 5)
     if bortle >= 8:
-        reasons.append('Severe light pollution \u2014 only strongest aurora visible from here')
+        reasons.append('Severe light pollution \u2014 only the strongest aurora would be visible here.')
         score -= 2
     elif bortle >= 7:
-        reasons.append('Significant light pollution \u2014 find a darker spot away from streetlights')
+        reasons.append('Light pollution is significant \u2014 find a darker spot if you can.')
         score -= 1
     elif bortle >= 6:
-        reasons.append('Moderate light pollution \u2014 look north away from town lights')
+        reasons.append('Some light pollution \u2014 look north, away from town lights.')
     elif bortle <= 3:
-        reasons.append('Excellent dark sky site \u2014 ideal for aurora viewing')
+        reasons.append('This is a great dark sky location.')
         score += 1
 
     # Determine verdict

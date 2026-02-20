@@ -51,11 +51,12 @@
                 <div class="cond-panel cond-status">
                     <div class="cond-status-header">
                         <span class="cond-label">UK Aurora Activity Now</span>
+                        <span class="metric-tag">AuroraWatch</span>
                         <span id="awStatus" class="weather-status-badge status-{{ aw_status }}">{{ aw_status|capitalize }}</span>
                         <button class="info-tooltip-btn" aria-label="What is UK Aurora Activity?"><i class="bi bi-question-circle-fill"></i></button>
                     </div>
                     <p id="awMeaning" class="aw-meaning">{% if aw_status == 'green' %}Aurora unlikely for most of the UK.{% elif aw_status == 'yellow' %}Best chance in Scotland if skies are clear.{% elif aw_status == 'amber' %}Good chance in northern UK &mdash; look north.{% elif aw_status == 'red' %}Possible much farther south &mdash; find a dark spot.{% else %}Status unavailable{% endif %}</p>
-                    <div class="info-tooltip-content">Live UK magnetometer readings &mdash; higher means aurora is more likely.</div>
+                    <div class="info-tooltip-content">Live UK magnetometer readings &mdash; best indicator of aurora right now.</div>
 
                     <!-- Aurora Chance -->
                     <div class="cornwall-chance" id="cornwallChance">
@@ -82,13 +83,14 @@
                 <!-- Radial Hp30/Kp Gauge (centre) — shows Hp30 if available, falls back to Kp -->
                 <div class="cond-panel cond-kp-radial">
                     <div class="cond-kp-label">
-                        <span id="gaugeMainLabel">{% if hp30 is not none %}Global Activity (30-min){% else %}Global Activity (Now){% endif %}</span>
-                        <span class="metric-tag" id="gaugeMetricTag">{% if hp30 is not none %}Hp30{% else %}Kp{% endif %}</span>
+                        <span id="gaugeMainLabel">Global Magnetic Activity</span>
+                        <span class="metric-tag" id="gaugeMetricTag">{% if hp30 is not none %}Hp30 &bull; 30-min{% else %}Kp{% endif %}</span>
                         <button class="info-tooltip-btn" aria-label="What is the Hp30 index?"><i class="bi bi-question-circle-fill"></i></button>
                     </div>
                     <div class="info-tooltip-content">Global magnetic activity updated every 30 minutes.</div>
                     <div class="radial-gauge-container" id="radialGauge"
                          data-kp="{{ '%.1f'|format(hp30) if hp30 is not none else ('%.1f'|format(kp) if kp is not none else '0') }}"></div>
+                    <p id="hp30Meaning" class="gauge-meaning">{% if hp30 is not none %}{% if hp30 < 2 %}Quiet globally{% elif hp30 < 4 %}Unsettled globally{% elif hp30 < 6 %}Active storm conditions{% else %}Strong geomagnetic storm{% endif %}{% else %}Unavailable{% endif %}</p>
                 </div>
 
                 <!-- Predicted Kp Gauge -->
@@ -96,13 +98,14 @@
                 <div class="cond-panel cond-kp-radial cond-kp-predicted">
                     <div class="cond-kp-label">
                         {% set pred_hours = space_weather.get('kp_predicted_hours', 3) %}
-                        <span id="kpPredictedLabel">Storm Strength (3-hour)</span>
-                        <span class="metric-tag">Kp</span>
+                        <span id="kpPredictedLabel">Storm Strength Forecast</span>
+                        <span class="metric-tag">Kp &bull; 3-hour</span>
                         <button class="info-tooltip-btn" aria-label="What is storm strength?"><i class="bi bi-question-circle-fill"></i></button>
                     </div>
                     <div class="info-tooltip-content">Global storm level averaged over 3 hours.</div>
                     <div class="radial-gauge-container" id="radialGaugePredicted"
                          data-kp="{{ '%.1f'|format(pred_kp) if pred_kp is not none else '0' }}"></div>
+                    <p id="kpPredictedMeaning" class="gauge-meaning">{% if pred_kp is not none %}{% if pred_kp < 2 %}Quiet{% elif pred_kp < 4 %}Low{% elif pred_kp < 6 %}Moderate{% else %}Strong{% endif %}{% else %}Unavailable{% endif %}</p>
                 </div>
             </div>
 
@@ -444,9 +447,9 @@
                     <button class="info-tooltip-btn" aria-label="About this chart"><i class="bi bi-question-circle-fill"></i></button>
                 </span>
                 <span class="chart-legend">
-                    <span class="legend-item"><span class="legend-dot legend-observed"></span>Observed Kp</span>
-                    <span class="legend-item"><span class="legend-dot legend-hp30"></span>Observed Hp30</span>
-                    <span class="legend-item"><span class="legend-dot legend-predicted"></span>Predicted Kp</span>
+                    <span class="legend-item"><span class="legend-dot legend-observed"></span>Storm Strength (recent)</span>
+                    <span class="legend-item"><span class="legend-dot legend-hp30"></span>Global Activity (recent)</span>
+                    <span class="legend-item"><span class="legend-dot legend-predicted"></span>Storm Strength (forecast)</span>
                     <span class="legend-item"><span class="legend-line legend-threshold"></span><span id="chartThresholdLabel">{{ location_name }} (Kp {{ kp_threshold }})</span></span>
                 </span>
             </div>

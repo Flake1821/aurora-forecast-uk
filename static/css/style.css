@@ -416,6 +416,18 @@ a:hover {
     animation: aw-meaning-fadein 0.25s ease;
 }
 
+.gauge-meaning {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin: 0.15rem 0 0 0;
+    line-height: 1.4;
+    text-align: center;
+    transition: opacity 0.25s ease;
+}
+.gauge-meaning-fade {
+    animation: aw-meaning-fadein 0.25s ease;
+}
+
 .cond-label {
     font-size: 0.8rem;
     color: var(--text-secondary);
@@ -4805,7 +4817,8 @@ a:hover {
     .info-tooltip-content {
         transition: none !important;
     }
-    .aw-meaning-fade {
+    .aw-meaning-fade,
+    .gauge-meaning-fade {
         animation: none !important;
     }
 }
