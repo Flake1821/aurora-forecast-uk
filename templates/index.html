@@ -246,6 +246,11 @@
                     <div class="weather-viewing-label weather-viewing-{{ cw.get('cloud_level', 'unknown') }}" id="currentViewingLabel">
                         {{ cw.get('cloud_label', 'Loading...') }}
                     </div>
+                    {% if cw.get('stale') %}
+                    <div class="weather-stale-note">
+                        <i class="bi bi-clock-history me-1"></i>Updated {{ cw.get('stale_age_mins', '?') }} min ago
+                    </div>
+                    {% endif %}
 
                     <!-- Hourly Cloud Forecast Mini-Chart -->
                     {% set hourly_cloud = space_weather.get('hourly_cloud_forecast', []) %}

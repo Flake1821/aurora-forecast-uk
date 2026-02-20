@@ -151,6 +151,20 @@ def get_current_conditions(lat=None, lon=None, location_name=None, rural_urban='
     # Current weather conditions (right now, location-specific)
     current_weather = _fetch_current_weather(lat, lon)
 
+    # Stale-cache fallback: if weather fetch failed, use previous cached data
+    if current_weather.get('cloud_cover') is None and cached and cached.raw_data:
+        try:
+            stale = json.loads(cached.raw_data)
+            stale_cw = stale.get('current_weather', {})
+            if stale_cw.get('cloud_cover') is not None:
+                logger.info('Using stale cached weather data (Open-Meteo unavailable)')
+                current_weather = stale_cw
+                current_weather['stale'] = True
+                age_mins = round((datetime.utcnow() - cached.fetched_at).total_seconds() / 60)
+                current_weather['stale_age_mins'] = age_mins
+        except (json.JSONDecodeError, TypeError, AttributeError):
+            pass
+
     # Hourly cloud forecast for mini-chart (next 12 hours)
     hourly_cloud = _fetch_hourly_cloud_forecast(lat, lon)
 
@@ -1279,17 +1293,21 @@ def _fetch_current_weather(lat=DEFAULT_LAT, lon=DEFAULT_LON):
             'models': UKMO_MODEL_2KM,
         }
         cloud_model = 'Met Office UKV 2km'
-        try:
-            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
-            resp.raise_for_status()
-        except Exception:
-            # UKMO model unavailable — fall back to generic forecast
-            logger.info('UKMO 2km model unavailable, falling back to generic forecast')
-            params.pop('models', None)
-            params['current'] = 'cloud_cover,temperature_2m,weather_code,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m'
-            cloud_model = ''
-            resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
-            resp.raise_for_status()
+        resp = None
+        for attempt in range(2):
+            try:
+                resp = requests.get(OPEN_METEO_URL, params=params, timeout=10)
+                resp.raise_for_status()
+                break
+            except Exception:
+                if attempt == 0:
+                    # UKMO model unavailable — fall back to generic forecast
+                    logger.info('UKMO 2km model unavailable, falling back to generic forecast')
+                    params.pop('models', None)
+                    params['current'] = 'cloud_cover,temperature_2m,weather_code,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m'
+                    cloud_model = ''
+                else:
+                    raise  # both attempts failed — fall through to default/stale cache
 
         data = resp.json()
 
