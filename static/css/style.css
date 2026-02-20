@@ -4973,7 +4973,8 @@ a:hover {
     margin-bottom: 1.5rem;
 }
 .past-events-heading,
-.future-events-heading {
+.future-events-heading,
+.not-uk-heading {
     color: var(--text-muted);
     font-size: 0.85rem;
     font-weight: 600;
@@ -5025,21 +5026,70 @@ a:hover {
     text-align: center;
 }
 
+/* ── Not Visible from UK ── */
+.not-uk-section {
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+}
+.not-uk-grid {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 0.6rem !important;
+}
+.not-uk-grid .sky-card {
+    filter: grayscale(50%);
+    opacity: 0.6;
+    transition: filter 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+.not-uk-grid .sky-card:hover {
+    filter: grayscale(20%);
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+.not-uk-grid .sky-card-illustration {
+    aspect-ratio: 16 / 8;
+}
+.not-uk-grid .sky-card-body {
+    padding: 0.4rem 0.6rem;
+}
+.not-uk-grid .sky-card-title {
+    font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.not-uk-grid .sky-card-date {
+    font-size: 0.65rem;
+}
+.not-uk-grid .event-type-badge {
+    font-size: 0.55rem;
+    padding: 0.1rem 0.4rem;
+}
+.not-uk-banner {
+    background: rgba(255, 193, 7, 0.12);
+    border: 1px solid rgba(255, 193, 7, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
 /* ── Responsive ── */
 @media (max-width: 1100px) {
     .sky-grid { grid-template-columns: repeat(3, 1fr); }
-    .past-events-grid { grid-template-columns: repeat(4, 1fr) !important; }
+    .past-events-grid, .not-uk-grid { grid-template-columns: repeat(4, 1fr) !important; }
 }
 @media (max-width: 768px) {
     .sky-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
     .sky-card-title { font-size: 0.85rem; }
     .sky-detail-inner { padding: 1.5rem; }
     .sky-detail-header h4 { font-size: 1.1rem; }
-    .past-events-grid { grid-template-columns: repeat(3, 1fr) !important; }
+    .past-events-grid, .not-uk-grid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 @media (max-width: 480px) {
     .sky-grid { grid-template-columns: 1fr; }
     .sky-card-body { padding: 0.75rem; }
     .sky-detail-inner { padding: 1.25rem; }
-    .past-events-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .past-events-grid, .not-uk-grid { grid-template-columns: repeat(2, 1fr) !important; }
 }

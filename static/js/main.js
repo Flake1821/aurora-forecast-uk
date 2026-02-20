@@ -1467,6 +1467,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var closeBtn = document.getElementById('skyDetailClose');
         var pastGrid = document.getElementById('pastEventsGrid');
         var pastSection = document.getElementById('pastEventsSection');
+        var notUkGrid = document.getElementById('notUkGrid');
+        var notUkSection = document.getElementById('notUkSection');
         var activeCard = null;
         var isAnimating = false;
 
@@ -1493,6 +1495,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 pastSection.style.display = '';
                 var futureHeading = document.getElementById('futureEventsHeading');
                 if (futureHeading) futureHeading.style.display = '';
+            }
+        }
+
+        // ── Not Visible from UK Detection ──
+        if (notUkGrid && notUkSection) {
+            var notUkCards = document.querySelectorAll('.sky-card[data-uk-visible="no"]');
+            notUkCards.forEach(function(card) {
+                card.classList.add('not-uk-event');
+                notUkGrid.appendChild(card);
+            });
+            if (notUkCards.length > 0) {
+                notUkSection.style.display = '';
             }
         }
 
@@ -1528,8 +1542,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 ? '<div class="past-event-banner"><i class="bi bi-clock-history me-1"></i>This event has passed</div>'
                 : '';
 
+            var notUkBanner = card.classList.contains('not-uk-event')
+                ? '<div class="not-uk-banner"><i class="bi bi-geo-alt me-1"></i>Not visible from the UK</div>'
+                : '';
+
             content.innerHTML =
-                pastBanner +
+                pastBanner + notUkBanner +
                 '<div class="sky-detail-header">' +
                     badge +
                     '<span class="sky-card-date">' + date + '</span>' +
@@ -1632,6 +1650,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         grid.addEventListener('click', handleCardClick);
         if (pastGrid) pastGrid.addEventListener('click', handleCardClick);
+        if (notUkGrid) notUkGrid.addEventListener('click', handleCardClick);
 
         // Close button
         closeBtn.addEventListener('click', function(e) {
@@ -1660,8 +1679,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 closeModal(false);
 
-                // Apply filter to both grids
-                [grid, pastGrid].forEach(function(g) {
+                // Apply filter to all grids
+                [grid, pastGrid, notUkGrid].forEach(function(g) {
                     if (!g) return;
                     g.querySelectorAll('.sky-card').forEach(function(card) {
                         if (filter === 'all' || card.getAttribute('data-event-type') === filter) {
@@ -1676,6 +1695,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (pastGrid && pastSection) {
                     var visiblePast = pastGrid.querySelectorAll('.sky-card:not([style*="display: none"])');
                     pastSection.style.display = visiblePast.length > 0 ? '' : 'none';
+                }
+
+                // Show/hide not-UK section based on visible not-UK cards
+                if (notUkGrid && notUkSection) {
+                    var visibleNotUk = notUkGrid.querySelectorAll('.sky-card:not([style*="display: none"])');
+                    notUkSection.style.display = visibleNotUk.length > 0 ? '' : 'none';
                 }
             });
         });

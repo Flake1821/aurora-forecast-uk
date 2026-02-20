@@ -109,7 +109,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="eclipse" data-idx="5" data-date="2026-02-17" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="eclipse" data-idx="5" data-date="2026-02-17" data-uk-visible="no" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-eclipse eclipse-annular-solar" role="img" aria-label="Annular solar eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -179,7 +179,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="eclipse" data-idx="9" data-date="2026-03-03" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="eclipse" data-idx="9" data-date="2026-03-03" data-uk-visible="no" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-eclipse eclipse-total-lunar" role="img" aria-label="Total lunar eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -724,6 +724,14 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- ═══ NOT VISIBLE FROM UK ═══ -->
+        <div class="not-uk-section" id="notUkSection" style="display:none;">
+            <h5 class="not-uk-heading">
+                <i class="bi bi-geo-alt me-2"></i>Not Visible from the UK
+            </h5>
+            <div class="sky-grid not-uk-grid" id="notUkGrid"></div>
         </div>
 
         {# ── Modal overlay + expand panel ── #}
