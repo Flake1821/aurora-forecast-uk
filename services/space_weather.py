@@ -1380,6 +1380,81 @@ def _fetch_current_weather(lat=DEFAULT_LAT, lon=DEFAULT_LON):
         }
     except Exception as e:
         logger.warning(f'Open-Meteo current weather fetch failed: {e}')
+        # Fallback: try wttr.in (free, no API key)
+        return _fetch_weather_wttr_fallback(lat, lon, default)
+
+
+def _fetch_weather_wttr_fallback(lat, lon, default):
+    """Fallback weather fetch using wttr.in when Open-Meteo is unavailable."""
+    try:
+        url = f'https://wttr.in/{lat},{lon}?format=j1'
+        resp = _http_session.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        cc = data.get('current_condition', [{}])[0]
+
+        cloud = int(cc.get('cloudcover', 0)) if cc.get('cloudcover') else None
+        temp = float(cc.get('temp_C')) if cc.get('temp_C') else None
+        vis = float(cc.get('visibility')) if cc.get('visibility') else None
+        wind_speed = float(cc.get('windspeedKmph')) if cc.get('windspeedKmph') else None
+        wind_dir = float(cc.get('winddirDegree')) if cc.get('winddirDegree') else None
+        weather_desc = cc.get('weatherDesc', [{}])[0].get('value', 'Unknown')
+
+        # Cloud label
+        if cloud is None:
+            cloud_label, cloud_level = 'No data', 'unknown'
+        elif cloud <= 15:
+            cloud_label, cloud_level = 'Clear skies', 'good'
+        elif cloud <= 30:
+            cloud_label, cloud_level = 'Mostly clear', 'good'
+        elif cloud <= 55:
+            cloud_label, cloud_level = 'Partly cloudy', 'fair'
+        elif cloud <= 80:
+            cloud_label, cloud_level = 'Mostly cloudy', 'poor'
+        else:
+            cloud_label, cloud_level = 'Overcast', 'poor'
+
+        # Weather icon mapping (simplified)
+        icon = 'question-circle'
+        desc_lower = weather_desc.lower() if weather_desc else ''
+        if 'clear' in desc_lower or 'sunny' in desc_lower:
+            icon = 'sun'
+        elif 'partly' in desc_lower:
+            icon = 'cloud-sun'
+        elif 'cloud' in desc_lower or 'overcast' in desc_lower:
+            icon = 'clouds'
+        elif 'rain' in desc_lower or 'drizzle' in desc_lower:
+            icon = 'cloud-rain'
+        elif 'snow' in desc_lower:
+            icon = 'cloud-snow'
+        elif 'fog' in desc_lower or 'mist' in desc_lower:
+            icon = 'cloud-fog'
+        elif 'thunder' in desc_lower:
+            icon = 'cloud-lightning-rain'
+
+        logger.info('wttr.in fallback succeeded for current weather')
+        return {
+            'cloud_cover': cloud,
+            'cloud_cover_high': None,
+            'cloud_cover_mid': None,
+            'cloud_cover_low': None,
+            'cloud_label': cloud_label,
+            'cloud_level': cloud_level,
+            'cloud_model': '',
+            'temperature': temp,
+            'weather_code': None,
+            'weather_description': weather_desc,
+            'weather_icon': icon,
+            'visibility_km': vis,
+            'wind_speed': round(wind_speed, 1) if wind_speed is not None else None,
+            'wind_direction': round(wind_dir) if wind_dir is not None else None,
+            'wind_direction_compass': _wind_direction_compass(wind_dir),
+            'wind_gusts': None,
+            'wind_classification': _wind_speed_classification(wind_speed),
+            'timestamp': '',
+        }
+    except Exception as e2:
+        logger.warning(f'wttr.in fallback also failed: {e2}')
         return default
 
 
