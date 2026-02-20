@@ -35,6 +35,7 @@
         <div class="section-badge live-badge">
             <span class="badge-dot badge-dot-pulse"></span>
             LIVE NOW
+            <span class="badge-refresh-note">Based on live UK magnetometer readings.</span>
             <span class="badge-time" id="liveTimestamp">
                 {% if space_weather.get('kp_timestamp') %}
                 Updated {{ space_weather.get('kp_timestamp', '')[:16] }}
@@ -55,7 +56,7 @@
                         <span id="awStatus" class="weather-status-badge status-{{ aw_status }}">{{ aw_status|capitalize }}</span>
                         <button class="info-tooltip-btn" aria-label="What is UK Aurora Activity?"><i class="bi bi-question-circle-fill"></i></button>
                     </div>
-                    <p id="awMeaning" class="aw-meaning">{% if aw_status == 'green' %}Aurora unlikely for most of the UK.{% elif aw_status == 'yellow' %}Best chance in Scotland if skies are clear.{% elif aw_status == 'amber' %}Good chance in northern UK &mdash; look north.{% elif aw_status == 'red' %}Possible much farther south &mdash; find a dark spot.{% else %}Status unavailable{% endif %}</p>
+                    <p id="awMeaning" class="aw-meaning">{% if aw_status == 'green' %}Quiet &mdash; aurora unlikely here.{% elif aw_status == 'yellow' %}Minor activity &mdash; possible in far north.{% elif aw_status == 'amber' %}Active &mdash; possible if skies clear.{% elif aw_status == 'red' %}Strong activity &mdash; good chance tonight.{% else %}Status unavailable{% endif %}</p>
                     <div class="info-tooltip-content">Live UK magnetometer readings &mdash; best indicator of aurora right now.</div>
 
                     <!-- Aurora Chance -->
@@ -90,7 +91,7 @@
                     <div class="info-tooltip-content">Global magnetic activity updated every 30 minutes.</div>
                     <div class="radial-gauge-container" id="radialGauge"
                          data-kp="{{ '%.1f'|format(hp30) if hp30 is not none else ('%.1f'|format(kp) if kp is not none else '0') }}"></div>
-                    <p id="hp30Meaning" class="gauge-meaning">{% if hp30 is not none %}{% if hp30 < 2 %}Quiet globally{% elif hp30 < 4 %}Unsettled globally{% elif hp30 < 6 %}Active storm conditions{% else %}Strong geomagnetic storm{% endif %}{% else %}Unavailable{% endif %}</p>
+                    <p id="hp30Meaning" class="gauge-meaning">{% if hp30 is not none %}{% if hp30 < 2 %}Low global activity{% elif hp30 < 4 %}Moderate global activity{% elif hp30 < 6 %}Strong global activity{% else %}Strong global storm{% endif %}{% else %}Unavailable{% endif %}</p>
                 </div>
 
                 <!-- Predicted Kp Gauge -->
@@ -447,9 +448,9 @@
                     <button class="info-tooltip-btn" aria-label="About this chart"><i class="bi bi-question-circle-fill"></i></button>
                 </span>
                 <span class="chart-legend">
-                    <span class="legend-item"><span class="legend-dot legend-observed"></span>Storm Strength (recent)</span>
-                    <span class="legend-item"><span class="legend-dot legend-hp30"></span>Global Activity (recent)</span>
-                    <span class="legend-item"><span class="legend-dot legend-predicted"></span>Storm Strength (forecast)</span>
+                    <span class="legend-item"><span class="legend-dot legend-observed"></span>Storm Strength (3h)</span>
+                    <span class="legend-item"><span class="legend-dot legend-hp30"></span>Global Activity (30m)</span>
+                    <span class="legend-item"><span class="legend-dot legend-predicted"></span>Storm Forecast (3h)</span>
                     <span class="legend-item"><span class="legend-line legend-threshold"></span><span id="chartThresholdLabel">{{ location_name }} (Kp {{ kp_threshold }})</span></span>
                 </span>
             </div>

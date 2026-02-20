@@ -1112,7 +1112,7 @@ def _aurora_visibility_note(kp, kp_threshold=5, location_name='your location',
     """Generate location-specific aurora visibility note.
 
     Considers Kp margin AND real conditions (cloud cover, darkness, moon phase).
-    Uses accurate NOAA Kp scale language.
+    Uses plain-English activity descriptors.
     """
     if kp is None:
         return 'Unable to determine current conditions.'
@@ -1125,21 +1125,21 @@ def _aurora_visibility_note(kp, kp_threshold=5, location_name='your location',
     dark_status = darkness_info.get('darkness_status', 'unknown')
     moon_illum = moon_phase.get('illumination', 0)
 
-    # NOAA storm descriptor
+    # Plain-English activity descriptor
     if kp >= 8:
-        storm_desc = 'Extreme storm'
+        storm_desc = 'Extreme storm conditions'
     elif kp >= 7:
-        storm_desc = 'Strong storm'
+        storm_desc = 'Strong storm conditions'
     elif kp >= 5:
-        storm_desc = 'Geomagnetic storm'
+        storm_desc = 'Storm level activity'
     elif kp >= 4:
-        storm_desc = 'Unsettled'
+        storm_desc = 'Elevated activity'
     elif kp >= 3:
-        storm_desc = 'Active'
+        storm_desc = 'Moderate activity'
     elif kp >= 2:
-        storm_desc = 'Quiet'
+        storm_desc = 'Low activity'
     else:
-        storm_desc = 'Very quiet'
+        storm_desc = 'Very low activity'
 
     # Below threshold — conditions don't matter
     if margin < -1:
@@ -1536,16 +1536,6 @@ def _go_outside_verdict(kp, current_weather, moon_phase, kp_threshold=5,
     reasons = []
     score = 0  # Higher = better for viewing
 
-    # Helper: NOAA severity descriptor for the actual Kp value
-    def _kp_desc(val):
-        if val >= 8: return 'Extreme storm'
-        if val >= 7: return 'Strong storm'
-        if val >= 5: return 'Geomagnetic storm'
-        if val >= 4: return 'Unsettled'
-        if val >= 3: return 'Active'
-        if val >= 2: return 'Quiet'
-        return 'Very quiet'
-
     # ── Daylight blocker — aurora is invisible in daylight ──
     dark_status = darkness_info.get('darkness_status', 'unknown')
     if dark_status in ('daylight', 'civil_twilight'):
@@ -1557,7 +1547,7 @@ def _go_outside_verdict(kp, current_weather, moon_phase, kp_threshold=5,
         return {
             'verdict': f'Still too bright \u2014 sunset at {sunset}',
             'level': 'no',
-            'reasons': reasons,
+            'reasons': reasons[:2],
         }
 
     # ── Hard cloud blocker — 90%+ overcast means nothing is visible ──
@@ -1574,7 +1564,7 @@ def _go_outside_verdict(kp, current_weather, moon_phase, kp_threshold=5,
         return {
             'verdict': 'Not tonight \u2014 completely overcast',
             'level': 'no',
-            'reasons': reasons,
+            'reasons': reasons[:2],
         }
 
     # Factor 1: Aurora activity (most important, scaled by latitude threshold)
@@ -1648,6 +1638,27 @@ def _go_outside_verdict(kp, current_weather, moon_phase, kp_threshold=5,
     elif bortle <= 3:
         reasons.append('This is a great dark sky location.')
         score += 1
+
+    # Priority-sort and limit to top 2 reasons
+    _REASON_KEYWORDS = [
+        'overcast', 'cloud', 'rain', 'precipitation',
+        'activity is low', 'faint glow', 'very likely', 'possible from',
+        'too bright', 'sunset', 'darkness',
+        'moonlight', 'moon brightness',
+        'magnetic conditions',
+        'light pollution', 'dark sky',
+        'unavailable',
+    ]
+
+    def _reason_priority(reason):
+        r = reason.lower()
+        for i, kw in enumerate(_REASON_KEYWORDS):
+            if kw in r:
+                return i
+        return len(_REASON_KEYWORDS)
+
+    reasons.sort(key=_reason_priority)
+    reasons = reasons[:2]
 
     # Determine verdict
     if score >= 5:
@@ -2315,16 +2326,16 @@ def _fetch_imf_data():
                 if bz is not None:
                     # Classify Bz (negative = southward = good for aurora)
                     if bz <= -10:
-                        bz_label = 'Strongly southward'
+                        bz_label = 'Excellent for aurora'
                         bz_level = 'excellent'
                     elif bz <= -5:
-                        bz_label = 'Southward'
+                        bz_label = 'Favourable for aurora'
                         bz_level = 'good'
                     elif bz <= 0:
-                        bz_label = 'Weakly southward'
+                        bz_label = 'Slightly favourable'
                         bz_level = 'neutral'
                     else:
-                        bz_label = 'Northward'
+                        bz_label = 'Not favourable for aurora'
                         bz_level = 'poor'
 
                     return {

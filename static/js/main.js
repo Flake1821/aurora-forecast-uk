@@ -24,13 +24,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Kp Severity label from numeric value ──
     function kpSeverityLabel(kp) {
         if (kp === null || kp === undefined) return 'Unknown';
-        if (kp >= 8) return 'Extreme storm';
-        if (kp >= 7) return 'Strong storm';
-        if (kp >= 5) return 'Geomagnetic storm';
-        if (kp >= 4) return 'Unsettled';
-        if (kp >= 3) return 'Active';
-        if (kp >= 2) return 'Quiet';
-        return 'Very quiet';
+        if (kp >= 8) return 'Extreme storm conditions';
+        if (kp >= 7) return 'Strong storm conditions';
+        if (kp >= 5) return 'Storm level activity';
+        if (kp >= 4) return 'Elevated activity';
+        if (kp >= 3) return 'Moderate activity';
+        if (kp >= 2) return 'Low activity';
+        return 'Very low activity';
     }
 
     // ── Accurate CSS moon phase rendering ──
@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var datasets = [
             {
-                label: 'Storm Strength (recent)',
+                label: 'Storm Strength (3h)',
                 data: observedData,
                 borderColor: '#00E676',
                 backgroundColor: 'rgba(0, 230, 118, 0.1)',
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 spanGaps: false,
             },
             {
-                label: 'Storm Strength (forecast)',
+                label: 'Storm Forecast (3h)',
                 data: predictedData,
                 borderColor: '#448AFF',
                 backgroundColor: 'rgba(68, 138, 255, 0.05)',
@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var hasHp30 = hp30Data.some(function (v) { return v !== null; });
         if (hasHp30) {
             datasets.push({
-                label: 'Global Activity (recent)',
+                label: 'Global Activity (30m)',
                 data: hp30Data,
                 borderColor: '#00BCD4',
                 backgroundColor: 'rgba(0, 188, 212, 0.06)',
@@ -633,10 +633,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Hp30 gauge → plain-English meaning
     var HP30_MEANINGS = [
-        { max: 2, text: 'Quiet globally' },
-        { max: 4, text: 'Unsettled globally' },
-        { max: 6, text: 'Active storm conditions' },
-        { max: Infinity, text: 'Strong geomagnetic storm' }
+        { max: 2, text: 'Low global activity' },
+        { max: 4, text: 'Moderate global activity' },
+        { max: 6, text: 'Strong global activity' },
+        { max: Infinity, text: 'Strong global storm' }
     ];
 
     // Kp predicted gauge → plain-English meaning
@@ -655,10 +655,11 @@ document.addEventListener('DOMContentLoaded', function () {
         return mappings[mappings.length - 1].text;
     }
 
-    function updateGaugeMeaning(elementId, text) {
+    function updateGaugeMeaning(elementId, text, colour) {
         var el = document.getElementById(elementId);
         if (!el) return;
         el.textContent = text;
+        if (colour) el.style.color = colour;
         el.classList.remove('gauge-meaning-fade');
         void el.offsetWidth;
         el.classList.add('gauge-meaning-fade');
@@ -666,10 +667,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // AuroraWatch status → plain-English meaning
     var AW_MEANINGS = {
-        green:   'Aurora unlikely for most of the UK.',
-        yellow:  'Best chance in Scotland if skies are clear.',
-        amber:   'Good chance in northern UK \u2014 look north.',
-        red:     'Possible much farther south \u2014 find a dark spot.',
+        green:   'Quiet \u2014 aurora unlikely here.',
+        yellow:  'Minor activity \u2014 possible in far north.',
+        amber:   'Active \u2014 possible if skies clear.',
+        red:     'Strong activity \u2014 good chance tonight.',
         unknown: 'Status unavailable'
     };
 
@@ -712,12 +713,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     renderRadialGauge(parseFloat(hp30Val), 'radialGauge', {isHp30: true});
                     if (mainLabel) mainLabel.textContent = 'Global Magnetic Activity';
                     if (metricTag) metricTag.textContent = 'Hp30 \u2022 30-min';
-                    updateGaugeMeaning('hp30Meaning', gaugeMeaningText(parseFloat(hp30Val), HP30_MEANINGS));
+                    updateGaugeMeaning('hp30Meaning', gaugeMeaningText(parseFloat(hp30Val), HP30_MEANINGS), kpColour(parseFloat(hp30Val)));
                 } else if (data.kp_index !== null && data.kp_index !== undefined) {
                     renderRadialGauge(parseFloat(data.kp_index), 'radialGauge');
                     if (mainLabel) mainLabel.textContent = 'Global Magnetic Activity';
                     if (metricTag) metricTag.textContent = 'Kp';
-                    updateGaugeMeaning('hp30Meaning', gaugeMeaningText(parseFloat(data.kp_index), HP30_MEANINGS));
+                    updateGaugeMeaning('hp30Meaning', gaugeMeaningText(parseFloat(data.kp_index), HP30_MEANINGS), kpColour(parseFloat(data.kp_index)));
                 }
 
                 // Update aurora chance indicator (uses server's effective_kp-based label)
@@ -748,7 +749,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.kp_predicted_next !== null && data.kp_predicted_next !== undefined) {
                     var predKp = parseFloat(data.kp_predicted_next);
                     renderRadialGauge(predKp, 'radialGaugePredicted');
-                    updateGaugeMeaning('kpPredictedMeaning', gaugeMeaningText(predKp, KP_PRED_MEANINGS));
+                    updateGaugeMeaning('kpPredictedMeaning', gaugeMeaningText(predKp, KP_PRED_MEANINGS), kpColour(predKp));
                 } else {
                     renderRadialGauge(0, 'radialGaugePredicted');
                     updateGaugeMeaning('kpPredictedMeaning', 'Unavailable');
