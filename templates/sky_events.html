@@ -23,12 +23,20 @@
             <button class="event-filter-btn" data-filter="equinox"><i class="bi bi-sun me-1"></i>Seasons</button>
         </div>
 
+        <!-- ═══ PAST EVENTS ═══ -->
+        <div class="past-events-section" id="pastEventsSection" style="display:none;">
+            <h5 class="past-events-heading">
+                <i class="bi bi-clock-history me-2"></i>Past Events
+            </h5>
+            <div class="sky-grid past-events-grid" id="pastEventsGrid"></div>
+        </div>
+
         <!-- ═══ CARD GRID ═══ -->
         <div class="sky-grid" id="skyGrid">
 
             {# ── JANUARY ── #}
 
-            <div class="sky-card" data-event-type="meteor" data-idx="1" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="1" data-date="2026-01-04" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -45,7 +53,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="2" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="2" data-date="2026-01-03" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -62,7 +70,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="planet" data-idx="3" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="planet" data-idx="3" data-date="2026-01-10" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-planet planet-jupiter" role="img" aria-label="Jupiter illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -81,7 +89,7 @@
 
             {# ── FEBRUARY ── #}
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="4" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="4" data-date="2026-02-01" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -98,7 +106,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="eclipse" data-idx="5" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="eclipse" data-idx="5" data-date="2026-02-17" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-eclipse eclipse-annular-solar" role="img" aria-label="Annular solar eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -115,7 +123,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="planet" data-idx="6" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="planet" data-idx="6" data-date="2026-02-20" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-planet planet-conjunction-sn" role="img" aria-label="Saturn Neptune conjunction illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -132,7 +140,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="planet" data-idx="7" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="planet" data-idx="7" data-date="2026-02-28" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-planet planet-alignment" role="img" aria-label="Six planet alignment illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -151,7 +159,7 @@
 
             {# ── MARCH ── #}
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="8" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="8" data-date="2026-03-03" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -168,7 +176,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="eclipse" data-idx="9" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="eclipse" data-idx="9" data-date="2026-03-03" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-eclipse eclipse-total-lunar" role="img" aria-label="Total lunar eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -185,7 +193,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="planet" data-idx="10" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="planet" data-idx="10" data-date="2026-03-08" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-planet planet-conjunction-vs" role="img" aria-label="Venus Saturn conjunction illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -202,7 +210,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="equinox" data-idx="11" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="equinox" data-idx="11" data-date="2026-03-20" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-equinox equinox-spring" role="img" aria-label="Spring equinox illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -221,7 +229,7 @@
 
             {# ── APRIL ── #}
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="12" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="12" data-date="2026-04-02" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -238,7 +246,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="meteor" data-idx="13" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="13" data-date="2026-04-23" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -257,7 +265,7 @@
 
             {# ── MAY ── #}
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="14" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="14" data-date="2026-05-01" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -274,7 +282,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="meteor" data-idx="15" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="15" data-date="2026-05-06" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -291,7 +299,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="16" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="16" data-date="2026-05-31" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -310,7 +318,7 @@
 
             {# ── JUNE ── #}
 
-            <div class="sky-card" data-event-type="planet" data-idx="17" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="planet" data-idx="17" data-date="2026-06-09" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-planet planet-conjunction-vj" role="img" aria-label="Venus Jupiter conjunction illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -327,7 +335,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="equinox" data-idx="18" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="equinox" data-idx="18" data-date="2026-06-21" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-equinox equinox-summer" role="img" aria-label="Summer solstice illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -344,7 +352,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="19" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="19" data-date="2026-06-30" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -363,7 +371,7 @@
 
             {# ── JULY ── #}
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="20" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="20" data-date="2026-07-29" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -380,7 +388,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="meteor" data-idx="21" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="21" data-date="2026-07-31" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -399,7 +407,7 @@
 
             {# ── AUGUST ── #}
 
-            <div class="sky-card" data-event-type="eclipse" data-idx="22" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="eclipse" data-idx="22" data-date="2026-08-12" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-eclipse eclipse-partial-solar" role="img" aria-label="Partial solar eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -416,7 +424,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="meteor" data-idx="23" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="23" data-date="2026-08-13" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -433,7 +441,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="24" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="24" data-date="2026-08-28" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -450,7 +458,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="eclipse" data-idx="25" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="eclipse" data-idx="25" data-date="2026-08-28" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-eclipse eclipse-partial-lunar" role="img" aria-label="Partial lunar eclipse illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -469,7 +477,7 @@
 
             {# ── SEPTEMBER ── #}
 
-            <div class="sky-card" data-event-type="equinox" data-idx="26" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="equinox" data-idx="26" data-date="2026-09-23" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-equinox equinox-autumn" role="img" aria-label="Autumn equinox illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -486,7 +494,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="planet" data-idx="27" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="planet" data-idx="27" data-date="2026-09-26" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-planet planet-neptune" role="img" aria-label="Neptune illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -503,7 +511,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="28" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="28" data-date="2026-09-26" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -522,7 +530,7 @@
 
             {# ── OCTOBER ── #}
 
-            <div class="sky-card" data-event-type="planet" data-idx="29" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="planet" data-idx="29" data-date="2026-10-04" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-planet planet-saturn" role="img" aria-label="Saturn illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -539,7 +547,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="meteor" data-idx="30" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="30" data-date="2026-10-09" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -556,7 +564,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="meteor" data-idx="31" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="31" data-date="2026-10-22" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -573,7 +581,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="32" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="32" data-date="2026-10-26" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -592,7 +600,7 @@
 
             {# ── NOVEMBER ── #}
 
-            <div class="sky-card" data-event-type="meteor" data-idx="33" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="33" data-date="2026-11-18" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -609,7 +617,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="34" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="34" data-date="2026-11-24" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -626,7 +634,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="planet" data-idx="35" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="planet" data-idx="35" data-date="2026-11-25" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-planet planet-uranus" role="img" aria-label="Uranus illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -645,7 +653,7 @@
 
             {# ── DECEMBER ── #}
 
-            <div class="sky-card" data-event-type="meteor" data-idx="36" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="36" data-date="2026-12-14" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -662,7 +670,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="equinox" data-idx="37" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="equinox" data-idx="37" data-date="2026-12-21" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-equinox equinox-winter" role="img" aria-label="Winter solstice illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -679,7 +687,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="meteor" data-idx="38" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="meteor" data-idx="38" data-date="2026-12-23" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-meteor" role="img" aria-label="Meteor shower illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>
@@ -696,7 +704,7 @@
                 </div>
             </div>
 
-            <div class="sky-card" data-event-type="fullmoon" data-idx="39" role="button" tabindex="0">
+            <div class="sky-card" data-event-type="fullmoon" data-idx="39" data-date="2026-12-24" role="button" tabindex="0">
                 <div class="sky-card-illustration sky-anim-fullmoon" role="img" aria-label="Full moon illustration">
                     <div class="sky-ambient-overlay" aria-hidden="true"></div>
                 </div>

@@ -1465,8 +1465,34 @@ document.addEventListener('DOMContentLoaded', function () {
         var modal = document.getElementById('skyDetailModal');
         var content = document.getElementById('skyDetailContent');
         var closeBtn = document.getElementById('skyDetailClose');
+        var pastGrid = document.getElementById('pastEventsGrid');
+        var pastSection = document.getElementById('pastEventsSection');
         var activeCard = null;
         var isAnimating = false;
+
+        // ── Past Events Detection ──
+        if (pastGrid && pastSection) {
+            var now = new Date();
+            now.setHours(0, 0, 0, 0); // start of today
+
+            var allCards = grid.querySelectorAll('.sky-card[data-date]');
+            var hasPast = false;
+
+            allCards.forEach(function(card) {
+                var dateStr = card.getAttribute('data-date');
+                var parts = dateStr.split('-');
+                var eventDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                if (eventDate < now) {
+                    card.classList.add('past-event');
+                    pastGrid.appendChild(card);
+                    hasPast = true;
+                }
+            });
+
+            if (hasPast) {
+                pastSection.style.display = '';
+            }
+        }
 
         // Target modal size (centred on screen)
         function getModalTarget() {
@@ -1496,7 +1522,12 @@ document.addEventListener('DOMContentLoaded', function () {
             var date = card.querySelector('.sky-card-date').textContent;
             var badge = card.querySelector('.event-type-badge').outerHTML;
 
+            var pastBanner = card.classList.contains('past-event')
+                ? '<div class="past-event-banner"><i class="bi bi-clock-history me-1"></i>This event has passed</div>'
+                : '';
+
             content.innerHTML =
+                pastBanner +
                 '<div class="sky-detail-header">' +
                     badge +
                     '<span class="sky-card-date">' + date + '</span>' +
@@ -1586,7 +1617,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Card click handler (delegated on grid)
-        grid.addEventListener('click', function(e) {
+        function handleCardClick(e) {
             var card = e.target.closest('.sky-card');
             if (!card) return;
 
@@ -1596,7 +1627,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (activeCard) closeModal(false);
                 openModal(card);
             }
-        });
+        }
+        grid.addEventListener('click', handleCardClick);
+        if (pastGrid) pastGrid.addEventListener('click', handleCardClick);
 
         // Close button
         closeBtn.addEventListener('click', function(e) {
@@ -1625,13 +1658,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 closeModal(false);
 
-                grid.querySelectorAll('.sky-card').forEach(function(card) {
-                    if (filter === 'all' || card.getAttribute('data-event-type') === filter) {
-                        card.style.display = '';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                // Apply filter to both grids
+                [grid, pastGrid].forEach(function(g) {
+                    if (!g) return;
+                    g.querySelectorAll('.sky-card').forEach(function(card) {
+                        if (filter === 'all' || card.getAttribute('data-event-type') === filter) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
                 });
+
+                // Show/hide past section based on visible past cards
+                if (pastGrid && pastSection) {
+                    var visiblePast = pastGrid.querySelectorAll('.sky-card:not([style*="display: none"])');
+                    pastSection.style.display = visiblePast.length > 0 ? '' : 'none';
+                }
             });
         });
 
