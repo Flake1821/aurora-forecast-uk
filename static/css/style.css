@@ -3769,6 +3769,135 @@ a:hover {
 
 
 /* ═══════════════════════════════════════════════
+   SKY EVENTS — Astro Background
+   ═══════════════════════════════════════════════ */
+
+.astro-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* ── Star Layers ── */
+.astro-stars {
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(1.2px 1.2px at 12% 8%, rgba(255,255,255,0.85) 50%, transparent 50%),
+        radial-gradient(1px 1px at 27% 15%, rgba(255,255,255,0.7) 50%, transparent 50%),
+        radial-gradient(1.5px 1.5px at 45% 5%, rgba(200,220,255,0.9) 50%, transparent 50%),
+        radial-gradient(0.8px 0.8px at 68% 12%, rgba(255,255,255,0.5) 50%, transparent 50%),
+        radial-gradient(1px 1px at 85% 7%, rgba(255,255,255,0.65) 50%, transparent 50%),
+        radial-gradient(1.3px 1.3px at 8% 25%, rgba(255,240,200,0.8) 50%, transparent 50%),
+        radial-gradient(0.9px 0.9px at 33% 30%, rgba(255,255,255,0.55) 50%, transparent 50%),
+        radial-gradient(1.1px 1.1px at 52% 22%, rgba(200,200,255,0.75) 50%, transparent 50%),
+        radial-gradient(1.4px 1.4px at 74% 28%, rgba(255,255,255,0.85) 50%, transparent 50%),
+        radial-gradient(0.7px 0.7px at 92% 18%, rgba(255,255,255,0.45) 50%, transparent 50%),
+        radial-gradient(1px 1px at 15% 42%, rgba(255,255,255,0.6) 50%, transparent 50%),
+        radial-gradient(1.2px 1.2px at 38% 48%, rgba(200,220,255,0.7) 50%, transparent 50%),
+        radial-gradient(0.8px 0.8px at 58% 38%, rgba(255,255,255,0.5) 50%, transparent 50%),
+        radial-gradient(1.5px 1.5px at 78% 45%, rgba(255,240,200,0.85) 50%, transparent 50%),
+        radial-gradient(1px 1px at 95% 35%, rgba(255,255,255,0.55) 50%, transparent 50%),
+        radial-gradient(0.9px 0.9px at 5% 58%, rgba(255,255,255,0.5) 50%, transparent 50%),
+        radial-gradient(1.3px 1.3px at 22% 62%, rgba(255,255,255,0.75) 50%, transparent 50%),
+        radial-gradient(1px 1px at 48% 55%, rgba(200,200,255,0.6) 50%, transparent 50%),
+        radial-gradient(0.7px 0.7px at 65% 60%, rgba(255,255,255,0.45) 50%, transparent 50%),
+        radial-gradient(1.1px 1.1px at 88% 52%, rgba(255,255,255,0.7) 50%, transparent 50%),
+        radial-gradient(1px 1px at 10% 75%, rgba(255,255,255,0.55) 50%, transparent 50%),
+        radial-gradient(1.4px 1.4px at 30% 78%, rgba(200,220,255,0.8) 50%, transparent 50%),
+        radial-gradient(0.8px 0.8px at 55% 72%, rgba(255,255,255,0.5) 50%, transparent 50%),
+        radial-gradient(1.2px 1.2px at 72% 80%, rgba(255,240,200,0.7) 50%, transparent 50%),
+        radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.6) 50%, transparent 50%),
+        radial-gradient(0.9px 0.9px at 18% 90%, rgba(255,255,255,0.5) 50%, transparent 50%),
+        radial-gradient(1.1px 1.1px at 42% 88%, rgba(255,255,255,0.65) 50%, transparent 50%),
+        radial-gradient(1.3px 1.3px at 62% 92%, rgba(200,200,255,0.7) 50%, transparent 50%),
+        radial-gradient(0.7px 0.7px at 82% 85%, rgba(255,255,255,0.45) 50%, transparent 50%),
+        radial-gradient(1px 1px at 97% 95%, rgba(255,255,255,0.6) 50%, transparent 50%);
+    animation: astro-twinkle 8s ease-in-out infinite alternate;
+}
+
+.astro-stars-2 {
+    opacity: 0.6;
+    transform: scale(1.5) rotate(30deg);
+    animation: astro-twinkle-2 12s ease-in-out infinite alternate;
+}
+
+@keyframes astro-twinkle {
+    0%   { opacity: 0.8; }
+    50%  { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+@keyframes astro-twinkle-2 {
+    0%   { opacity: 0.5; }
+    50%  { opacity: 0.7; }
+    100% { opacity: 0.4; }
+}
+
+/* ── Nebula Colour Washes ── */
+.astro-nebula {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 600px 400px at 15% 20%, rgba(100, 40, 180, 0.08), transparent 70%),
+        radial-gradient(ellipse 500px 350px at 80% 60%, rgba(30, 60, 180, 0.06), transparent 70%),
+        radial-gradient(ellipse 700px 300px at 50% 85%, rgba(0, 180, 100, 0.04), transparent 70%),
+        radial-gradient(ellipse 400px 400px at 90% 15%, rgba(180, 60, 120, 0.05), transparent 70%);
+    animation: astro-nebula-drift 30s ease-in-out infinite alternate;
+}
+
+@keyframes astro-nebula-drift {
+    0%   { transform: translate(0, 0) scale(1); }
+    50%  { transform: translate(-15px, 10px) scale(1.02); }
+    100% { transform: translate(10px, -8px) scale(0.98); }
+}
+
+/* ── Shooting Stars ── */
+.astro-shooting-star {
+    position: absolute;
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.3), transparent);
+    top: 12%;
+    left: -120px;
+    transform: rotate(-25deg);
+    opacity: 0;
+    animation: astro-shoot 9s 3s ease-in infinite;
+}
+
+.astro-shooting-star-2 {
+    width: 80px;
+    top: 35%;
+    transform: rotate(-30deg);
+    animation: astro-shoot-2 14s 8s ease-in infinite;
+}
+
+@keyframes astro-shoot {
+    0%    { left: -120px; opacity: 0; }
+    2%    { opacity: 1; }
+    8%    { left: 110%; opacity: 0; }
+    100%  { left: 110%; opacity: 0; }
+}
+@keyframes astro-shoot-2 {
+    0%    { left: -80px; opacity: 0; }
+    1.5%  { opacity: 0.8; }
+    6%    { left: 105%; opacity: 0; }
+    100%  { left: 105%; opacity: 0; }
+}
+
+/* Fade bottom so background doesn't clash with footer */
+.astro-bg::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: linear-gradient(to top, var(--night-sky), transparent);
+}
+
+/* ═══════════════════════════════════════════════
    SKY EVENTS 2026 — Card Grid
    ═══════════════════════════════════════════════ */
 
