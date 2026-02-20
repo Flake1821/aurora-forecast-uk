@@ -32,29 +32,128 @@
             <p class="mb-3">
                 The dashboard is designed to be understood at a glance, with no scientific
                 jargon. All labels and descriptions use plain English so you can quickly
-                decide whether it's worth heading outside.
+                decide whether it's worth heading outside. Everything updates automatically
+                every 5 minutes.
             </p>
-            <ul class="mb-3 small">
-                <li class="mb-2">
-                    <strong>Gauges</strong> are colour-coded from
-                    <span style="color:#4CAF50">green</span> (quiet) through
-                    <span style="color:#FFC107">yellow</span> and
-                    <span style="color:#FF9800">orange</span> to
-                    <span style="color:#F44336">red</span> (storm).
-                    The text below each gauge tells you what the current reading means.
-                </li>
-                <li class="mb-2">
-                    <strong>"Should I go outside?"</strong> combines aurora activity,
-                    cloud cover, moonlight, darkness, and magnetic conditions into a
-                    single recommendation. The top two factors driving the verdict are
-                    shown as bullet points.
+
+            <h5 class="mt-4 mb-2"><i class="bi bi-broadcast me-2"></i>UK Aurora Activity Now</h5>
+            <p class="small mb-2">
+                This panel shows the live AuroraWatch UK status from Lancaster University's
+                magnetometer network. The colour badge (Green / Yellow / Amber / Red) tells you
+                how disturbed the UK's magnetic field is right now. Green means no alert;
+                Red means a strong geomagnetic storm is in progress and aurora may be visible
+                across much of the UK.
+            </p>
+            <p class="small mb-3">
+                Below the badge, your <strong>local aurora chance</strong> shows whether aurora
+                is likely from your location based on the current activity level and your
+                latitude threshold. A summary line explains the overall situation, including
+                cloud and daylight conditions.
+            </p>
+
+            <h5 class="mt-4 mb-2"><i class="bi bi-speedometer me-2"></i>Gauges</h5>
+            <p class="small mb-2">
+                The two gauges show real-time geomagnetic activity. Both are colour-coded from
+                <span style="color:#4CAF50">green</span> (quiet) through
+                <span style="color:#FFC107">yellow</span> and
+                <span style="color:#FF9800">orange</span> to
+                <span style="color:#F44336">red</span> (storm).
+                The text below each gauge changes colour to match the dial, so you can
+                read the meaning without checking the number.
+            </p>
+            <ul class="small mb-3">
+                <li class="mb-1">
+                    <strong>Global Magnetic Activity (Hp30)</strong> &mdash; updated every 30
+                    minutes from GFZ Potsdam. This is the most up-to-date measure of worldwide
+                    geomagnetic activity. Higher values mean stronger disturbance.
                 </li>
                 <li>
-                    <strong>IMF Bz</strong> shows whether Earth's magnetic shield is open
-                    or closed. When the arrow points down (southward), conditions are
-                    more favourable for aurora.
+                    <strong>Storm Strength Forecast (Kp)</strong> &mdash; the 3-hourly forecast
+                    from NOAA. This predicts how strong the next geomagnetic period will be.
+                    When it reaches your location's threshold, aurora becomes possible.
                 </li>
             </ul>
+
+            <h5 class="mt-4 mb-2"><i class="bi bi-stars me-2"></i>Aurora Tonight</h5>
+            <p class="small mb-3">
+                A quick summary of tonight's viewing conditions: the peak forecast Kp,
+                current Hp30, dark hours, cloud outlook, and moon phase. The badge
+                (None / Poor / Fair / Good / Excellent) gives you an overall rating.
+                If aurora is possible but cloud is heavy, it will tell you.
+            </p>
+
+            <h5 class="mt-4 mb-2"><i class="bi bi-cloud me-2"></i>Weather &amp; Conditions</h5>
+            <p class="small mb-3">
+                The <strong>Right Now</strong> panel shows current weather at your location:
+                cloud cover percentage, temperature, wind, and visibility. The
+                <strong>Cloud Forecast</strong> bar chart shows hour-by-hour cloud cover for
+                the next 12 hours so you can spot any clear gaps. The
+                <strong>Moon</strong> panel shows tonight's phase, rise/set times, and whether
+                moonlight will interfere with faint aurora. The <strong>Light Pollution</strong>
+                panel shows your Bortle scale rating &mdash; lower numbers mean darker skies
+                and better chances of seeing faint aurora.
+            </p>
+
+            <h5 class="mt-4 mb-2"><i class="bi bi-signpost-split me-2"></i>Should I Go Outside?</h5>
+            <p class="small mb-2">
+                This is the single most important panel. It combines all the factors &mdash;
+                aurora activity, cloud cover, darkness, moonlight, and magnetic conditions &mdash;
+                into one clear recommendation:
+            </p>
+            <ul class="small mb-2">
+                <li><span style="color:#4CAF50"><strong>Yes!</strong></span> &mdash; Conditions are good. Head outside to a dark spot.</li>
+                <li><span style="color:#FFC107"><strong>Worth a look</strong></span> &mdash; Conditions are mixed. Check the northern horizon.</li>
+                <li><span style="color:#FFC107"><strong>Marginal</strong></span> &mdash; Conditions could improve. Keep monitoring.</li>
+                <li><span style="color:#F44336"><strong>Not tonight</strong></span> &mdash; One or more factors are blocking the view.</li>
+            </ul>
+            <p class="small mb-3">
+                The two bullet points below the verdict show the most important reasons
+                driving the recommendation, in priority order. If there is a good viewing
+                window in the next 12 hours, it will be shown with the expected cloud cover.
+            </p>
+
+            <h5 class="mt-4 mb-2"><i class="bi bi-wind me-2"></i>Solar Wind, IMF Bz &amp; Storm Scale</h5>
+            <p class="small mb-2">
+                These three panels show the real-time conditions in space that drive aurora:
+            </p>
+            <ul class="small mb-3">
+                <li class="mb-1">
+                    <strong>Solar Wind</strong> &mdash; speed and density of particles flowing
+                    from the Sun. Faster and denser wind means more energy hitting Earth's
+                    magnetic field.
+                </li>
+                <li class="mb-1">
+                    <strong>IMF Bz</strong> &mdash; the direction of the interplanetary magnetic
+                    field. When the arrow points <strong>down</strong> (southward / negative),
+                    Earth's magnetic shield opens up and aurora is more likely. The label below
+                    tells you whether conditions are favourable or not.
+                </li>
+                <li>
+                    <strong>Storm Scale</strong> &mdash; NOAA's G-scale from G0 (none) to G5
+                    (extreme). G1 or above means a geomagnetic storm is officially in progress.
+                    G3+ means aurora may be visible across southern England.
+                </li>
+            </ul>
+
+            <h5 class="mt-4 mb-2"><i class="bi bi-graph-up me-2"></i>Geomagnetic Activity Timeline</h5>
+            <p class="small mb-3">
+                The chart at the bottom shows recent and forecast geomagnetic activity over
+                the past few days. The <span style="color:#00E676">green line</span> is observed
+                storm strength (Kp, 3-hourly), the <span style="color:#00BCD4">cyan line</span>
+                is global activity (Hp30, 30-minute resolution), and the
+                <span style="color:#448AFF">blue dashed line</span> is the NOAA forecast.
+                The <span style="color:#FF9800">orange dashed line</span> is your location's
+                aurora threshold &mdash; when activity rises above it, aurora becomes possible
+                from your area.
+            </p>
+
+            <h5 class="mt-4 mb-2"><i class="bi bi-geo-alt me-2"></i>Setting Your Location</h5>
+            <p class="small mb-0">
+                Click the location button in the top navigation bar to change your location.
+                Enter any UK postcode and the dashboard will adjust your Kp threshold,
+                cloud forecast, weather conditions, dark hours, and light pollution estimate
+                to match. Your location is saved in your browser so you only need to set it once.
+            </p>
         </div>
 
         <div class="glass-card mt-4">
