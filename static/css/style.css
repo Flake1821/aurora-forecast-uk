@@ -1706,12 +1706,12 @@ a:hover {
     animation: imf-wave-drift-up 7s linear infinite;
 }
 @keyframes imf-wave-drift-up {
-    0%   { transform: translateY(-33.33%); }
-    100% { transform: translateY(0); }
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-33.33%); }
 }
 @keyframes imf-wave-drift-down {
-    0%   { transform: translateY(-66.66%); }
-    100% { transform: translateY(-33.33%); }
+    0%   { transform: translateY(-33.33%); }
+    100% { transform: translateY(0); }
 }
 /* Weakly south (Bz 0 to -5): gentle green downward drift */
 .cond-imf.imf-south-weak::before {
