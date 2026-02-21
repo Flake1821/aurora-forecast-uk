@@ -1709,10 +1709,14 @@ a:hover {
     0%   { transform: translateY(-33.33%); }
     100% { transform: translateY(0); }
 }
-/* Weakly south (Bz 0 to -5): gentle green upward drift */
+@keyframes imf-wave-drift-down {
+    0%   { transform: translateY(-66.66%); }
+    100% { transform: translateY(-33.33%); }
+}
+/* Weakly south (Bz 0 to -5): gentle green downward drift */
 .cond-imf.imf-south-weak::before {
     opacity: 0.4;
-    animation: imf-wave-drift-up 4.5s linear infinite;
+    animation: imf-wave-drift-down 4.5s linear infinite;
     background:
         repeating-linear-gradient(
             0deg,
@@ -1727,10 +1731,10 @@ a:hover {
             transparent 13px, transparent 25px
         );
 }
-/* Moderately south (Bz -5 to -10): clear green, medium speed */
+/* Moderately south (Bz -5 to -10): clear green downward, medium speed */
 .cond-imf.imf-south-moderate::before {
     opacity: 0.55;
-    animation: imf-wave-drift-up 2.5s linear infinite;
+    animation: imf-wave-drift-down 2.5s linear infinite;
     background:
         repeating-linear-gradient(
             0deg,
@@ -1745,10 +1749,10 @@ a:hover {
             transparent 12.5px, transparent 24px
         );
 }
-/* Strongly south (Bz -10 to -20): bright green, fast */
+/* Strongly south (Bz -10 to -20): bright green downward, fast */
 .cond-imf.imf-south-strong::before {
     opacity: 0.7;
-    animation: imf-wave-drift-up 1.4s linear infinite;
+    animation: imf-wave-drift-down 1.4s linear infinite;
     background:
         repeating-linear-gradient(
             0deg,
@@ -1763,10 +1767,10 @@ a:hover {
             transparent 11px, transparent 20px
         );
 }
-/* Extreme south (Bz < -20): vivid green, very fast rushing */
+/* Extreme south (Bz < -20): vivid green downward, very fast rushing */
 .cond-imf.imf-south-extreme::before {
     opacity: 0.85;
-    animation: imf-wave-drift-up 0.7s linear infinite;
+    animation: imf-wave-drift-down 0.7s linear infinite;
     background:
         repeating-linear-gradient(
             0deg,
